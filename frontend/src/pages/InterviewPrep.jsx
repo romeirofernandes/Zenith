@@ -206,43 +206,60 @@ const InterviewPrep = () => {
     fetchData();
   }, []);
 
-  const startInterview = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/interview/questions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          job: selectedJob,
-          resume,
-        }),
-      });
-      const data = await res.json();
-      if (Array.isArray(data.questions) && data.questions.length > 0) {
-        setQuestions(data.questions);
-      } else {
-        setQuestions([
-          "Tell me about yourself.",
-          "Describe a challenging project you worked on.",
-          "How do you handle tight deadlines?",
-          "What is your experience with React?",
-          "Why do you want to work at this company?",
-        ]);
-      }
-    } catch {
-      setQuestions([
+// When you set questions (in startInterview), also initialize answers:
+const startInterview = async () => {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/interview/questions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        job: selectedJob,
+        resume,
+      }),
+    });
+    const data = await res.json();
+    let qs = [];
+    if (Array.isArray(data.questions) && data.questions.length > 0) {
+      qs = data.questions;
+      setQuestions(qs);
+    } else {
+      qs = [
         "Tell me about yourself.",
         "Describe a challenging project you worked on.",
         "How do you handle tight deadlines?",
         "What is your experience with React?",
         "Why do you want to work at this company?",
-      ]);
+      ];
+      setQuestions(qs);
     }
-    setStep(1);
-    setCurrentQ(0);
-    setAnswers([]);
-    setMediaBlobs([]);
-    setTranscript("");
-  };
+    // Initialize answers array with empty objects for each question
+    setAnswers(qs.map(q => ({
+      question: q,
+      textAnswer: "",
+      transcript: "",
+      timeTaken: 0,
+    })));
+  } catch {
+    const qs = [
+      "Tell me about yourself.",
+      "Describe a challenging project you worked on.",
+      "How do you handle tight deadlines?",
+      "What is your experience with React?",
+      "Why do you want to work at this company?",
+    ];
+    setQuestions(qs);
+    setAnswers(qs.map(q => ({
+      question: q,
+      textAnswer: "",
+      transcript: "",
+      timeTaken: 0,
+    })));
+  }
+  setStep(1);
+  setCurrentQ(0);
+  setMediaBlobs([]);
+  setTranscript("");
+};
 
   const startRecording = async () => {
     try {
@@ -290,7 +307,7 @@ const stopRecording = async () => {
 
   // Clean the transcript before saving
   const cleanedTranscript = transcript.replace(/ \[speaking\.\.\.\].*/, "").trim();
-  console.log("💾 Saving transcript:", cleanedTranscript); // Debug log
+  console.log("💾 Saving transcript:", cleanedTranscript);
 
   await recorderRef.current.stopRecording(() => {
     const blob = recorderRef.current.getBlob();
@@ -301,11 +318,12 @@ const stopRecording = async () => {
       const copy = [...prev];
       copy[currentQ] = {
         ...copy[currentQ],
-        question: questions[currentQ], // Ensure question is set
+        question: questions[currentQ],
         timeTaken: timer,
-        transcript: cleanedTranscript // Use the cleaned transcript
+        transcript: cleanedTranscript,
+        textAnswer: cleanedTranscript // Put transcript directly in textAnswer
       };
-      console.log("📝 Updated answers array:", copy); // Debug log
+      console.log("📝 Updated answers array:", copy);
       return copy;
     });
   });
@@ -324,19 +342,20 @@ const stopRecording = async () => {
     setTranscript("");
   };
 
-  const handleAnswerChange = (e) => {
-    const value = e.target.value;
-    setAnswers((prev) => {
-      const copy = [...prev];
-      copy[currentQ] = {
-        ...copy[currentQ],
-        question: questions[currentQ],
-        textAnswer: value,
-        timeTaken: timer,
-      };
-      return copy;
-    });
-  };
+const handleAnswerChange = (e) => {
+  const value = e.target.value;
+  setAnswers((prev) => {
+    const copy = [...prev];
+    copy[currentQ] = {
+      ...copy[currentQ],
+      question: questions[currentQ],
+      textAnswer: value,
+      transcript: value, // Keep transcript synced
+      timeTaken: timer,
+    };
+    return copy;
+  });
+};
 
 const submitInterview = async () => {
   try {
@@ -448,18 +467,19 @@ const submitInterview = async () => {
   // UI
   if (step === 0)
     return (
-      <Card className="max-w-xl mx-auto mt-12">
+      <Card className="max-w-5xl mx-auto mt-12 ">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-primary">🎯 AI Interview Prep</CardTitle>
+          <CardTitle className="text-2xl font-bold text-primary"> AI Interview Prep</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-4 text-muted-foreground">Select a job to start your mock interview:</div>
           <div className="grid gap-3">
             {(Array.isArray(jobs) ? jobs : []).map((job) => {
-              const isSelected = selectedJob?.id === job.id;
+              console.log("Rendering job:", job);
+              const isSelected = selectedJob?._id === job._id;
               return (
                 <Button
-                  key={job.id || job.jobtitle}
+                  key={job._id || job.jobtitle}
                   variant={isSelected ? "default" : "outline"}
                   className={`w-full justify-start ${
                     isSelected
@@ -479,7 +499,7 @@ const submitInterview = async () => {
             disabled={!selectedJob}
             onClick={startInterview}
           >
-            🚀 Start Interview
+             Start Interview
           </Button>
         </CardContent>
       </Card>
@@ -530,13 +550,17 @@ const submitInterview = async () => {
             </div>
           </div>
 
-          <textarea
-            className="w-full border rounded p-3 mb-4"
-            placeholder="✍️ Type your answer or edit the transcription above..."
-            value={answers[currentQ]?.textAnswer || ""}
-            onChange={handleAnswerChange}
-            rows={4}
-          />
+<textarea
+  className="w-full border rounded p-3 mb-4"
+  placeholder="✍️ Speak or type your answer..."
+  value={
+    recording
+      ? transcript.replace(/ \[speaking\.\.\.\].*/, "")
+      : answers[currentQ]?.textAnswer || ""
+  }
+  onChange={handleAnswerChange}
+  rows={4}
+/>
           
           <div className="flex justify-between">
             <Button

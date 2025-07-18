@@ -17,6 +17,8 @@ import Achievements from "./components/dashboard/Achievements";
 import ProfileAnalytics from "./components/dashboard/ProfileAnalytics";
 import ResumeBuilder from "./components/dashboard/ResumeBuilder";
 import ProjectRecommendations from "./components/dashboard/ProjectRecommendations";
+import ColdEmail from "./components/Dashboard/ColdEmail";
+
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -73,7 +75,8 @@ const App = () => {
             path="/project-recommendations"
             element={user ? <ProjectRecommendations /> : <Login />}
           />
-        </Routes>
+          <Route path="/coldpalmer" element={user ? <ColdEmail /> : <Login />} />       
+          </Routes>
         <Toaster
           position="top-right"
           toastOptions={{
