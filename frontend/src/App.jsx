@@ -3,8 +3,10 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './config/firebase';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import {BrowserRouter, Routes, Route } from 'react-router-dom'
+import Landing from './pages/Landing'
 
-function App() {
+const App = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,12 +28,13 @@ function App() {
       </div>
     );
   }
-
   return (
-    <div className="App">
-      {user ? <Dashboard /> : <Login />}
-    </div>
-  );
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export default App;
