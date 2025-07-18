@@ -4,37 +4,51 @@ import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebase";
 import { useNavigate } from "react-router-dom";
 import {
-  FaUser,
-  FaFileAlt,
-  FaComments,
-  FaSignOutAlt,
-  FaBars,
-  FaTimes,
- FaBriefcase, FaHeart , FaPenFancy
-} from "react-icons/fa";
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import {
+  User,
+  FileText,
+  MessageSquare,
+  Briefcase,
+  Heart,
+  PenTool,
+  LogOut,
+  Menu,
+} from "lucide-react";
+
 import Profile from "../components/Dashboard/Profile";
 import Jobs from "@/components/Dashboard/Jobs";
 import WishList from "@/components/Dashboard/WishList";
 import Tests from "../components/dashboard/Tests";
+import InterviewPrep from "./InterviewPrep";
 
 const sidebarItems = [
-  { id: "profile", label: "Profile", icon: FaUser },
-  { id: "latex", label: "Latex", icon: FaFileAlt },
-  { id: "interview", label: "Interview", icon: FaComments },
-  { id: "jobs", label: "Jobs", icon: FaBriefcase },
-  { id: "wishlist", label: "Wishlist", icon: FaHeart },
-  { id: "tests", label: "Tests", icon: FaPenFancy },
+  { id: "profile", label: "Profile", icon: User },
+  { id: "jobs", label: "Jobs", icon: Briefcase },
+  { id: "wishlist", label: "Wishlist", icon: Heart },
+  { id: "tests", label: "Tests", icon: PenTool },
+  { id: "interview", label: "Interview", icon: MessageSquare },
 ];
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-
-  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,7 +56,6 @@ const Dashboard = () => {
       setUser(firebaseUser);
       if (firebaseUser) {
         fetchProfile(firebaseUser);
-        verifyToken(firebaseUser);
       }
     });
 
@@ -59,7 +72,6 @@ const Dashboard = () => {
   };
 
   const fetchProfile = async (currentUser) => {
-    setLoading(true);
     try {
       const token = await currentUser.getIdToken();
       const response = await fetch(
@@ -72,69 +84,45 @@ const Dashboard = () => {
       );
 
       const data = await response.json();
-      console.log("Profile data:", data); 
       if (data.success) {
         setUserProfile(data.user);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
-    setLoading(false);
   };
 
-  const verifyToken = async (currentUser) => {
-    try {
-      const token = await currentUser.getIdToken();
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/verify`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const data = await response.json();
-      console.log("Token verification:", data);
-    } catch (error) {
-      console.error("Token verification error:", error);
+  const getUserDisplayName = () => {
+    if (userProfile?.profile?.firstName && userProfile?.profile?.lastName) {
+      return `${userProfile.profile.firstName} ${userProfile.profile.lastName}`;
     }
+    return user?.displayName || "User";
   };
 
-  const refreshProfile = () => {
-    if (user) {
-      fetchProfile(user);
-    }
+  const getUserEmail = () => {
+    return userProfile?.email || user?.email || "No email";
   };
 
-  const copyToken = async () => {
-    if (user) {
-      try {
-        const token = await user.getIdToken();
-        await navigator.clipboard.writeText(token);
-        alert("Token copied to clipboard!");
-      } catch (error) {
-        console.error("Error copying token:", error);
-      }
-    }
+  const getUserInitials = () => {
+    const displayName = getUserDisplayName();
+    return displayName
+      .split(" ")
+      .map((name) => name[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.08 },
-    },
-  };
+  const renderContent = () => {
+    const content = {
+      profile: <Profile user={user} userProfile={userProfile} />,
+      jobs: <Jobs />,
+      wishlist: <WishList />,
+      tests: <Tests />,
+      interview: <InterviewPrep/>
+    };
 
-  const itemVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { duration: 0.22, ease: "easeOut" },
-    },
+    return content[activeTab] || content.profile;
   };
 
   if (!user) {
@@ -146,235 +134,96 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-muted/20">
-      {/* Mobile Navbar */}
-      <div className="lg:hidden bg-background border-b border-border/50 p-4">
-        <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-blue-700 font-sans">
-            SOS Dashboard
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsMobileMenuOpen(true)}
-          >
-            <FaBars className="h-5 w-5" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex">
-        {/* Desktop Sidebar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.18, ease: "linear" }}
-          className="hidden lg:flex w-64 bg-gradient-to-b from-blue-900 via-blue-700 to-blue-500 text-white rounded-xl shadow-lg h-[95vh] sticky top-[2vh] flex-col z-30 m-4 ml-4"
-        >
-          <div className="p-6 border-b border-blue-800">
-            <div className="text-2xl font-bold text-white font-sans mb-4">
-              SOS Dashboard
-            </div>
-            <div className="flex items-center space-x-3">
-              {user.photoURL ? (
-                <img
-                  src={user.photoURL}
-                  alt="Profile"
-                  className="h-12 w-12 rounded-full"
-                />
-              ) : (
-                <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-xl font-bold">
-                  {user.displayName?.[0] || user.email?.[0] || "U"}
-                </div>
-              )}
-              <div>
-                <p className="text-sm font-medium truncate">{user.displayName || "User"}</p>
-                <p className="text-xs text-blue-200 truncate">{user.email}</p>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        {/* Sidebar */}
+        <Sidebar className="border-r bg-sidebar">
+          <SidebarHeader className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Briefcase className="h-4 w-4" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-semibold text-sidebar-foreground">
+                  SOS Dashboard
+                </span>
               </div>
             </div>
-          </div>
-          <div className="p-4 flex-1">
-            <nav className="space-y-2">
-              {sidebarItems.map((item) => (
-                <motion.button
-                  key={item.id}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 ${
-                    activeTab === item.id
-                      ? "bg-white text-blue-700 shadow-md"
-                      : "text-blue-100 hover:text-white hover:bg-blue-800"
-                  }`}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </motion.button>
-              ))}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleLogout}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-red-200 hover:text-red-600 hover:bg-red-50 transition-all duration-150 mt-4"
-              >
-                <FaSignOutAlt className="h-5 w-5" />
-                <span>Logout</span>
-              </motion.button>
-            </nav>
-          </div>
-        </motion.div>
+          </SidebarHeader>
 
-        {/* Mobile Sidebar Overlay */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="lg:hidden fixed inset-0 bg-black/50 z-40"
-                onClick={() => setIsMobileMenuOpen(false)}
-              />
-              <motion.div
-                initial={{ x: -300 }}
-                animate={{ x: 0 }}
-                exit={{ x: -300 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="lg:hidden fixed left-4 top-4 bottom-4 w-64 bg-gradient-to-b from-blue-900 via-blue-700 to-blue-500 text-white rounded-xl shadow-xl z-50 flex flex-col"
-              >
-                <div className="p-6 border-b border-blue-800">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="text-2xl font-bold text-white font-sans">
-                      SOS Dashboard
-                    </div>
-                    <button
-                      className="text-white"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <FaTimes className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    {user.photoURL ? (
-                      <img
-                        src={user.photoURL}
-                        alt="Profile"
-                        className="h-12 w-12 rounded-full"
-                      />
-                    ) : (
-                      <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-xl font-bold">
-                        {user.displayName?.[0] || user.email?.[0] || "U"}
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-sm font-medium truncate">{user.displayName || "User"}</p>
-                      <p className="text-xs text-blue-200 truncate">{user.email}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 flex-1">
-                  <nav className="space-y-2">
-                    {sidebarItems.map((item) => (
-                      <motion.button
-                        key={item.id}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          setActiveTab(item.id);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 ${
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {sidebarItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton
+                        onClick={() => setActiveTab(item.id)}
+                        className={`w-full justify-start gap-3 ${
                           activeTab === item.id
-                            ? "bg-white text-blue-700 shadow-md"
-                            : "text-blue-100 hover:text-white hover:bg-blue-800"
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                         }`}
                       >
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.label}</span>
-                      </motion.button>
-                    ))}
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleLogout}
-                      className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-red-200 hover:text-red-600 hover:bg-red-50 transition-all duration-150 mt-4"
-                    >
-                      <FaSignOutAlt className="h-5 w-5" />
-                      <span>Logout</span>
-                    </motion.button>
-                  </nav>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+                        <item.icon className="h-4 w-4" />
+                        <span className="font-medium">{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+
+          <SidebarFooter className="p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={user.photoURL} alt={getUserDisplayName()} />
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {getUserInitials()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-sidebar-foreground truncate">
+                  {getUserDisplayName()}
+                </p>
+                <p className="text-xs text-sidebar-foreground/70 truncate">
+                  {getUserEmail()}
+                </p>
+              </div>
+            </div>
+            <Separator className="mb-4" />
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+              className="w-full justify-start gap-2 text-red-500 hover:bg-red-100"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Logout</span>
+            </Button>
+          </SidebarFooter>
+        </Sidebar>
 
         {/* Main Content */}
-        <div className="flex-1 p-6">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            transition={{ duration: 0.22, ease: "easeOut" }}
-            className="space-y-6 max-w-7xl mx-auto"
-          >
-            {/* Tab Content */}
-           {activeTab === "profile" && (
-  <motion.div variants={itemVariants}>
-    <Profile
-      user={user}
-      userProfile={userProfile}
-      loading={loading}
-      handleLogout={handleLogout}
-      refreshProfile={refreshProfile}
-      verifyToken={verifyToken}
-      copyToken={copyToken}
-    />
-  </motion.div>
-)}
+        <div className="flex-1 flex flex-col">
+          {/* Mobile Header */}
+          <div className="lg:hidden flex items-center justify-between p-4 border-b bg-background">
+            <SidebarTrigger className="lg:hidden">
+              <Menu className="h-6 w-6" />
+            </SidebarTrigger>
+            <h1 className="text-lg font-semibold">SOS Dashboard</h1>
+          </div>
 
-{activeTab === "jobs" && (
-  <motion.div variants={itemVariants}>
-    <Jobs/>
-  </motion.div>
-)}
-{activeTab === "wishlist" && (
-  <motion.div variants={itemVariants}>
-    <WishList/>
-  </motion.div>
-)}
-{activeTab === "tests" && (
-  <motion.div variants={itemVariants}>
-    <Tests/>
-  </motion.div>
-)}
-            {activeTab === "latex" && (
-              <motion.div variants={itemVariants}>
-                <div className="p-8 text-2xl">Latex</div>
-              </motion.div>
-            )}
-            {activeTab === "interview" && (
-              <motion.div variants={itemVariants}>
-                <div className="p-8 text-2xl">Interview</div>
-              </motion.div>
-            )}
-          </motion.div>
+          {/* Main Content Area */}
+          <main className="flex-1 overflow-auto">
+            <div className="container mx-auto p-4 lg:p-6">
+              {renderContent()}
+            </div>
+          </main>
         </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
-
-// Helper Button component for mobile nav
-function Button({ children, ...props }) {
-  return (
-    <button
-      {...props}
-      className={`px-2 py-1 rounded hover:bg-blue-100 transition ${props.className || ""}`}
-    >
-      {children}
-    </button>
-  );
-}
 
 export default Dashboard;
