@@ -32,7 +32,7 @@ import json
 app = FastAPI()
 
 # Replace these with your actual keys or load from .env
-GROQ_API_KEY = "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"
+GROQ_API_KEY = ""
 GROQ_MODEL = 'llama3-8b-8192'  # Example model
 
 
