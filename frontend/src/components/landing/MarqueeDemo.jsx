@@ -89,7 +89,7 @@ const ReviewCard = ({ img, name, username, body, gradientClass }) => (
 
 export default function MarqueeDemo() {
   return (
-    <section className="mt-24 max-w-5xl mx-auto w-full">
+    <section id="testimonials" className="mt-24 max-w-5xl mx-auto w-full">
       <h2 className="text-3xl md:text-4xl font-semibold leading-tight text-center mb-8">
         What our users say
       </h2>
