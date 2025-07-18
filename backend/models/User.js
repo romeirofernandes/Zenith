@@ -43,11 +43,6 @@ const userSchema = new mongoose.Schema({
     }
   },
   preferences: {
-    theme: {
-      type: String,
-      enum: ['light', 'dark'],
-      default: 'light'
-    },
     notifications: {
       email: { type: Boolean, default: true },
       push: { type: Boolean, default: true }
@@ -56,7 +51,58 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date,
     default: Date.now
+  },
+  resume: {
+    skills: [String],
+    experience: [
+      {
+        company: String,
+        position: String,
+        startDate: Date,
+        endDate: Date,
+        description: String
+      }
+    ],
+    education: [
+      {
+        institution: String,
+        degree: String,
+        fieldOfStudy: String,
+        startYear: Number,
+        endYear: Number,
+        grade: String
+      }
+    ],
+    coCurricular: [String],
+    certifications: [
+      {
+        name: String,
+        issuer: String,
+        date: Date, 
+        credentials: String
+      }
+    ],
+    projects: [
+      {
+        title: String,
+        description: String,
+        link: String
+      }
+    ],
+    summary: String,
+    linkedin: {
+      type: String,
+      default: ''
+    },
+    profileLinks: [
+      {
+        platform: String, 
+        url: String
+      }
+    ]
   }
+
+
 }, {
   timestamps: true
 });
