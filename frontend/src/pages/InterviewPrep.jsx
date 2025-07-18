@@ -448,18 +448,19 @@ const submitInterview = async () => {
   // UI
   if (step === 0)
     return (
-      <Card className="max-w-xl mx-auto mt-12">
+      <Card className="max-w-5xl mx-auto mt-12 ">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-primary">🎯 AI Interview Prep</CardTitle>
+          <CardTitle className="text-2xl font-bold text-primary"> AI Interview Prep</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-4 text-muted-foreground">Select a job to start your mock interview:</div>
           <div className="grid gap-3">
             {(Array.isArray(jobs) ? jobs : []).map((job) => {
-              const isSelected = selectedJob?.id === job.id;
+              console.log("Rendering job:", job);
+              const isSelected = selectedJob?._id === job._id;
               return (
                 <Button
-                  key={job.id || job.jobtitle}
+                  key={job._id || job.jobtitle}
                   variant={isSelected ? "default" : "outline"}
                   className={`w-full justify-start ${
                     isSelected
@@ -479,7 +480,7 @@ const submitInterview = async () => {
             disabled={!selectedJob}
             onClick={startInterview}
           >
-            🚀 Start Interview
+             Start Interview
           </Button>
         </CardContent>
       </Card>
