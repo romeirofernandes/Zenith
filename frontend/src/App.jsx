@@ -4,20 +4,19 @@ import { auth } from "./config/firebase";
 import Login from "./pages/Login";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
-import SkillMap from "./components/SkillMap";
+import SkillMap from "./components/dashboard/SkillMap";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./components/dashboard/Profile";
-import Latex from "./components/dashboard/Latex";
 import Interview from "./components/dashboard/Interview";
 import InterviewPrep from "./pages/InterviewPrep";
 import Moat from "./pages/Moat";
 import Tests from "./components/dashboard/Tests";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { Toaster } from "sonner";
-import Achievements from "./components/Achievements";
-import ProfileAnalytics from "./components/ProfileAnalytics";
-import ResumeBuilder from "./components/ResumeBuilder";
-import ProjectRecommendations from "./components/ProjectRecommendations";
+import Achievements from "./components/dashboard/Achievements";
+import ProfileAnalytics from "./components/dashboard/ProfileAnalytics";
+import ResumeBuilder from "./components/dashboard/ResumeBuilder";
+import ProjectRecommendations from "./components/dashboard/ProjectRecommendations";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -54,7 +53,6 @@ const App = () => {
           />
           <Route path="/skillmap" element={<SkillMap />} />
           <Route path="/profile" element={user ? <Profile /> : <Login />} />
-          <Route path="/latex" element={user ? <Latex /> : <Login />} />
           <Route path="/interview" element={user ? <Interview /> : <Login />} />
           <Route
             path="/interviewprep"
@@ -62,10 +60,19 @@ const App = () => {
           />
           <Route path="/moat" element={user ? <Moat /> : <Login />} />
           <Route path="/tests" element={user ? <Tests /> : <Login />} />
-          <Route path="/achievements" element={user ? <Achievements /> : <Login />} />
-          <Route path="/analytics" element={user ? <ProfileAnalytics /> : <Login />} />
-          <Route path="/resume-builder" element={<ResumeBuilder/>} />
-          <Route path="/project-recommendations" element={user ? <ProjectRecommendations /> : <Login />} />
+          <Route
+            path="/achievements"
+            element={user ? <Achievements /> : <Login />}
+          />
+          <Route
+            path="/analytics"
+            element={user ? <ProfileAnalytics /> : <Login />}
+          />
+          <Route path="/resume-builder" element={<ResumeBuilder />} />
+          <Route
+            path="/project-recommendations"
+            element={user ? <ProjectRecommendations /> : <Login />}
+          />
         </Routes>
         <Toaster
           position="top-right"

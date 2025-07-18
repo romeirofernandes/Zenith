@@ -40,11 +40,11 @@ import Jobs from "@/components/Dashboard/Jobs";
 import WishList from "@/components/Dashboard/WishList";
 import Tests from "../components/dashboard/Tests";
 import InterviewPrep from "./InterviewPrep";
-import SkillMap from "../components/SkillMap";
-import ResumeBuilder from "../components/ResumeBuilder";
-import Achievements from "../components/Achievements";
-import ProfileAnalytics from "../components/ProfileAnalytics";
-import ProjectRecommendations from "../components/ProjectRecommendations";
+import SkillMap from "../components/dashboard/SkillMap";
+import ResumeBuilder from "../components/dashboard/ResumeBuilder";
+import Achievements from "../components/dashboard/Achievements";
+import ProfileAnalytics from "../components/dashboard/ProfileAnalytics";
+import ProjectRecommendations from "../components/dashboard/ProjectRecommendations";
 
 const sidebarItems = [
   { id: "profile", label: "Profile", icon: User },

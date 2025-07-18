@@ -8,7 +8,7 @@ import {
   StyleSheet,
   Font,
 } from "@react-pdf/renderer";
-import { auth } from "../config/firebase";
+import { auth } from "../../config/firebase";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Empty profile template

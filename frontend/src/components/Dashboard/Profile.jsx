@@ -232,9 +232,9 @@ const Profile = ({
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? "Saving..." : "Save Profile"}
           </Button>
-          <Button onClick={handleLogout} variant="outline">
+          {/* <Button onClick={handleLogout} variant="outline">
             Logout
-          </Button>
+          </Button> */}
         </div>
       </div>
 
