@@ -105,7 +105,7 @@ ${JSON.stringify(profile, null, 2)}
           Authorization: `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "mixtral-8x7b-32768",
+          model: "llama3-70b-8192",
           messages: [
             { role: "system", content: "You are a resume improvement assistant." },
             { role: "user", content: prompt },
@@ -114,17 +114,26 @@ ${JSON.stringify(profile, null, 2)}
         }),
       });
       const data = await res.json();
+      console.log(data);
       // Try to parse improved JSON from AI response
       let improved = null;
       try {
-        const match = data.choices[0].message.content.match(/```json([\s\S]*?)```/);
+        // Try to extract JSON from ```json ... ```
+        const match = data.choices[0].message.content.match(/```json\s*([\s\S]*?)\s*```/);
         if (match) {
           improved = JSON.parse(match[1]);
         } else {
-          improved = JSON.parse(data.choices[0].message.content);
+          // Try to extract JSON from ``` ... ```
+          const match2 = data.choices[0].message.content.match(/```([\s\S]*?)```/);
+          if (match2) {
+            improved = JSON.parse(match2[1]);
+          } else {
+            // Try to parse as plain JSON
+            improved = JSON.parse(data.choices[0].message.content);
+          }
         }
-      } catch {
-        // fallback: do nothing
+      } catch (error) {
+        console.log("AI JSON parse error:", error);
       }
       if (improved) setProfile(improved);
       else alert("AI could not improve the resume. Try again.");
