@@ -71,7 +71,7 @@ const scrollbarHideStyle = `
 `;
 
 // Inject the CSS
-if (typeof document !== 'undefined') {
+if (typeof document !== "undefined") {
   const styleSheet = document.createElement("style");
   styleSheet.innerText = scrollbarHideStyle;
   document.head.appendChild(styleSheet);
@@ -94,64 +94,64 @@ const sidebarItems = [
 // Animation variants
 const sidebarVariants = {
   hidden: { x: -300, opacity: 0 },
-  visible: { 
-    x: 0, 
+  visible: {
+    x: 0,
     opacity: 1,
     transition: {
       type: "spring",
       stiffness: 300,
       damping: 30,
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const menuItemVariants = {
   hidden: { x: -20, opacity: 0 },
-  visible: { 
-    x: 0, 
+  visible: {
+    x: 0,
     opacity: 1,
     transition: {
       type: "spring",
       stiffness: 400,
-      damping: 25
-    }
+      damping: 25,
+    },
   },
   hover: {
     x: 8,
     transition: {
       type: "spring",
       stiffness: 400,
-      damping: 10
-    }
-  }
+      damping: 10,
+    },
+  },
 };
 
 const contentVariants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     y: 20,
-    scale: 0.95
+    scale: 0.95,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     scale: 1,
     transition: {
       type: "spring",
       stiffness: 300,
       damping: 30,
-      duration: 0.3
-    }
+      duration: 0.3,
+    },
   },
-  exit: { 
-    opacity: 0, 
+  exit: {
+    opacity: 0,
     y: -20,
     scale: 0.95,
     transition: {
-      duration: 0.2
-    }
-  }
+      duration: 0.2,
+    },
+  },
 };
 
 const avatarVariants = {
@@ -160,21 +160,21 @@ const avatarVariants = {
     rotate: [0, -5, 5, 0],
     transition: {
       scale: { type: "spring", stiffness: 300 },
-      rotate: { duration: 0.5 }
-    }
-  }
+      rotate: { duration: 0.5 },
+    },
+  },
 };
 
 const logoVariants = {
   initial: { scale: 1, rotate: 0 },
-  hover: { 
-    scale: 1.1, 
+  hover: {
+    scale: 1.1,
     rotate: 360,
     transition: {
       duration: 0.6,
-      ease: "easeInOut"
-    }
-  }
+      ease: "easeInOut",
+    },
+  },
 };
 
 const Dashboard = () => {
@@ -282,27 +282,27 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <motion.div 
+      <motion.div
         className="min-h-screen bg-background flex items-center justify-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
         <motion.div
-          animate={{ 
+          animate={{
             scale: [1, 1.2, 1],
-            rotate: [0, 180, 360]
+            rotate: [0, 180, 360],
           }}
-          transition={{ 
+          transition={{
             duration: 2,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
           className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center"
         >
           <Briefcase className="h-6 w-6 text-primary-foreground" />
         </motion.div>
-        <motion.div 
+        <motion.div
           className="ml-4 text-foreground text-xl"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.5, repeat: Infinity }}
@@ -315,20 +315,22 @@ const Dashboard = () => {
 
   if (!user) {
     return (
-      <motion.div 
+      <motion.div
         className="min-h-screen bg-background flex items-center justify-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="text-foreground text-xl">Please sign in to continue</div>
+        <div className="text-foreground text-xl">
+          Please sign in to continue
+        </div>
       </motion.div>
     );
   }
 
   return (
     <SidebarProvider>
-      <motion.div 
+      <motion.div
         className="min-h-screen flex w-full"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -343,13 +345,13 @@ const Dashboard = () => {
           <Sidebar className="border-r bg-sidebar relative overflow-hidden">
             {/* Subtle gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/5 pointer-events-none" />
-            
+
             <SidebarHeader className="p-4 relative z-10">
-              <motion.div 
+              <motion.div
                 className="flex items-center gap-3"
                 whileHover="hover"
               >
-                <motion.div 
+                <motion.div
                   className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground relative overflow-hidden"
                   variants={logoVariants}
                   initial="initial"
@@ -370,7 +372,7 @@ const Dashboard = () => {
                   />
                 </motion.div>
                 <div className="flex flex-col">
-                  <motion.span 
+                  <motion.span
                     className="font-semibold text-sidebar-foreground"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -417,18 +419,27 @@ const Dashboard = () => {
                                     layoutId="activeIndicator"
                                     initial={{ scaleY: 0 }}
                                     animate={{ scaleY: 1 }}
-                                    transition={{ type: "spring", stiffness: 300 }}
+                                    transition={{
+                                      type: "spring",
+                                      stiffness: 300,
+                                    }}
                                   />
                                 )}
-                                
+
                                 <motion.div
-                                  animate={activeTab === item.id ? { rotate: 360 } : { rotate: 0 }}
+                                  animate={
+                                    activeTab === item.id
+                                      ? { rotate: 360 }
+                                      : { rotate: 0 }
+                                  }
                                   transition={{ duration: 0.3 }}
                                 >
                                   <item.icon className="h-4 w-4" />
                                 </motion.div>
-                                <span className="font-medium">{item.label}</span>
-                                
+                                <span className="font-medium">
+                                  {item.label}
+                                </span>
+
                                 {/* Ripple effect on click */}
                                 <motion.div
                                   className="absolute inset-0 bg-white/10 rounded-md"
@@ -448,22 +459,20 @@ const Dashboard = () => {
             </SidebarContent>
 
             <SidebarFooter className="p-4 relative z-10">
-              <motion.div 
+              <motion.div
                 className="flex items-center gap-3 mb-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
               >
-                <motion.div variants={avatarVariants} whileHover="hover">
-                  <Avatar className="h-10 w-10 ring-2 ring-primary/20 transition-all duration-300">
-                    <AvatarImage src={user.photoURL} alt={getUserDisplayName()} />
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {getUserInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                </motion.div>
+                <Avatar className="h-10 w-10 ring-2 ring-primary/20 transition-all duration-300">
+                  <AvatarImage src={user.photoURL} alt={getUserDisplayName()} />
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="flex-1 min-w-0">
-                  <motion.p 
+                  <motion.p
                     className="text-sm font-medium text-sidebar-foreground truncate"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -471,7 +480,7 @@ const Dashboard = () => {
                   >
                     {getUserDisplayName()}
                   </motion.p>
-                  <motion.p 
+                  <motion.p
                     className="text-xs text-sidebar-foreground/70 truncate"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -482,33 +491,14 @@ const Dashboard = () => {
                 </div>
               </motion.div>
               <Separator className="mb-4" />
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <Button
+                variant="ghost"
+                onClick={handleLogout}
+                className="w-full justify-start gap-2 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-300 relative overflow-hidden group"
               >
-                <Button
-                  variant="ghost"
-                  onClick={handleLogout}
-                  className="w-full justify-start gap-2 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-300 relative overflow-hidden group"
-                >
-                  <motion.div
-                    animate={{ rotate: [0, 15, 0] }}
-                    transition={{ duration: 0.3 }}
-                    className="group-hover:animate-bounce"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </motion.div>
-                  <span>Logout</span>
-                  
-                  {/* Hover effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-red-50 opacity-0 group-hover:opacity-100"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "0%" }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </Button>
-              </motion.div>
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </Button>
             </SidebarFooter>
           </Sidebar>
         </motion.div>
@@ -516,7 +506,7 @@ const Dashboard = () => {
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Mobile Header */}
-          <motion.div 
+          <motion.div
             className="lg:hidden flex items-center justify-between p-4 border-b bg-background"
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -530,7 +520,7 @@ const Dashboard = () => {
                 <Menu className="h-6 w-6" />
               </motion.div>
             </SidebarTrigger>
-            <motion.h1 
+            <motion.h1
               className="text-lg font-semibold"
               animate={{ scale: [1, 1.02, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
@@ -551,9 +541,9 @@ const Dashboard = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
               style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch'
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+                WebkitOverflowScrolling: "touch",
               }}
             >
               <AnimatePresence mode="wait">
