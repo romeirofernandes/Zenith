@@ -11,6 +11,7 @@ import Latex from './components/dashboard/Latex';
 import Interview from './components/dashboard/Interview';
 import InterviewPrep from './pages/InterviewPrep';
 import Moat from './pages/Moat';
+import Tests from './components/dashboard/Tests';
 
 
 const App = () => {
@@ -47,6 +48,7 @@ const App = () => {
         <Route path="/interview" element={user ? <Interview /> : <Login />} />
         <Route path="/interviewprep" element={user ? <InterviewPrep /> : <Login />} />
         <Route path="/moat" element={user ? <Moat /> : <Login />} />
+         <Route path="/tests" element={user ? <Tests/> : <Login />} />
       </Routes>
     </BrowserRouter>
   )

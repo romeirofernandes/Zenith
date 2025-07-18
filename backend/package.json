@@ -25,7 +25,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.0",
     "multer": "^2.0.2",
-    "multer": "^2.0.2",
     "streamifier": "^0.1.1"
   },
   "devDependencies": {
