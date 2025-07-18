@@ -17,6 +17,7 @@ import { Toaster } from "sonner";
 import Achievements from "./components/Achievements";
 import ProfileAnalytics from "./components/ProfileAnalytics";
 import ResumeBuilder from "./components/ResumeBuilder";
+import ProjectRecommendations from "./components/ProjectRecommendations";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -64,6 +65,7 @@ const App = () => {
           <Route path="/achievements" element={user ? <Achievements /> : <Login />} />
           <Route path="/analytics" element={user ? <ProfileAnalytics /> : <Login />} />
           <Route path="/resume-builder" element={<ResumeBuilder/>} />
+          <Route path="/project-recommendations" element={user ? <ProjectRecommendations /> : <Login />} />
         </Routes>
         <Toaster
           position="top-right"
