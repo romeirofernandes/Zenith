@@ -1,6 +1,8 @@
 import React from "react";
-import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
+import Navbar from "@/components/landing/Navbar";
+import HeroSection from "@/components/landing/HeroSection";
+import Features from "@/components/Features";
+import Footer from "@/components/landing/Footer";
 
 const Landing = () => {
   return (
@@ -8,7 +10,9 @@ const Landing = () => {
       <Navbar />
       <main className="pt-24">
         <HeroSection />
+        <Features />
       </main>
+      <Footer />
     </div>
   );
 };
