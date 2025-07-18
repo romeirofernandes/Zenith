@@ -30,36 +30,42 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
+  e.preventDefault();
+  setLoading(true);
+  setMessage("");
 
-    try {
-      if (isRegister) {
-        await createUserWithEmailAndPassword(auth, email, password);
-        setMessage("Account created successfully!");
-      } else {
-        await signInWithEmailAndPassword(auth, email, password);
-        setMessage("Login successful!");
-      }
-      navigate("/dashboard");
-    } catch (error) {
-      setMessage(error.message);
+  try {
+    if (isRegister) {
+      await createUserWithEmailAndPassword(auth, email, password);
+      const idToken = await auth.currentUser.getIdToken();
+      localStorage.setItem("authToken", idToken);
+      setMessage("Account created successfully!");
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+      const idToken = await auth.currentUser.getIdToken();
+      localStorage.setItem("authToken", idToken);
+      setMessage("Login successful!");
     }
-    setLoading(false);
-  };
+    navigate("/dashboard");
+  } catch (error) {
+    setMessage(error.message);
+  }
+  setLoading(false);
+};
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    try {
-      await signInWithPopup(auth, googleProvider);
-      setMessage("Google login successful!");
-      navigate("/dashboard");
-    } catch (error) {
-      setMessage(error.message);
-    }
-    setLoading(false);
-  };
+const handleGoogleLogin = async () => {
+  setLoading(true);
+  try {
+    await signInWithPopup(auth, googleProvider);
+    const idToken = await auth.currentUser.getIdToken();
+    localStorage.setItem("authToken", idToken);
+    setMessage("Google login successful!");
+    navigate("/dashboard");
+  } catch (error) {
+    setMessage(error.message);
+  }
+  setLoading(false);
+};
 
   return (
     <div

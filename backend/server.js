@@ -3,6 +3,7 @@ const cors = require('cors');
 const connectDB = require('./config/database');
 require('dotenv').config();
 const interviewRoutes = require('./routes/interviewRoutes');
+const achievementRoutes = require('./routes/achievementRoutes');
 
 // Connect to database
 connectDB();
@@ -36,10 +37,9 @@ app.use("/api/resume", require("./routes/resumeRoutes"));
 app.use('/api/jobs', require("./routes/jobRoutes"));
 app.use("/api/soft-skills", require("./routes/softSkillsRoutes"));
 app.use('/api/interview', interviewRoutes);
-
 app.use("/api/profile", require("./routes/profileRoutes"));
-
 app.use("/api/moat", require("./routes/moatRoutes"));
+app.use("/api/achievements", achievementRoutes);
 
 // Health check
 app.get("/health", (req, res) => {
