@@ -6,7 +6,6 @@ import {
   TbTarget,
   TbBrain,
   TbCode,
-  TbBook,
   TbCheck,
   TbClock,
   TbArrowRight,
@@ -603,57 +602,6 @@ const Moat = () => {
                             </div>
                           </CardContent>
                         </Card>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Recommended Blogs */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="mb-8"
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <TbBook className="w-6 h-6" />
-                    <span>Recommended Reading</span>
-                  </CardTitle>
-                  <CardDescription>Stay updated with industry trends and best practices</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {data.blogs.map((blog, index) => (
-                      <motion.div
-                        key={blog.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="group"
-                      >
-                        <div className="p-4 border rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer hover:border-primary/50">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {blog.category}
-                                </Badge>
-                                <span className="text-sm text-muted-foreground">{blog.readTime}</span>
-                              </div>
-                              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-2">
-                                {blog.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground mb-3">{blog.description}</p>
-                            </div>
-                            <a href={blog.url} target="_blank" rel="noopener noreferrer">
-                              <TbExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors ml-4" />
-                            </a>
-                          </div>
-                        </div>
                       </motion.div>
                     ))}
                   </div>

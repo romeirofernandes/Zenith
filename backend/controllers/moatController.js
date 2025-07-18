@@ -561,87 +561,6 @@ Return only the JSON array, no additional text.
         console.error("Error generating blog recommendations:", error);
       }
 
-      // Generate recommended reading
-      const readingPrompt = `
-Based on this job description and candidate resume, recommend 5 books, articles, or resources that would help the candidate prepare for this role.
-
-Job Details:
-- Title: ${jobDescription.job_title}
-- Required Skills: ${JSON.stringify(jobDescription.required_skills)}
-- Experience Level: ${jobDescription.experience_level}
-
-Candidate Profile:
-- Skills: ${JSON.stringify(resumeData.skills)}
-- Experience: ${JSON.stringify(resumeData.experience)}
-
-Return ONLY a valid JSON array with this structure:
-[
-  {
-    "id": 1,
-    "title": "Clean Code: A Handbook of Agile Software Craftsmanship",
-    "author": "Robert C. Martin",
-    "type": "book",
-    "description": "Essential reading for writing maintainable and professional code",
-    "category": "Software Development",
-    "priority": "high",
-    "estimatedTime": "2-3 weeks"
-  }
-]
-
-Return only the JSON array, no additional text.
-`;
-
-      let recommendedReading = [
-        {
-          id: 1,
-          title: "Clean Code: A Handbook of Agile Software Craftsmanship",
-          author: "Robert C. Martin",
-          type: "book",
-          description: "Essential reading for writing maintainable and professional code",
-          category: "Software Development",
-          priority: "high",
-          estimatedTime: "2-3 weeks"
-        }
-      ];
-
-      try {
-        const readingResponse = await fetch(
-          "https://api.groq.com/openai/v1/chat/completions",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${GROQ_API_KEY}`,
-            },
-            body: JSON.stringify({
-              model: GROQ_MODEL,
-              messages: [
-                {
-                  role: "system",
-                  content: "You are a learning specialist and technical mentor. Always return valid JSON arrays only, no additional text or explanations.",
-                },
-                { role: "user", content: readingPrompt },
-              ],
-              temperature: 0.7,
-              max_tokens: 1200,
-            }),
-          }
-        );
-
-        if (readingResponse.ok) {
-          const readingData = await readingResponse.json();
-          const readingText = readingData.choices?.[0]?.message?.content?.trim() || "[]";
-
-          const parsedReading = parseAIArrayResponse(readingText);
-          if (parsedReading && Array.isArray(parsedReading)) {
-            recommendedReading = parsedReading;
-            console.log("Recommended reading generated successfully");
-          }
-        }
-      } catch (error) {
-        console.error("Error generating recommended reading:", error);
-      }
-
       // Calculate skill comparison
       const jobSkills = Array.isArray(jobDescription.required_skills) 
         ? jobDescription.required_skills.map((skill) => skill.toLowerCase().trim())
@@ -709,7 +628,6 @@ Return only the JSON array, no additional text.
           roadmap,
           projects,
           blogs,
-          recommendedReading,
           jobInfo: jobDescription,
         },
       });
