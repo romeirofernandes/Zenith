@@ -146,7 +146,7 @@ const Dashboard = () => {
               </div>
               <div className="flex flex-col">
                 <span className="font-semibold text-sidebar-foreground">
-                  SOS Dashboard
+                  Zenith
                 </span>
               </div>
             </div>
