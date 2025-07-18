@@ -18,6 +18,17 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+// Helper function to convert ISO date to yyyy-MM-dd format
+const formatDateForInput = (isoString) => {
+  if (!isoString) return "";
+  try {
+    const date = new Date(isoString);
+    return date.toISOString().split("T")[0];
+  } catch (error) {
+    return "";
+  }
+};
+
 const Profile = ({
   user,
   userProfile,
@@ -63,7 +74,8 @@ const Profile = ({
         profile: {
           firstName: userProfile.profile?.firstName || "",
           lastName: userProfile.profile?.lastName || "",
-          dateOfBirth: userProfile.profile?.dateOfBirth || "",
+          dateOfBirth:
+            formatDateForInput(userProfile.profile?.dateOfBirth) || "",
           gender: userProfile.profile?.gender || "",
           address: {
             street: userProfile.profile?.address?.street || "",
@@ -77,7 +89,11 @@ const Profile = ({
           softskills: userProfile.resume?.softskills || [],
           resumeText: userProfile.resume?.resumeText || "",
           skills: userProfile.resume?.skills || [],
-          experience: userProfile.resume?.experience || [],
+          experience: (userProfile.resume?.experience || []).map((exp) => ({
+            ...exp,
+            startDate: formatDateForInput(exp.startDate),
+            endDate: formatDateForInput(exp.endDate),
+          })),
           education: userProfile.resume?.education || [],
           coCurricular: userProfile.resume?.coCurricular || [],
           certifications: userProfile.resume?.certifications || [],
@@ -95,11 +111,7 @@ const Profile = ({
     if (!file) return;
 
     if (file.type !== "application/pdf") {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a PDF file",
-        variant: "destructive",
-      });
+      toast.error("Please upload a PDF file");
       return;
     }
 
@@ -128,19 +140,24 @@ const Profile = ({
         resume: {
           ...prev.resume,
           ...extractedResume,
+          // Format dates if they exist in extracted data
+          experience: (
+            extractedResume.experience ||
+            prev.resume.experience ||
+            []
+          ).map((exp) => ({
+            ...exp,
+            startDate: formatDateForInput(exp.startDate),
+            endDate: formatDateForInput(exp.endDate),
+          })),
         },
       }));
 
-      toast({
-        title: "Resume extracted successfully",
-        description: "Please review and edit the extracted information",
-      });
+      toast.success(
+        "Resume extracted successfully! Please review and edit the extracted information."
+      );
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to extract resume. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to extract resume. Please try again.");
     } finally {
       setIsUploading(false);
     }
@@ -166,18 +183,15 @@ const Profile = ({
         throw new Error("Failed to save profile");
       }
 
-      toast({
-        title: "Profile saved successfully",
-        description: "Your profile has been updated",
-      });
+      toast.success(
+        "Profile saved successfully! Your profile has been updated."
+      );
 
-      refreshProfile();
+      if (refreshProfile) {
+        refreshProfile();
+      }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save profile. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to save profile. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -232,9 +246,6 @@ const Profile = ({
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? "Saving..." : "Save Profile"}
           </Button>
-          {/* <Button onClick={handleLogout} variant="outline">
-            Logout
-          </Button> */}
         </div>
       </div>
 
