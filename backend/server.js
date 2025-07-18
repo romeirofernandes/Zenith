@@ -33,6 +33,8 @@ app.use('/api/interview', interviewRoutes);
 
 app.use("/api/profile", require("./routes/profileRoutes"));
 
+app.use("/api/moat", require("./routes/moatRoutes"));
+
 // Health check
 app.get("/health", (req, res) => {
   res.status(200).json({
