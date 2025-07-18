@@ -12,11 +12,13 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import Profile from "../components/Dashboard/Profile";
+import Jobs from "@/components/Dashboard/Jobs";
 
 const sidebarItems = [
   { id: "profile", label: "Profile", icon: FaUser },
   { id: "latex", label: "Latex", icon: FaFileAlt },
   { id: "interview", label: "Interview", icon: FaComments },
+   { id: "jobs", label: "Jobs", icon: FaComments },
 ];
 
 const Dashboard = () => {
@@ -322,6 +324,12 @@ const Dashboard = () => {
       verifyToken={verifyToken}
       copyToken={copyToken}
     />
+  </motion.div>
+)}
+
+{activeTab === "jobs" && (
+  <motion.div variants={itemVariants}>
+    <Jobs/>
   </motion.div>
 )}
             {activeTab === "latex" && (
