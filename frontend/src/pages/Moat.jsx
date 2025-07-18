@@ -55,7 +55,7 @@ const Moat = () => {
       if (user) {
         const jobId = searchParams.get("jobId")
         if (!jobId) {
-          navigate("/wishlist")
+          navigate("/dashboard")
           return
         }
 
@@ -181,7 +181,7 @@ const Moat = () => {
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Back button */}
-        <Button variant="outline" onClick={() => navigate("/wishlist")} className="mb-8">
+        <Button variant="outline" onClick={() => navigate("/dashboard")} className="mb-8">
           ← Back to Wishlist
         </Button>
 
