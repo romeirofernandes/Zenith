@@ -46,6 +46,35 @@ import Achievements from "../components/dashboard/Achievements";
 import ProfileAnalytics from "../components/dashboard/ProfileAnalytics";
 import ProjectRecommendations from "../components/dashboard/ProjectRecommendations";
 
+// Update the scrollbarHideStyle constant at the top of the file
+const scrollbarHideStyle = `
+  .scrollbar-hide {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+  * {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+  *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+`;
+
+// Inject the CSS
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = scrollbarHideStyle;
+  document.head.appendChild(styleSheet);
+}
+
 const sidebarItems = [
   { id: "profile", label: "Profile", icon: User },
   { id: "jobs", label: "Jobs", icon: Briefcase },
@@ -59,10 +88,97 @@ const sidebarItems = [
   { id: "interview", label: "Interview", icon: MessageSquare },
 ];
 
+// Animation variants
+const sidebarVariants = {
+  hidden: { x: -300, opacity: 0 },
+  visible: { 
+    x: 0, 
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 30,
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const menuItemVariants = {
+  hidden: { x: -20, opacity: 0 },
+  visible: { 
+    x: 0, 
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 25
+    }
+  },
+  hover: {
+    x: 8,
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 10
+    }
+  }
+};
+
+const contentVariants = {
+  hidden: { 
+    opacity: 0, 
+    y: 20,
+    scale: 0.95
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 30,
+      duration: 0.3
+    }
+  },
+  exit: { 
+    opacity: 0, 
+    y: -20,
+    scale: 0.95,
+    transition: {
+      duration: 0.2
+    }
+  }
+};
+
+const avatarVariants = {
+  hover: {
+    scale: 1.1,
+    rotate: [0, -5, 5, 0],
+    transition: {
+      scale: { type: "spring", stiffness: 300 },
+      rotate: { duration: 0.5 }
+    }
+  }
+};
+
+const logoVariants = {
+  initial: { scale: 1, rotate: 0 },
+  hover: { 
+    scale: 1.1, 
+    rotate: 360,
+    transition: {
+      duration: 0.6,
+      ease: "easeInOut"
+    }
+  }
+};
+
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [activeTab, setActiveTab] = useState("profile");
+  const [isLoading, setIsLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -72,6 +188,8 @@ const Dashboard = () => {
       setUser(firebaseUser);
       if (firebaseUser) {
         fetchProfile(firebaseUser);
+      } else {
+        setIsLoading(false);
       }
     });
 
@@ -105,6 +223,8 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -155,109 +275,298 @@ const Dashboard = () => {
     "analytics",
   ];
 
+  if (isLoading) {
+    return (
+      <motion.div 
+        className="min-h-screen bg-background flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div
+          animate={{ 
+            scale: [1, 1.2, 1],
+            rotate: [0, 180, 360]
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center"
+        >
+          <Briefcase className="h-6 w-6 text-primary-foreground" />
+        </motion.div>
+        <motion.div 
+          className="ml-4 text-foreground text-xl"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          Loading user...
+        </motion.div>
+      </motion.div>
+    );
+  }
+
   if (!user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground text-xl">Loading user...</div>
-      </div>
+      <motion.div 
+        className="min-h-screen bg-background flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="text-foreground text-xl">Please sign in to continue</div>
+      </motion.div>
     );
   }
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <motion.div 
+        className="min-h-screen flex w-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         {/* Sidebar */}
-        <Sidebar className="border-r bg-sidebar">
-          <SidebarHeader className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Briefcase className="h-4 w-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-semibold text-sidebar-foreground">
-                  Zenith
-                </span>
-              </div>
-            </div>
-          </SidebarHeader>
+        <motion.div
+          variants={sidebarVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <Sidebar className="border-r bg-sidebar relative overflow-hidden">
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/5 pointer-events-none" />
+            
+            <SidebarHeader className="p-4 relative z-10">
+              <motion.div 
+                className="flex items-center gap-3"
+                whileHover="hover"
+              >
+                <motion.div 
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground relative overflow-hidden"
+                  variants={logoVariants}
+                  initial="initial"
+                  whileHover="hover"
+                >
+                  <Briefcase className="h-4 w-4" />
+                  {/* Shine effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    animate={{
+                      x: [-100, 100],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 3,
+                    }}
+                  />
+                </motion.div>
+                <div className="flex flex-col">
+                  <motion.span 
+                    className="font-semibold text-sidebar-foreground"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    Zenith
+                  </motion.span>
+                </div>
+              </motion.div>
+            </SidebarHeader>
 
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {sidebarItems.map((item) => (
-                    <SidebarMenuItem key={item.id}>
-                      <SidebarMenuButton
-                        onClick={() => setActiveTab(item.id)}
-                        className={`w-full justify-start gap-3 ${
-                          activeTab === item.id
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                        }`}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span className="font-medium">{item.label}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
+            <SidebarContent className="relative z-10">
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <AnimatePresence>
+                      {sidebarItems.map((item, index) => (
+                        <motion.div
+                          key={item.id}
+                          variants={menuItemVariants}
+                          initial="hidden"
+                          animate="visible"
+                          custom={index}
+                          whileHover="hover"
+                          transition={{ delay: index * 0.1 }}
+                        >
+                          <SidebarMenuItem>
+                            <motion.div
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              <SidebarMenuButton
+                                onClick={() => setActiveTab(item.id)}
+                                className={`w-full justify-start gap-3 relative overflow-hidden transition-all duration-300 ${
+                                  activeTab === item.id
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-lg"
+                                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                                }`}
+                              >
+                                {/* Active indicator */}
+                                {activeTab === item.id && (
+                                  <motion.div
+                                    className="absolute left-0 top-0 bottom-0 w-1 bg-primary"
+                                    layoutId="activeIndicator"
+                                    initial={{ scaleY: 0 }}
+                                    animate={{ scaleY: 1 }}
+                                    transition={{ type: "spring", stiffness: 300 }}
+                                  />
+                                )}
+                                
+                                <motion.div
+                                  animate={activeTab === item.id ? { rotate: 360 } : { rotate: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                >
+                                  <item.icon className="h-4 w-4" />
+                                </motion.div>
+                                <span className="font-medium">{item.label}</span>
+                                
+                                {/* Ripple effect on click */}
+                                <motion.div
+                                  className="absolute inset-0 bg-white/10 rounded-md"
+                                  initial={{ scale: 0, opacity: 0 }}
+                                  whileTap={{ scale: 1, opacity: 1 }}
+                                  transition={{ duration: 0.2 }}
+                                />
+                              </SidebarMenuButton>
+                            </motion.div>
+                          </SidebarMenuItem>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
 
-          <SidebarFooter className="p-4">
-            <div className="flex items-center gap-3 mb-4">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={user.photoURL} alt={getUserDisplayName()} />
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {getUserInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">
-                  {getUserDisplayName()}
-                </p>
-                <p className="text-xs text-sidebar-foreground/70 truncate">
-                  {getUserEmail()}
-                </p>
-              </div>
-            </div>
-            <Separator className="mb-4" />
-            <Button
-              variant="ghost"
-              onClick={handleLogout}
-              className="w-full justify-start gap-2 text-red-500 hover:bg-red-100"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
-            </Button>
-          </SidebarFooter>
-        </Sidebar>
+            <SidebarFooter className="p-4 relative z-10">
+              <motion.div 
+                className="flex items-center gap-3 mb-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <motion.div variants={avatarVariants} whileHover="hover">
+                  <Avatar className="h-10 w-10 ring-2 ring-primary/20 transition-all duration-300">
+                    <AvatarImage src={user.photoURL} alt={getUserDisplayName()} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </motion.div>
+                <div className="flex-1 min-w-0">
+                  <motion.p 
+                    className="text-sm font-medium text-sidebar-foreground truncate"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.7 }}
+                  >
+                    {getUserDisplayName()}
+                  </motion.p>
+                  <motion.p 
+                    className="text-xs text-sidebar-foreground/70 truncate"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                  >
+                    {getUserEmail()}
+                  </motion.p>
+                </div>
+              </motion.div>
+              <Separator className="mb-4" />
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="w-full justify-start gap-2 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-300 relative overflow-hidden group"
+                >
+                  <motion.div
+                    animate={{ rotate: [0, 15, 0] }}
+                    transition={{ duration: 0.3 }}
+                    className="group-hover:animate-bounce"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </motion.div>
+                  <span>Logout</span>
+                  
+                  {/* Hover effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-red-50 opacity-0 group-hover:opacity-100"
+                    initial={{ x: "-100%" }}
+                    whileHover={{ x: "0%" }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </Button>
+              </motion.div>
+            </SidebarFooter>
+          </Sidebar>
+        </motion.div>
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Mobile Header */}
-          <div className="lg:hidden flex items-center justify-between p-4 border-b bg-background">
+          <motion.div 
+            className="lg:hidden flex items-center justify-between p-4 border-b bg-background"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
             <SidebarTrigger className="lg:hidden">
-              <Menu className="h-6 w-6" />
+              <motion.div
+                whileHover={{ rotate: 180 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Menu className="h-6 w-6" />
+              </motion.div>
             </SidebarTrigger>
-            <h1 className="text-lg font-semibold">Zenith</h1>
-          </div>
+            <motion.h1 
+              className="text-lg font-semibold"
+              animate={{ scale: [1, 1.02, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              Zenith
+            </motion.h1>
+          </motion.div>
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-hidden">
-            <div
-              className={`h-full ${
+          <main className="flex-1 overflow-hidden scrollbar-hide">
+            <motion.div
+              className={`h-full overflow-y-auto scrollbar-hide ${
                 fullScreenComponents.includes(activeTab)
                   ? "p-0"
                   : "container mx-auto p-4 lg:p-6"
               }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch'
+              }}
             >
-              {renderContent()}
-            </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  variants={contentVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="h-full"
+                >
+                  {renderContent()}
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
           </main>
         </div>
-      </div>
+      </motion.div>
     </SidebarProvider>
   );
 };
