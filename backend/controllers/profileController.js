@@ -188,6 +188,22 @@ const profileController = {
       res.status(500).json({ error: "Failed to fetch analytics" });
     }
   },
+
+  async getResume(req, res) {
+    try {
+      const user = await User.findByFirebaseUid(req.user.uid).lean();
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      if (!user.resume) {
+        return res.status(404).json({ error: "Resume not found" });
+      }
+      res.json({ resume: user.resume });
+    } catch (error) {
+      console.error("Error fetching resume:", error);
+      res.status(500).json({ error: "Failed to fetch resume" });
+    }
+  },
 };
 
 module.exports = profileController;

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import RecordRTC from "recordrtc";
+// import { c } from "framer-motion/dist/types.d-Bq-Qm38R";
 
 // ---- SAMPLE DATA ----
 const sampleJobs = [
@@ -75,6 +76,7 @@ const InterviewPrep = () => {
   const [jobs, setJobs] = useState([]);
   const [resume, setResume] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
+   console.log("Current selectedJob state:", selectedJob);
   const [questions, setQuestions] = useState([]);
   const [step, setStep] = useState(0); // 0: select, 1: interview, 2: review
   const [currentQ, setCurrentQ] = useState(0);
@@ -93,12 +95,18 @@ const InterviewPrep = () => {
       let jobsData = sampleJobs;
       let resumeData = sampleResume;
       try {
-        const jobsRes = await fetch(`${import.meta.env.VITE_API_URL}/jobs`);
+        const jobsRes = await fetch(`${import.meta.env.VITE_API_URL}/jobs/all`);
         const jobsJson = await jobsRes.json();
         if (Array.isArray(jobsJson.jobs) && jobsJson.jobs.length > 0) jobsData = jobsJson.jobs;
+        console.log("Fetched jobs:", jobsData);
       } catch {}
       try {
-        const resumeRes = await fetch(`${import.meta.env.VITE_API_URL}/resume/me`);
+        const resumeRes = await fetch(`${import.meta.env.VITE_API_URL}/profile/resume`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+        );
         const resumeJson = await resumeRes.json();
         if (resumeJson.resume) resumeData = resumeJson.resume;
       } catch {}
@@ -241,17 +249,29 @@ console.log("Submitting interview to", `${import.meta.env.VITE_API_URL}/intervie
         <CardContent>
           <div className="mb-4 text-muted-foreground">Select a job to start your mock interview:</div>
           <div className="grid gap-3">
-            {(Array.isArray(jobs) ? jobs : []).map((job) => (
-              <Button
-                key={job.id}
-                variant={selectedJob?.id === job.id ? "default" : "outline"}
-                className="w-full justify-start"
-                onClick={() => setSelectedJob(job)}
-              >
-                <span className="font-semibold">{job.company_name}</span>
-                <span className="ml-2 text-xs text-muted-foreground">{job.job_title}</span>
-              </Button>
-            ))}
+            {(Array.isArray(jobs) ? jobs : []).map((job) => {
+              const isSelected = selectedJob?._id === job._id;
+              console.log("Job:", job.company_name, "| Job ID:", job._id, "| Selected Job ID:", selectedJob?._id, "| Is Selected:", isSelected);
+              return (
+                <Button
+                  key={job._id || job.job_title}
+                  variant={isSelected ? "default" : "outline"}
+                  className={`w-full justify-start ${
+                    isSelected
+                      ? "bg-blue-100 text-primary border-primary"
+                      : "bg-white text-black border-gray-200"
+                  } hover:bg-blue-100 transition-colors`}
+                  onClick={() => {
+                    console.log("Clicked job:", job);
+                    console.log("Setting selectedJob to:", job);
+                    setSelectedJob(job);
+                  }}
+                >
+                  <span className="font-semibold">{job.company_name}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{job.job_title}</span>
+                </Button>
+              );
+            })}
           </div>
           <Button
             className="mt-6 w-full"
