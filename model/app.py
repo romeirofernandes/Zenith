@@ -12,48 +12,50 @@ from fastapi.middleware.cors import CORSMiddleware
 import pdfplumber
 import requests
 import os
-
+import json
+import dotenv
+dotenv.load_dotenv()
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
-import pdfplumber
-import requests
-import os
-import json
-
-app = FastAPI()
 
 # Replace these with your actual keys or load from .env
-GROQ_API_KEY = ""
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 GROQ_MODEL = 'llama3-8b-8192'  # Example model
 
 
 @app.post("/extract_resume")
 async def extract_and_parse_resume(file: UploadFile = File(...)):
+    print("Received file:", file.filename)
     if not file.filename.endswith(".pdf"):
+        print("File is not a PDF")
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
 
     try:
         text = ""
         with pdfplumber.open(file.file) as pdf:
             for page in pdf.pages:
-                text += page.extract_text() or ""
+                page_text = page.extract_text() or ""
+                print(f"Extracted text from page: {page_text[:100]}...")  # Print first 100 chars
+                text += page_text
     except Exception as e:
+        print("PDF extraction error:", str(e))
         raise HTTPException(status_code=500, detail=f"Failed to extract PDF: {str(e)}")
 
     if not text.strip():
+        print("No extractable text found in the PDF.")
         raise HTTPException(status_code=400, detail="No extractable text found in the PDF.")
 
     # Clean the text to avoid JSON parsing issues
     cleaned_text = text.replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r')
+    print("Cleaned text for prompt:", cleaned_text[:300], "...")  # Print first 300 chars
 
     prompt = f"""
 You are a resume parser. Given the plain text of a resume, extract the following fields in JSON format.
@@ -82,6 +84,7 @@ Resume text: {cleaned_text}
 Return only the JSON object:"""
 
     try:
+        print("Sending request to Groq API...")
         response = requests.post(
             "https://api.groq.com/openai/v1/chat/completions",
             headers={
@@ -94,43 +97,52 @@ Return only the JSON object:"""
                     {"role": "system", "content": "You are a professional resume parser. Return only valid JSON without any commentary."},
                     {"role": "user", "content": prompt}
                 ],
-                "temperature": 0.1  # Lower temperature for more consistent output
+                "temperature": 0.1
             }
         )
+        print("Groq API status code:", response.status_code)
+        print("Groq API response text:", response.text[:500], "...")  # Print first 500 chars
 
         if response.status_code != 200:
+            print("Groq API error:", response.text)
             raise HTTPException(status_code=500, detail=f"Groq API error: {response.text}")
 
         result = response.json()
+        print("Groq API parsed JSON:", result)
         if "choices" not in result or not result["choices"]:
+            print("Groq returned no choices:", result)
             raise HTTPException(status_code=500, detail=f"Groq returned no choices: {result}")
 
         raw_content = result["choices"][0]["message"]["content"].strip()
+        print("Groq raw content:", raw_content[:500], "...")  # Print first 500 chars
 
         # Find the JSON part (in case there's any preamble)
         json_start = raw_content.find("{")
         json_end = raw_content.rfind("}") + 1
         
         if json_start == -1 or json_end == 0:
+            print("No valid JSON found in response")
             raise HTTPException(status_code=500, detail="No valid JSON found in response")
         
         json_str = raw_content[json_start:json_end]
+        print("Extracted JSON string:", json_str[:500], "...")  # Print first 500 chars
 
         # Additional cleaning for common JSON issues
-        json_str = re.sub(r'"""([^"]*?)"""', r'"\1"', json_str)  # Replace triple quotes with single quotes
-        json_str = re.sub(r'(?<!\\)"([^"]*?)"(?=\s*[,}])', r'"\1"', json_str)  # Fix unescaped quotes
+        import re
+        json_str = re.sub(r'"""([^"]*?)"""', r'"\1"', json_str)
+        json_str = re.sub(r'(?<!\\)"([^"]*?)"(?=\s*[,}])', r'"\1"', json_str)
         
         # Parse the JSON
         try:
             parsed_resume = json.loads(json_str)
         except json.JSONDecodeError as e:
-            # If JSON parsing fails, try to fix common issues
+            print("JSONDecodeError:", str(e))
             try:
-                # Remove any trailing commas
                 json_str = re.sub(r',\s*}', '}', json_str)
                 json_str = re.sub(r',\s*]', ']', json_str)
                 parsed_resume = json.loads(json_str)
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e2:
+                print("Final JSONDecodeError:", str(e2))
                 raise HTTPException(
                     status_code=500, 
                     detail=f"Failed to parse JSON: {str(e)}\nRaw JSON:\n{json_str[:500]}..."
@@ -153,18 +165,21 @@ Return only the JSON object:"""
         
         for field, default_value in required_fields.items():
             if field not in parsed_resume:
+                print(f"Field '{field}' missing, setting default.")
                 parsed_resume[field] = default_value
 
     except HTTPException:
         raise
     except Exception as e:
+        print("General exception in resume parsing:", str(e))
         raise HTTPException(status_code=500, detail=f"Failed to parse resume using Groq: {str(e)}")
 
+    print("Returning parsed resume:", parsed_resume)
     return {
         "success": True,
         "parsed_resume": parsed_resume
     }
-
+    
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 nltk.download('punkt')
