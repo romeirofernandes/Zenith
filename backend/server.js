@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
 require('dotenv').config();
+const jobRoutes=require("./routes/jobRoutes")
 
 // Connect to database
 connectDB();
@@ -22,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
-
+app.use('/api/jobs', jobRoutes);
 app.use('/api/resume', require('./routes/resumeRoutes'));
 
 const softSkillsRoutes = require('./routes/softSkillsRoutes');
