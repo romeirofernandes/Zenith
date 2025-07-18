@@ -31,6 +31,8 @@ app.use('/api/jobs', require("./routes/jobRoutes"));
 app.use("/api/soft-skills", require("./routes/softSkillsRoutes"));
 app.use('/api/interview', interviewRoutes);
 
+app.use("/api/profile", require("./routes/profileRoutes"));
+
 // Health check
 app.get("/health", (req, res) => {
   res.status(200).json({
