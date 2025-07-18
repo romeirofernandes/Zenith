@@ -16,7 +16,7 @@ import {
   Award,
   Briefcase,
 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 const Profile = ({
   user,
@@ -56,7 +56,7 @@ const Profile = ({
 
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const { toast } = useToast();
+  // const { toast } = toast();
 
   useEffect(() => {
     if (userProfile) {
@@ -119,7 +119,9 @@ const Profile = ({
       }
 
       const data = await response.json();
+      console.log("Extracted resume data:", data);
       const extractedResume = data.parsed_resume;
+      console.log("Extracted Resume:", extractedResume);
 
       // Update profile data with extracted information
       setProfileData((prev) => ({
