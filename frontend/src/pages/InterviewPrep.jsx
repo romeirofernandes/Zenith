@@ -91,6 +91,7 @@ const InterviewPrep = () => {
   const [transcript, setTranscript] = useState("");
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
+  const transcriptRef = useRef(""); // Add ref for immediate transcript access
 
   useEffect(() => {
     if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
@@ -130,6 +131,7 @@ const InterviewPrep = () => {
 
       if (finalTranscript) {
         setTranscript(prev => prev + finalTranscript);
+        transcriptRef.current += finalTranscript + " ";
       }
       
       // Show interim results too
@@ -206,24 +208,41 @@ const InterviewPrep = () => {
     fetchData();
   }, []);
 
-// When you set questions (in startInterview), also initialize answers:
-const startInterview = async () => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/interview/questions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        job: selectedJob,
-        resume,
-      }),
-    });
-    const data = await res.json();
-    let qs = [];
-    if (Array.isArray(data.questions) && data.questions.length > 0) {
-      qs = data.questions;
-      setQuestions(qs);
-    } else {
-      qs = [
+  // Initialize interview
+  const startInterview = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/interview/questions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          job: selectedJob,
+          resume,
+        }),
+      });
+      const data = await res.json();
+      let qs = [];
+      if (Array.isArray(data.questions) && data.questions.length > 0) {
+        qs = data.questions;
+        setQuestions(qs);
+      } else {
+        qs = [
+          "Tell me about yourself.",
+          "Describe a challenging project you worked on.",
+          "How do you handle tight deadlines?",
+          "What is your experience with React?",
+          "Why do you want to work at this company?",
+        ];
+        setQuestions(qs);
+      }
+      // Initialize answers array
+      setAnswers(qs.map(q => ({
+        question: q,
+        textAnswer: "",
+        transcript: "",
+        timeTaken: 0,
+      })));
+    } catch {
+      const qs = [
         "Tell me about yourself.",
         "Describe a challenging project you worked on.",
         "How do you handle tight deadlines?",
@@ -231,35 +250,19 @@ const startInterview = async () => {
         "Why do you want to work at this company?",
       ];
       setQuestions(qs);
+      setAnswers(qs.map(q => ({
+        question: q,
+        textAnswer: "",
+        transcript: "",
+        timeTaken: 0,
+      })));
     }
-    // Initialize answers array with empty objects for each question
-    setAnswers(qs.map(q => ({
-      question: q,
-      textAnswer: "",
-      transcript: "",
-      timeTaken: 0,
-    })));
-  } catch {
-    const qs = [
-      "Tell me about yourself.",
-      "Describe a challenging project you worked on.",
-      "How do you handle tight deadlines?",
-      "What is your experience with React?",
-      "Why do you want to work at this company?",
-    ];
-    setQuestions(qs);
-    setAnswers(qs.map(q => ({
-      question: q,
-      textAnswer: "",
-      transcript: "",
-      timeTaken: 0,
-    })));
-  }
-  setStep(1);
-  setCurrentQ(0);
-  setMediaBlobs([]);
-  setTranscript("");
-};
+    setStep(1);
+    setCurrentQ(0);
+    setMediaBlobs([]);
+    setTranscript("");
+    transcriptRef.current = ""; // Clear transcript ref
+  };
 
   const startRecording = async () => {
     try {
@@ -278,6 +281,7 @@ const startInterview = async () => {
       setRecording(true);
       setTimer(0);
       setTranscript(""); // Clear previous transcript
+      transcriptRef.current = ""; // Clear ref
       
       timerInterval.current = setInterval(() => {
         setTimer((t) => t + 1);
@@ -296,24 +300,18 @@ const startInterview = async () => {
     }
   };
 
-const stopRecording = async () => {
-  // Stop speech recognition first
-  if (recognitionRef.current) {
-    console.log("🛑 Stopping speech recognition...");
-    recognitionRef.current.stop();
-  }
-  setRecording(false);
-  setIsListening(false);
-
-  // Clean the transcript before saving
-  const cleanedTranscript = transcript.replace(/ \[speaking\.\.\.\].*/, "").trim();
-  console.log("💾 Saving transcript:", cleanedTranscript);
-
-  await recorderRef.current.stopRecording(() => {
-    const blob = recorderRef.current.getBlob();
-    setMediaBlobs((prev) => [...prev, blob]);
-    clearInterval(timerInterval.current);
+  const stopRecording = async () => {
+    // Stop speech recognition first
+    if (recognitionRef.current) {
+      console.log("🛑 Stopping speech recognition...");
+      recognitionRef.current.stop();
+    }
     
+    // Clean the transcript before saving
+    const cleanedTranscript = transcriptRef.current.replace(/ \[speaking\.\.\.\].*/, "").trim();
+    console.log("💾 Saving transcript:", cleanedTranscript);
+
+    // Update answers immediately with the cleaned transcript
     setAnswers((prev) => {
       const copy = [...prev];
       copy[currentQ] = {
@@ -321,27 +319,43 @@ const stopRecording = async () => {
         question: questions[currentQ],
         timeTaken: timer,
         transcript: cleanedTranscript,
-        textAnswer: cleanedTranscript // Put transcript directly in textAnswer
+        textAnswer: cleanedTranscript
       };
-      console.log("📝 Updated answers array:", copy);
       return copy;
     });
-  });
 
-  let tracks = videoRef.current.srcObject.getTracks();
-  tracks.forEach((track) => track.stop());
-};
+    // Stop the recording
+    if (recorderRef.current) {
+      await new Promise((resolve) => {
+        recorderRef.current.stopRecording(() => {
+          const blob = recorderRef.current.getBlob();
+          setMediaBlobs((prev) => [...prev, blob]);
+          resolve();
+        });
+      });
+    }
+
+    clearInterval(timerInterval.current);
+    setRecording(false);
+    setIsListening(false);
+
+    // Stop media tracks
+    if (videoRef.current?.srcObject) {
+      let tracks = videoRef.current.srcObject.getTracks();
+      tracks.forEach((track) => track.stop());
+    }
+  };
 
   const handleNext = async () => {
     if (recording) {
-    await stopRecording();
-  }
+      await stopRecording();
+    }
 
     setCurrentQ((q) => q + 1);
     setTimer(0);
     setTranscript("");
+    transcriptRef.current = ""; // Clear transcript ref
   };
-
 const handleAnswerChange = (e) => {
   const value = e.target.value;
   setAnswers((prev) => {
@@ -350,121 +364,121 @@ const handleAnswerChange = (e) => {
       ...copy[currentQ],
       question: questions[currentQ],
       textAnswer: value,
-      transcript: value, // Keep transcript synced
-      timeTaken: timer,
+      transcript: copy[currentQ]?.transcript || "", // Keep existing transcript
+      timeTaken: copy[currentQ]?.timeTaken || timer,
     };
     return copy;
   });
 };
 
-const submitInterview = async () => {
-  try {
-
-    if (recording) {
-      await stopRecording();
-      // Wait a bit for the recording to be processed
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-
-    setStep(2);
-    setFeedback({ loading: true });
-
-    // Ensure all answers have the current question set
-    const finalAnswers = answers.map((answer, i) => ({
-      questionNumber: i + 1,
-      question: questions[i], // Make sure question is always set
-      textAnswer: answer?.textAnswer || "",
-      transcript: answer?.transcript || "",
-      timeTaken: answer?.timeTaken || 0,
-      hasVideo: mediaBlobs[i] ? true : false
-    }));
-
-    // Add debug logging
-    console.log("🚀 Submitting interview with answers:", finalAnswers);
-    console.log("📊 Transcript data:", finalAnswers.map(a => ({ 
-      question: a.question, 
-      transcript: a.transcript 
-    })));
-
-    const interviewData = {
-      job: selectedJob,
-      resume: resume,
-      questions: questions,
-      answers: finalAnswers,
-      totalTime: answers.reduce((sum, answer) => sum + (answer?.timeTaken || 0), 0),
-      completedAt: new Date().toISOString()
-    };
-
-    const formData = new FormData();
-    formData.append("interviewData", JSON.stringify(interviewData));
-    
-    let authToken = localStorage.getItem("authToken");
-    
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/interview/submit`, {
-      method: "POST",
-      headers: {
-        ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-      },
-      body: formData,
-    });
-
-    if (!res.ok) {
-      if (res.status === 401) {
-        console.warn("Auth token expired, submitting without authentication");
-        const retryRes = await fetch(`${import.meta.env.VITE_API_URL}/interview/submit`, {
-          method: "POST",
-          body: formData,
-        });
-        
-        if (!retryRes.ok) {
-          throw new Error(`HTTP error! status: ${retryRes.status}`);
-        }
-        
-        const data = await retryRes.json();
-        setFeedback(data.feedback || data);
-        return;
+  const submitInterview = async () => {
+    try {
+      if (recording) {
+        await stopRecording();
+        // Wait a bit for the recording to be processed
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
 
-    const data = await res.json();
-    console.log("✅ Interview feedback received:", data);
-    
-    setFeedback(data.feedback || data);
-    
-  } catch (error) {
-    console.error("❌ Error submitting interview:", error);
-    
-    // Enhanced fallback feedback with the actual answers
-    setFeedback({
-      overallFeedback: {
-        strengths: "You completed the interview successfully and provided thoughtful responses to all questions.",
-        weaknesses: "Consider providing more specific examples and quantifiable achievements in your answers.",
-        tipsForImprovement: "Practice speaking more slowly and clearly, and use the STAR method (Situation, Task, Action, Result) for behavioral questions."
-      },
-      perQuestion: questions.map((question, i) => ({
-        question: question,
-        feedback: {
-          strengths: answers[i]?.textAnswer || answers[i]?.transcript ? "You provided a clear response to this question." : "You attempted to answer this question.",
-          weaknesses: "Could be more detailed and include specific examples.",
-          tipsForImprovement: "Consider structuring your answer with clear beginning, middle, and end."
+      setStep(2);
+      setFeedback({ loading: true });
+
+      // Create final answers array
+      const finalAnswers = answers.map((answer, i) => ({
+        questionNumber: i + 1,
+        question: questions[i],
+        textAnswer: answer?.textAnswer || answer?.transcript || "", // Fallback to transcript
+        transcript: answer?.transcript || "",
+        timeTaken: answer?.timeTaken || 0,
+        hasVideo: mediaBlobs[i] ? true : false
+      }));
+
+      console.log("🚀 Submitting interview with answers:", finalAnswers);
+
+      const interviewData = {
+        job: selectedJob,
+        resume: resume,
+        questions: questions,
+        answers: finalAnswers,
+        totalTime: finalAnswers.reduce((sum, answer) => sum + (answer?.timeTaken || 0), 0),
+        completedAt: new Date().toISOString()
+      };
+
+      const formData = new FormData();
+      formData.append("interviewData", JSON.stringify(interviewData));
+      
+      // Add video files to formData
+      mediaBlobs.forEach((blob, index) => {
+        formData.append(`video_${index}`, blob, `answer_${index}.webm`);
+      });
+      
+      let authToken = localStorage.getItem("authToken");
+      
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/interview/submit`, {
+        method: "POST",
+        headers: {
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          console.warn("Auth token expired, submitting without authentication");
+          const retryRes = await fetch(`${import.meta.env.VITE_API_URL}/interview/submit`, {
+            method: "POST",
+            body: formData,
+          });
+          
+          if (!retryRes.ok) {
+            throw new Error(`HTTP error! status: ${retryRes.status}`);
+          }
+          
+          const data = await retryRes.json();
+          setFeedback(data.feedback || data);
+          return;
         }
-      })),
-      score: {
-        overall: 75,
-        communication: 80,
-        technical: 70,
-        confidence: 75
-      },
-      recommendations: [
-        "Practice common interview questions",
-        "Prepare specific examples from your experience",
-        "Work on speaking clearly and at an appropriate pace"
-      ]
-    });
-  }
-};
-  // UI
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("✅ Interview feedback received:", data);
+      
+      setFeedback(data.feedback || data);
+      
+    } catch (error) {
+      console.error("❌ Error submitting interview:", error);
+      
+      // Enhanced fallback feedback
+      setFeedback({
+        overallFeedback: {
+          strengths: "You completed the interview successfully and provided thoughtful responses to all questions.",
+          weaknesses: "Consider providing more specific examples and quantifiable achievements in your answers.",
+          tipsForImprovement: "Practice speaking more slowly and clearly, and use the STAR method (Situation, Task, Action, Result) for behavioral questions."
+        },
+        perQuestion: questions.map((question, i) => ({
+          question: question,
+          feedback: {
+            strengths: answers[i]?.textAnswer || answers[i]?.transcript ? "You provided a clear response to this question." : "You attempted to answer this question.",
+            weaknesses: "Could be more detailed and include specific examples.",
+            tipsForImprovement: "Consider structuring your answer with clear beginning, middle, and end."
+          }
+        })),
+        score: {
+          overall: 75,
+          communication: 80,
+          technical: 70,
+          confidence: 75
+        },
+        recommendations: [
+          "Practice common interview questions",
+          "Prepare specific examples from your experience",
+          "Work on speaking clearly and at an appropriate pace"
+        ]
+      });
+    }
+  };
+
+  // UI Components
   if (step === 0)
     return (
       <Card className="max-w-5xl mx-auto mt-12 ">
@@ -475,7 +489,6 @@ const submitInterview = async () => {
           <div className="mb-4 text-muted-foreground">Select a job to start your mock interview:</div>
           <div className="grid gap-3">
             {(Array.isArray(jobs) ? jobs : []).map((job) => {
-              console.log("Rendering job:", job);
               const isSelected = selectedJob?._id === job._id;
               return (
                 <Button
@@ -521,7 +534,7 @@ const submitInterview = async () => {
             <Button 
               onClick={startRecording} 
               disabled={recording}
-              className={recording ? "bg-red-500" : ""}
+              className={recording ? "bg-red-500 hover:bg-red-600" : ""}
             >
               {recording ? "🔴 Recording..." : "🎬 Start Recording"}
             </Button>
@@ -532,7 +545,7 @@ const submitInterview = async () => {
             {isListening && <span className="text-green-500 text-sm">🎤 Listening...</span>}
           </div>
 
-          {/* IMPROVED TRANSCRIPTION DISPLAY */}
+          {/* Transcription Display */}
           <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-l-4 border-blue-400">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-lg">🎤</span>
@@ -550,17 +563,13 @@ const submitInterview = async () => {
             </div>
           </div>
 
-<textarea
-  className="w-full border rounded p-3 mb-4"
-  placeholder="✍️ Speak or type your answer..."
-  value={
-    recording
-      ? transcript.replace(/ \[speaking\.\.\.\].*/, "")
-      : answers[currentQ]?.textAnswer || ""
-  }
-  onChange={handleAnswerChange}
-  rows={4}
-/>
+          <textarea
+            className="w-full border rounded p-3 mb-4"
+            placeholder="✍️ Speak or type your answer..."
+            value={answers[currentQ]?.textAnswer || transcript || ""}
+            onChange={handleAnswerChange}
+            rows={4}
+          />
           
           <div className="flex justify-between">
             <Button
@@ -573,7 +582,7 @@ const submitInterview = async () => {
             {currentQ < questions.length - 1 ? (
               <Button onClick={handleNext}>Next ➡️</Button>
             ) : (
-              <Button onClick={submitInterview} className="bg-green-600">
+              <Button onClick={submitInterview} className="bg-green-600 hover:bg-green-700">
                 🎉 Submit Interview
               </Button>
             )}
@@ -592,7 +601,12 @@ const submitInterview = async () => {
           <div className="mb-6 p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
             <h3 className="font-semibold text-green-800 mb-2">🎯 Overall Feedback</h3>
             <div className="text-green-700">
-              {typeof feedback?.overallFeedback === "string" ? (
+              {feedback?.loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-700"></div>
+                  Analyzing your responses...
+                </div>
+              ) : typeof feedback?.overallFeedback === "string" ? (
                 feedback.overallFeedback
               ) : feedback?.overallFeedback && typeof feedback.overallFeedback === "object" ? (
                 <ul className="list-disc ml-4 space-y-1">
@@ -610,32 +624,34 @@ const submitInterview = async () => {
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">📝 Question-by-Question Feedback</h3>
-            {(Array.isArray(feedback?.perQuestion) ? feedback.perQuestion : []).map((q, i) => (
-              <div key={i} className="bg-gray-50 rounded-lg p-4 border">
-                <div className="font-semibold text-gray-800 mb-2">❓ {q.question}</div>
-                <div className="text-sm text-blue-900 mb-2 p-2 bg-blue-50 rounded">
-                  <b>Your answer:</b>{" "}
-                  {answers[i]?.textAnswer || answers[i]?.transcript || (
-                    <span className="italic text-gray-500">No text recorded</span>
-                  )}
+          {!feedback?.loading && (
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">📝 Question-by-Question Feedback</h3>
+              {(Array.isArray(feedback?.perQuestion) ? feedback.perQuestion : []).map((q, i) => (
+                <div key={i} className="bg-gray-50 rounded-lg p-4 border">
+                  <div className="font-semibold text-gray-800 mb-2">❓ {q.question}</div>
+                  <div className="text-sm text-blue-900 mb-2 p-2 bg-blue-50 rounded">
+                    <b>Your answer:</b>{" "}
+                    {answers[i]?.textAnswer || answers[i]?.transcript || (
+                      <span className="italic text-gray-500">No text recorded</span>
+                    )}
+                  </div>
+                  <div className="text-gray-700">
+                    <b>💡 Feedback:</b>{" "}
+                    {typeof q.feedback === "string" ? (
+                      q.feedback
+                    ) : q.feedback && typeof q.feedback === "object" ? (
+                      <ul className="list-disc ml-4 mt-1">
+                        {q.feedback.strengths && <li><b>Strengths:</b> {q.feedback.strengths}</li>}
+                        {q.feedback.weaknesses && <li><b>Improve:</b> {q.feedback.weaknesses}</li>}
+                        {q.feedback.tipsForImprovement && <li><b>Tips:</b> {q.feedback.tipsForImprovement}</li>}
+                      </ul>
+                    ) : "Good response!"}
+                  </div>
                 </div>
-                <div className="text-gray-700">
-                  <b>💡 Feedback:</b>{" "}
-                  {typeof q.feedback === "string" ? (
-                    q.feedback
-                  ) : q.feedback && typeof q.feedback === "object" ? (
-                    <ul className="list-disc ml-4 mt-1">
-                      {q.feedback.strengths && <li><b>Strengths:</b> {q.feedback.strengths}</li>}
-                      {q.feedback.weaknesses && <li><b>Improve:</b> {q.feedback.weaknesses}</li>}
-                      {q.feedback.tipsForImprovement && <li><b>Tips:</b> {q.feedback.tipsForImprovement}</li>}
-                    </ul>
-                  ) : "Good response!"}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <Button className="mt-6 w-full" onClick={() => setStep(0)}>
             🔄 Try Another Interview
