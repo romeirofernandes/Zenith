@@ -34,6 +34,8 @@ app.use("/soft-skills", softSkillsRoutes);
 const moatRoutes = require("./routes/moatRoutes");
 app.use("/api/moat", moatRoutes);
 
+app.use("/api/profile", require("./routes/profileRoutes"));
+
 // Health check
 app.get("/health", (req, res) => {
   res.status(200).json({
