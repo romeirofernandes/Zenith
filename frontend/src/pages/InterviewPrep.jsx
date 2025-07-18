@@ -279,36 +279,46 @@ const InterviewPrep = () => {
     }
   };
 
-  const stopRecording = async () => {
-    // Stop speech recognition first
-    if (recognitionRef.current) {
-      console.log("🛑 Stopping speech recognition...");
-      recognitionRef.current.stop();
-    }
-    setRecording(false);
-    setIsListening(false);
+const stopRecording = async () => {
+  // Stop speech recognition first
+  if (recognitionRef.current) {
+    console.log("🛑 Stopping speech recognition...");
+    recognitionRef.current.stop();
+  }
+  setRecording(false);
+  setIsListening(false);
 
-    await recorderRef.current.stopRecording(() => {
-      const blob = recorderRef.current.getBlob();
-      setMediaBlobs((prev) => [...prev, blob]);
-      clearInterval(timerInterval.current);
-      
-      setAnswers((prev) => {
-        const copy = [...prev];
-        copy[currentQ] = {
-          ...copy[currentQ],
-          timeTaken: timer,
-          transcript: transcript.replace(/ \[speaking\.\.\.\].*/, "").trim()
-        };
-        return copy;
-      });
+  // Clean the transcript before saving
+  const cleanedTranscript = transcript.replace(/ \[speaking\.\.\.\].*/, "").trim();
+  console.log("💾 Saving transcript:", cleanedTranscript); // Debug log
+
+  await recorderRef.current.stopRecording(() => {
+    const blob = recorderRef.current.getBlob();
+    setMediaBlobs((prev) => [...prev, blob]);
+    clearInterval(timerInterval.current);
+    
+    setAnswers((prev) => {
+      const copy = [...prev];
+      copy[currentQ] = {
+        ...copy[currentQ],
+        question: questions[currentQ], // Ensure question is set
+        timeTaken: timer,
+        transcript: cleanedTranscript // Use the cleaned transcript
+      };
+      console.log("📝 Updated answers array:", copy); // Debug log
+      return copy;
     });
+  });
 
-    let tracks = videoRef.current.srcObject.getTracks();
-    tracks.forEach((track) => track.stop());
-  };
+  let tracks = videoRef.current.srcObject.getTracks();
+  tracks.forEach((track) => track.stop());
+};
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    if (recording) {
+    await stopRecording();
+  }
+
     setCurrentQ((q) => q + 1);
     setTimer(0);
     setTranscript("");
@@ -330,22 +340,38 @@ const InterviewPrep = () => {
 
 const submitInterview = async () => {
   try {
-    setStep(2); // Show loading state first
+
+    if (recording) {
+      await stopRecording();
+      // Wait a bit for the recording to be processed
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    setStep(2);
     setFeedback({ loading: true });
 
-    // Prepare comprehensive interview data for AI analysis
+    // Ensure all answers have the current question set
+    const finalAnswers = answers.map((answer, i) => ({
+      questionNumber: i + 1,
+      question: questions[i], // Make sure question is always set
+      textAnswer: answer?.textAnswer || "",
+      transcript: answer?.transcript || "",
+      timeTaken: answer?.timeTaken || 0,
+      hasVideo: mediaBlobs[i] ? true : false
+    }));
+
+    // Add debug logging
+    console.log("🚀 Submitting interview with answers:", finalAnswers);
+    console.log("📊 Transcript data:", finalAnswers.map(a => ({ 
+      question: a.question, 
+      transcript: a.transcript 
+    })));
+
     const interviewData = {
       job: selectedJob,
       resume: resume,
       questions: questions,
-      answers: answers.map((answer, i) => ({
-        questionNumber: i + 1,
-        question: questions[i],
-        textAnswer: answer?.textAnswer || "",
-        transcript: answer?.transcript || "",
-        timeTaken: answer?.timeTaken || 0,
-        hasVideo: mediaBlobs[i] ? true : false
-      })),
+      answers: finalAnswers,
       totalTime: answers.reduce((sum, answer) => sum + (answer?.timeTaken || 0), 0),
       completedAt: new Date().toISOString()
     };
@@ -353,12 +379,6 @@ const submitInterview = async () => {
     const formData = new FormData();
     formData.append("interviewData", JSON.stringify(interviewData));
     
-    // Add video recordings (commented out for now to avoid large uploads)
-    // mediaBlobs.forEach((blob, i) => {
-    //   formData.append("video", blob, `question_${i + 1}_answer.webm`);
-    // });
-
-    // Get fresh auth token
     let authToken = localStorage.getItem("authToken");
     
     const res = await fetch(`${import.meta.env.VITE_API_URL}/interview/submit`, {
@@ -371,7 +391,6 @@ const submitInterview = async () => {
 
     if (!res.ok) {
       if (res.status === 401) {
-        // Token expired, try without auth for now
         console.warn("Auth token expired, submitting without authentication");
         const retryRes = await fetch(`${import.meta.env.VITE_API_URL}/interview/submit`, {
           method: "POST",
@@ -390,15 +409,14 @@ const submitInterview = async () => {
     }
 
     const data = await res.json();
-    console.log("Interview feedback received:", data);
+    console.log("✅ Interview feedback received:", data);
     
-    // Set the AI-generated feedback
     setFeedback(data.feedback || data);
     
   } catch (error) {
-    console.error("Error submitting interview for AI review:", error);
+    console.error("❌ Error submitting interview:", error);
     
-    // Enhanced fallback feedback
+    // Enhanced fallback feedback with the actual answers
     setFeedback({
       overallFeedback: {
         strengths: "You completed the interview successfully and provided thoughtful responses to all questions.",
