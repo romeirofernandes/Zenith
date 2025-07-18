@@ -5,6 +5,7 @@ require("dotenv").config();
 const interviewRoutes = require("./routes/interviewRoutes");
 const achievementRoutes = require("./routes/achievementRoutes");
 const fetchAndSaveJobs = require("./controllers/jobsfetch"); // Import the job fetcher
+const emailRoute = require("./routes/emailRoute");
 
 // Connect to database
 connectDB().then(() => {
@@ -31,7 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
-
+app.use("/api/email", emailRoute); 
 const skillMapData = require("./skillmap-data.json");
 
 app.get("/api/skillmap", (req, res) => {

@@ -1,5 +1,21 @@
 const axios = require("axios");
 const Job = require("../models/Jobs");
+const User = require("../models/User"); // Import User model
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
 
 const fetchAndSaveJobs = async () => {
   try {
@@ -36,8 +52,27 @@ const fetchAndSaveJobs = async () => {
     }));
 
     // Save the jobs to MongoDB
-    await Job.insertMany(formattedJobs, { ordered: false });
+    const savedJobs = await Job.insertMany(formattedJobs, { ordered: false });
     console.log("✅ Jobs saved to MongoDB successfully.");
+
+    // Notify users about new jobs
+    const users = await User.find({ isActive: true }); // Fetch active users
+    for (const user of users) {
+      const email = user.email;
+      const text = `Hello ${user.displayName || "User"},\n\nNew jobs have been added to the platform. Check them out now!\n\nBest regards,\nZenith`;
+
+      try {
+        await transporter.sendMail({
+          from: `"Zenith" <${process.env.EMAIL_USER}>`,
+          to: email,
+          subject: "New Jobs Added - Check Them Out!",
+          text: text,
+        });
+        console.log(`📧 Email sent to ${email}`);
+      } catch (error) {
+        console.error(`❌ Failed to send email to ${email}:`, error.message);
+      }
+    }
   } catch (error) {
     if (error.code === 11000) {
       console.log("⚠️ Duplicate job entries detected. Skipping duplicates.");
