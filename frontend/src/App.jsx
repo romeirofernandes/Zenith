@@ -4,6 +4,7 @@ import { auth } from './config/firebase';
 import Login from './pages/Login';;
 import {BrowserRouter, Routes, Route } from 'react-router-dom'
 import Landing from './pages/Landing'
+import SkillMap from './components/SkillMap';
 
 
 const App = () => {
@@ -33,7 +34,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={user ? <Dashboard user={user} /> : <Login />} />
+        {/* <Route path="/dashboard" element={user ? <Dashboard user={user} /> : <Login />} /> */}
+        <Route path="/skillmap" element={<SkillMap />} />
       </Routes>
     </BrowserRouter>
   )
