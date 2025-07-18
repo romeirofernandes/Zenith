@@ -1,42 +1,303 @@
-import React, { useRef, useState } from "react";
-import html2pdf from "html2pdf.js";
+import React, { useRef, useState, useEffect } from "react";
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { auth } from "../config/firebase"; // Adjust path as needed
 
-const defaultProfile = {
-  name: "Aman Sharma",
-  email: "aman@example.com",
-  phone: "+91-9876543210",
-  summary: "Aspiring software engineer with a passion for building impactful solutions.",
-  skills: ["JavaScript", "React", "Node.js", "MongoDB"],
-  education: [
-    {
-      degree: "B.Tech in Computer Engineering",
-      college: "RAIT, Navi Mumbai",
-      year: "2025",
-    },
-  ],
-  experience: [
-    {
-      title: "Web Developer Intern",
-      company: "StartupX",
-      duration: "May 2024 - July 2024",
-      details: [
-        "Built a full-stack MERN application for internal tools.",
-        "Improved page load speed by 30%.",
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Job Portal",
-      desc: "A smart job portal with AI-based recommendations and resume builder.",
-    },
-  ],
+// Empty profile template
+const emptyProfile = {
+  name: "",
+  email: "",
+  phone: "",
+  summary: "",
+  skills: [""],
+  education: [{ degree: "", college: "", year: "" }],
+  experience: [{ title: "", company: "", duration: "", details: [""] }],
+  projects: [{ name: "", desc: "" }]
 };
 
+// PDF styles
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: 'column',
+    backgroundColor: '#FFFFFF',
+    padding: 30,
+    fontFamily: 'Helvetica',
+    fontSize: 10,
+    lineHeight: 1.4,
+  },
+  header: {
+    marginBottom: 20,
+  },
+  name: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#000000',
+  },
+  contact: {
+    fontSize: 10,
+    color: '#666666',
+    marginBottom: 16,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    marginBottom: 8,
+    paddingBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#CCCCCC',
+    color: '#000000',
+  },
+  text: {
+    fontSize: 10,
+    lineHeight: 1.4,
+    color: '#333333',
+    marginBottom: 4,
+  },
+  skillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  skillChip: {
+    backgroundColor: '#F3F4F6',
+    color: '#000000',
+    padding: 4,
+    borderRadius: 12,
+    fontSize: 9,
+    fontWeight: 'bold',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+  },
+  experienceItem: {
+    marginBottom: 16,
+  },
+  jobTitle: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 2,
+  },
+  jobDetails: {
+    fontSize: 10,
+    color: '#666666',
+    marginBottom: 6,
+  },
+  bulletPoint: {
+    fontSize: 10,
+    color: '#333333',
+    marginLeft: 12,
+    marginBottom: 2,
+  },
+  educationItem: {
+    marginBottom: 12,
+  },
+  degree: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 2,
+  },
+  school: {
+    fontSize: 10,
+    color: '#666666',
+  },
+  projectItem: {
+    marginBottom: 12,
+  },
+  projectName: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 2,
+  },
+  projectDesc: {
+    fontSize: 10,
+    color: '#333333',
+  },
+});
+
+// PDF Document Component
+const ResumePDF = ({ profile }) => (
+  <Document>
+    <Page size="A4" style={styles.page}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.name}>{profile.name}</Text>
+        <Text style={styles.contact}>
+          {profile.email}{profile.phone ? ` | ${profile.phone}` : ''}
+        </Text>
+      </View>
+
+      {/* Professional Summary */}
+      {profile.summary && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Professional Summary</Text>
+          <Text style={styles.text}>{profile.summary}</Text>
+        </View>
+      )}
+
+      {/* Skills */}
+      {profile.skills.filter(Boolean).length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Skills</Text>
+          <View style={styles.skillsContainer}>
+            {profile.skills.filter(Boolean).map((skill, idx) => (
+              <Text key={idx} style={styles.skillChip}>
+                {skill}
+              </Text>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Education */}
+      {profile.education.some(edu => edu.degree || edu.college || edu.year) && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Education</Text>
+          {profile.education.map((edu, idx) => (
+            <View key={idx} style={styles.educationItem}>
+              <Text style={styles.degree}>{edu.degree}</Text>
+              <Text style={styles.school}>
+                {edu.college}{edu.year ? ` | ${edu.year}` : ''}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Experience */}
+      {profile.experience.some(exp => exp.title || exp.company || exp.duration) && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Experience</Text>
+          {profile.experience.map((exp, idx) => (
+            <View key={idx} style={styles.experienceItem}>
+              <Text style={styles.jobTitle}>
+                {exp.title}{exp.company ? ` @ ${exp.company}` : ''}
+              </Text>
+              <Text style={styles.jobDetails}>{exp.duration}</Text>
+              {exp.details.filter(Boolean).map((detail, detailIdx) => (
+                <Text key={detailIdx} style={styles.bulletPoint}>
+                  • {detail}
+                </Text>
+              ))}
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Projects */}
+      {profile.projects.some(proj => proj.name || proj.desc) && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Projects</Text>
+          {profile.projects.map((proj, idx) => (
+            <View key={idx} style={styles.projectItem}>
+              <Text style={styles.projectName}>{proj.name}</Text>
+              <Text style={styles.projectDesc}>{proj.desc}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+    </Page>
+  </Document>
+);
+
 const ResumeBuilder = () => {
-  const [profile, setProfile] = useState(defaultProfile);
+  const [profile, setProfile] = useState(emptyProfile);
   const [loadingAI, setLoadingAI] = useState(false);
+  const [loading, setLoading] = useState(true);
   const resumeRef = useRef();
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = auth.currentUser;
+        console.log("Firebase current user:", user); // Debug log
+
+        if (!user) {
+          console.log("No user logged in");
+          setLoading(false);
+          return;
+        }
+
+        const token = await user.getIdToken();
+        console.log("Got auth token"); // Debug log
+
+        // Fix the API URL by removing the duplicate /api
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        console.log("API URL:", apiUrl); // Debug log
+
+        // Remove the extra /api from the URL
+        const response = await fetch(`${apiUrl}/auth/current`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        console.log("Response status:", response.status); // Debug log
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("API Error:", errorData);
+          throw new Error(`Failed to fetch profile: ${errorData.message || response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Received user data:", data); // Debug log
+
+        if (data.success && data.user) {
+          setProfile({
+            name: data.user.displayName || "",
+            email: data.user.email || "",
+            phone: data.user.phoneNumber || "",
+            summary: data.user.resume?.summary || "",
+            skills: Array.isArray(data.user.resume?.skills) ? data.user.resume.skills : [""],
+            education: Array.isArray(data.user.resume?.education) ? 
+              data.user.resume.education.map(edu => ({
+                degree: edu.degree || "",
+                college: edu.institution || "",
+                year: edu.graduationYear || ""
+              })) : [{ degree: "", college: "", year: "" }],
+            experience: Array.isArray(data.user.resume?.experience) ?
+              data.user.resume.experience.map(exp => ({
+                title: exp.title || "",
+                company: exp.company || "",
+                duration: exp.duration || "",
+                details: Array.isArray(exp.details) ? exp.details : [exp.details || ""]
+              })) : [{ title: "", company: "", duration: "", details: [""] }],
+            projects: Array.isArray(data.user.resume?.projects) ?
+              data.user.resume.projects.map(proj => ({
+                name: proj.title || "",
+                desc: proj.description || ""
+              })) : [{ name: "", desc: "" }]
+          });
+        } else {
+          console.error("Invalid user data format:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
 
   // --- Handlers for dynamic sections ---
   const handleChange = (e) => {
@@ -73,20 +334,6 @@ const ResumeBuilder = () => {
     const updated = [...profile.skills];
     updated.splice(idx, 1);
     setProfile({ ...profile, skills: updated });
-  };
-
-  // --- PDF Download ---
-  const downloadPDF = () => {
-    const element = resumeRef.current;
-    const opt = {
-      margin: 0.2,
-      filename: `${profile.name.replace(/\s/g, "_")}_Resume.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-    };
-    html2pdf().set(opt).from(element).save();
   };
 
   // --- AI Resume Enhancement ---
@@ -149,13 +396,15 @@ ${JSON.stringify(profile, null, 2)}
       <div className="max-w-5xl mx-auto">
         {/* Top Buttons */}
         <div className="flex flex-wrap gap-4 justify-end mb-6">
-          <button
-            className="bg-primary text-white font-bold px-6 py-2 rounded hover:bg-primary/90 transition"
-            onClick={downloadPDF}
-            type="button"
+          <PDFDownloadLink
+            document={<ResumePDF profile={profile} />}
+            fileName={`${profile.name.replace(/\s/g, "_") || "resume"}.pdf`}
+            className="bg-primary text-white font-bold px-6 py-2 rounded hover:bg-primary/90 transition inline-block text-center"
           >
-            Download as PDF
-          </button>
+            {({ blob, url, loading, error }) =>
+              loading ? 'Generating PDF...' : 'Download as PDF'
+            }
+          </PDFDownloadLink>
           <button
             className="bg-black text-white font-bold px-6 py-2 rounded hover:bg-gray-900 transition flex items-center gap-2"
             onClick={enhanceWithAI}
@@ -412,15 +661,20 @@ ${JSON.stringify(profile, null, 2)}
 
           {/* Resume Preview */}
           <div
-            className="bg-white text-black rounded-xl shadow p-10 border border-gray-200 min-h-[900px] print:bg-white print:text-black"
             ref={resumeRef}
             id="resume-content"
+            className="bg-white rounded-xl shadow p-10 border border-gray-200 min-h-[900px]"
             style={{
-              fontFamily: "Inter, Arial, sans-serif",
-              maxWidth: 700,
+              fontFamily: "Arial, sans-serif",
+              width: "210mm",
+              minHeight: "297mm",
+              padding: "20mm",
               margin: "auto",
-              color: "#111",
-              background: "#fff",
+              color: "rgb(0, 0, 0)",
+              backgroundColor: "rgb(255, 255, 255)",
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
+              lineHeight: "1.5"
             }}
           >
             <h1 className="text-3xl font-bold text-black mb-1 tracking-tight">{profile.name}</h1>

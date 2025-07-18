@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { verifyFirebaseToken } = require('../middleware/auth');
 const authController = require('../controllers/authController');
+const { verifyFirebaseToken } = require('../middleware/auth');
 
 // Verify token and create/update user
 router.post('/verify', verifyFirebaseToken, authController.verifyUser);
@@ -17,5 +17,8 @@ router.get('/users', verifyFirebaseToken, authController.getAllUsers);
 
 // Delete user account
 router.delete('/account', verifyFirebaseToken, authController.deleteAccount);
+
+// Get current user
+router.get('/current', verifyFirebaseToken, authController.getCurrentUser);
 
 module.exports = router;
