@@ -34,13 +34,13 @@ import Profile from "../components/Dashboard/Profile";
 import Jobs from "@/components/Dashboard/Jobs";
 import WishList from "@/components/Dashboard/WishList";
 import Tests from "../components/dashboard/Tests";
+import InterviewPrep from "./InterviewPrep";
 
 const sidebarItems = [
   { id: "profile", label: "Profile", icon: User },
   { id: "jobs", label: "Jobs", icon: Briefcase },
   { id: "wishlist", label: "Wishlist", icon: Heart },
   { id: "tests", label: "Tests", icon: PenTool },
-  { id: "latex", label: "LaTeX", icon: FileText },
   { id: "interview", label: "Interview", icon: MessageSquare },
 ];
 
@@ -119,6 +119,7 @@ const Dashboard = () => {
       jobs: <Jobs />,
       wishlist: <WishList />,
       tests: <Tests />,
+      interview: <InterviewPrep/>
     };
 
     return content[activeTab] || content.profile;
