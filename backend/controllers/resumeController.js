@@ -1,9 +1,16 @@
 const axios = require('axios');
+const User = require('../models/User');
 
 const resumeController = {
   matchResumeWithJobs: async (req, res) => {
     try {
-      const { resume, jobDescriptions } = req.body;
+      const {jobDescriptions } = req.body;
+
+      const user = await User.findById(req.user)
+    if (!user || !user._id) {
+      return res.status(401).json({ success: false, message: 'Unauthorized: No user context found' });
+    }
+      resume = await User.findById(user._id).select('resume.resumeText').lean();
 
       if (!resume || !Array.isArray(jobDescriptions) || jobDescriptions.length === 0) {
         return res.status(400).json({

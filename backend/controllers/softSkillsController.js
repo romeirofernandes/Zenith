@@ -1,5 +1,6 @@
 require('dotenv').config();
 const fetch = require('node-fetch');
+const User = require('../models/User');
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_MODEL = 'llama3-8b-8192'; // or any model like `mixtral-8x7b-32768`
@@ -41,8 +42,6 @@ const softSkillsController = {
     }
   },
 
-  // 2. Analyze multiple answers
-  // 2. Analyze multiple answers
 analyzeAnswers: async (req, res) => {
   try {
     const { responses } = req.body;
@@ -52,7 +51,6 @@ analyzeAnswers: async (req, res) => {
     }
 
     const allSkillsSet = new Set();
-    const analysisResults = [];
 
     for (const { question, answer } of responses) {
       const prompt = `
@@ -86,13 +84,24 @@ Return a JSON array of detected soft skills. Example:
       const skills = matches ? JSON.parse(`[${matches[1]}]`) : [];
 
       skills.forEach(skill => allSkillsSet.add(skill.toLowerCase()));
-
     }
+
+    const user = req.user; 
+    if (!user || !user._id) {
+      return res.status(401).json({ success: false, message: 'Unauthorized: No user context found' });
+    }
+
+    await User.findByIdAndUpdate(
+      user._id,
+      { $set: { 'resume.softskills': Array.from(allSkillsSet) } },
+      { new: true }
+    );
 
     res.json({
       success: true,
-      combinedSkills: Array.from(allSkillsSet),
+      combinedSkills: Array.from(allSkillsSet)
     });
+
   } catch (error) {
     console.error('Error analyzing answers:', error.message);
     res.status(500).json({ success: false, message: 'Failed to analyze soft skills' });
