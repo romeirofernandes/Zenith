@@ -29,6 +29,12 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  wishlist: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Job'
+  }
+],
   profile: {
     firstName: String,
     lastName: String,
