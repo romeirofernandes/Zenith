@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { MoveRight, PhoneCall } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 function DemoGradientContainer() {
   return (
@@ -30,6 +31,7 @@ function DemoGradientContainer() {
 }
 
 function HeroSection() {
+  const navigate = useNavigate();
   const [titleNumber, setTitleNumber] = useState(0);
   const titles = useMemo(
     () => ["amazing", "new", "wonderful", "beautiful", "smart"],
@@ -97,8 +99,15 @@ function HeroSection() {
           transition={{ duration: 0.3, delay: 1 }}
           className="relative z-10 mt-8 flex flex-wrap items-center justify-center gap-4"
         >
-          <Button size="lg" className="w-60 gap-2" variant="default">
-            Sign up here <MoveRight className="w-4 h-4" />
+          <Button
+            size="lg"
+            className="w-60 gap-2"
+            variant="default"
+            onClick={() => {
+              navigate("/login");
+            }}
+          >
+            Get Started <MoveRight className="w-4 h-4" />
           </Button>
           <Button size="lg" className="w-60 gap-2" variant="outline">
             Jump on a call <PhoneCall className="w-4 h-4" />
