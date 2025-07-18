@@ -53,6 +53,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      console.log("Firebase User:", firebaseUser); // Log the Firebase user
       setUser(firebaseUser);
       if (firebaseUser) {
         fetchProfile(firebaseUser);
@@ -116,7 +117,7 @@ const Dashboard = () => {
   const renderContent = () => {
     const content = {
       profile: <Profile user={user} userProfile={userProfile} />,
-      jobs: <Jobs />,
+      jobs: <Jobs currentUser={user} />,
       wishlist: <WishList />,
       tests: <Tests />,
     };
@@ -210,7 +211,7 @@ const Dashboard = () => {
             <SidebarTrigger className="lg:hidden">
               <Menu className="h-6 w-6" />
             </SidebarTrigger>
-            <h1 className="text-lg font-semibold">SOS Dashboard</h1>
+            <h1 className="text-lg font-semibold">Zenith</h1>
           </div>
 
           {/* Main Content Area */}

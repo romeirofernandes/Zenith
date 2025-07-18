@@ -31,6 +31,8 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
+import WishlistButton from "@/components/ui/WishlistButton";
 import {
   Search,
   MapPin,
@@ -44,11 +46,10 @@ import {
   Calendar,
   Gift,
 } from "lucide-react";
-import { toast } from "sonner";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-export default function Jobs() {
+export default function Jobs({ currentUser }) {
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -81,23 +82,6 @@ export default function Jobs() {
     }
     loadJobs();
   }, []);
-
-  const handleAddToWishlist = async (jobId, e) => {
-    e.stopPropagation(); // Prevent dialog from opening
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/jobs/wishlist/${jobId}`,
-        {
-          userId: currentUser._id,
-        }
-      );
-      toast.success("Job added to wishlist!");
-      console.log("Added to wishlist:", response.data);
-    } catch (err) {
-      toast.error("Failed to add to wishlist");
-      console.error("Error adding to wishlist:", err);
-    }
-  };
 
   // Apply filters
   useEffect(() => {
@@ -303,14 +287,9 @@ export default function Jobs() {
                         <span className="truncate">{job.company_name}</span>
                       </CardDescription>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => handleAddToWishlist(job._id, e)}
-                      className="shrink-0 hover:text-red-500"
-                    >
-                      <Heart className="h-4 w-4" />
-                    </Button>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <WishlistButton jobId={job._id} />
+                    </div>
                   </div>
                 </CardHeader>
 
@@ -485,13 +464,7 @@ export default function Jobs() {
               </ScrollArea>
 
               <DialogFooter>
-                <Button
-                  onClick={(e) => handleAddToWishlist(job._id, e)}
-                  className="w-full sm:w-auto"
-                >
-                  <Heart className="h-4 w-4 mr-2" />
-                  Add to Wishlist
-                </Button>
+                <WishlistButton jobId={job._id} className="w-full sm:w-auto" />
               </DialogFooter>
             </DialogContent>
           </Dialog>
