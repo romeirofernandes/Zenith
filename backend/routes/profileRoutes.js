@@ -11,5 +11,7 @@ router.post(
 );
 
 router.get("/analytics", verifyFirebaseToken, profileController.getProfileAnalytics);
+// --- Add this route for resume ---
+router.get("/resume", verifyFirebaseToken, profileController.getResume);
 
 module.exports = router;

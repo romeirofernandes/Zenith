@@ -39,11 +39,13 @@ const Login = () => {
       await createUserWithEmailAndPassword(auth, email, password);
       const idToken = await auth.currentUser.getIdToken();
       localStorage.setItem("authToken", idToken);
+      localStorage.setItem("firebaseUid", auth.currentUser.uid);
       setMessage("Account created successfully!");
     } else {
       await signInWithEmailAndPassword(auth, email, password);
       const idToken = await auth.currentUser.getIdToken();
       localStorage.setItem("authToken", idToken);
+      localStorage.setItem("firebaseUid", auth.currentUser.uid);
       setMessage("Login successful!");
     }
     navigate("/dashboard");
@@ -59,6 +61,7 @@ const handleGoogleLogin = async () => {
     await signInWithPopup(auth, googleProvider);
     const idToken = await auth.currentUser.getIdToken();
     localStorage.setItem("authToken", idToken);
+    localStorage.setItem("firebaseUid", auth.currentUser.uid);
     setMessage("Google login successful!");
     navigate("/dashboard");
   } catch (error) {
