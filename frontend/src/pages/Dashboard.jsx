@@ -10,11 +10,12 @@ import {
   FaSignOutAlt,
   FaBars,
   FaTimes,
- FaBriefcase, FaHeart 
+ FaBriefcase, FaHeart , FaPenFancy
 } from "react-icons/fa";
 import Profile from "../components/Dashboard/Profile";
 import Jobs from "@/components/Dashboard/Jobs";
 import WishList from "@/components/Dashboard/WishList";
+import Tests from "../components/dashboard/Tests";
 
 const sidebarItems = [
   { id: "profile", label: "Profile", icon: FaUser },
@@ -22,6 +23,7 @@ const sidebarItems = [
   { id: "interview", label: "Interview", icon: FaComments },
   { id: "jobs", label: "Jobs", icon: FaBriefcase },
   { id: "wishlist", label: "Wishlist", icon: FaHeart },
+  { id: "tests", label: "Tests", icon: FaPenFancy },
 ];
 
 const Dashboard = () => {
@@ -339,6 +341,11 @@ const Dashboard = () => {
 {activeTab === "wishlist" && (
   <motion.div variants={itemVariants}>
     <WishList/>
+  </motion.div>
+)}
+{activeTab === "tests" && (
+  <motion.div variants={itemVariants}>
+    <Tests/>
   </motion.div>
 )}
             {activeTab === "latex" && (
