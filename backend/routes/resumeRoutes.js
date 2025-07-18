@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const resumeMatcherController = require('../controllers/resumeMatcherController');
+const resumeController = require('../controllers/resumeController');
 
 // POST /api/match-resume
-router.post('/match-resume', resumeMatcherController.matchResumeWithJobs);
+router.post('/match-resume', resumeController.matchResumeWithJobs);
 
-module.exports = resumeRouter;
+module.exports = router;
