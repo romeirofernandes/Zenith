@@ -1,14 +1,15 @@
 import React from 'react'
+import {BrowserRouter, Routes, Route } from 'react-router-dom'
+import Landing from './pages/Landing'
 
-function App() {
-
+const App = () => {
   return (
-    <>
-      <p className="text-3xl font-bold text-red-500 bg-blue-300 underline">
-        Team Mota LOG
-      </p>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
-export default App
+export default App  
