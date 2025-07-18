@@ -28,6 +28,11 @@ import {
   PenTool,
   LogOut,
   Menu,
+  Globe,
+  Award,
+  BarChart3,
+  FileUser,
+  Lightbulb,
 } from "lucide-react";
 
 import Profile from "../components/Dashboard/Profile";
@@ -35,11 +40,21 @@ import Jobs from "@/components/Dashboard/Jobs";
 import WishList from "@/components/Dashboard/WishList";
 import Tests from "../components/dashboard/Tests";
 import InterviewPrep from "./InterviewPrep";
+import SkillMap from "../components/SkillMap";
+import ResumeBuilder from "../components/ResumeBuilder";
+import Achievements from "../components/Achievements";
+import ProfileAnalytics from "../components/ProfileAnalytics";
+import ProjectRecommendations from "../components/ProjectRecommendations";
 
 const sidebarItems = [
   { id: "profile", label: "Profile", icon: User },
   { id: "jobs", label: "Jobs", icon: Briefcase },
   { id: "wishlist", label: "Wishlist", icon: Heart },
+  { id: "skillmap", label: "SkillMap", icon: Globe },
+  { id: "resume", label: "Resume Builder", icon: FileUser },
+  { id: "projects", label: "Project Ideas", icon: Lightbulb },
+  { id: "achievements", label: "Achievements", icon: Award },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "tests", label: "Tests", icon: PenTool },
   { id: "interview", label: "Interview", icon: MessageSquare },
 ];
@@ -53,7 +68,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      console.log("Firebase User:", firebaseUser); // Log the Firebase user
+      console.log("Firebase User:", firebaseUser);
       setUser(firebaseUser);
       if (firebaseUser) {
         fetchProfile(firebaseUser);
@@ -119,12 +134,26 @@ const Dashboard = () => {
       profile: <Profile user={user} userProfile={userProfile} />,
       jobs: <Jobs currentUser={user} />,
       wishlist: <WishList />,
+      skillmap: <SkillMap />,
+      resume: <ResumeBuilder />,
+      projects: <ProjectRecommendations />,
+      achievements: <Achievements />,
+      analytics: <ProfileAnalytics />,
       tests: <Tests />,
-      interview: <InterviewPrep/>
+      interview: <InterviewPrep />,
     };
 
     return content[activeTab] || content.profile;
   };
+
+  // Define components that need full-screen layout (no container padding)
+  const fullScreenComponents = [
+    "skillmap",
+    "resume",
+    "projects",
+    "achievements",
+    "analytics",
+  ];
 
   if (!user) {
     return (
@@ -216,8 +245,14 @@ const Dashboard = () => {
           </div>
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-4 lg:p-6">
+          <main className="flex-1 overflow-hidden">
+            <div
+              className={`h-full ${
+                fullScreenComponents.includes(activeTab)
+                  ? "p-0"
+                  : "container mx-auto p-4 lg:p-6"
+              }`}
+            >
               {renderContent()}
             </div>
           </main>

@@ -1,6 +1,15 @@
 import React, { useRef, useState, useEffect } from "react";
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
-import { auth } from "../config/firebase"; // Adjust path as needed
+import {
+  PDFDownloadLink,
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Font,
+} from "@react-pdf/renderer";
+import { auth } from "../config/firebase";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Empty profile template
 const emptyProfile = {
@@ -11,16 +20,16 @@ const emptyProfile = {
   skills: [""],
   education: [{ degree: "", college: "", year: "" }],
   experience: [{ title: "", company: "", duration: "", details: [""] }],
-  projects: [{ name: "", desc: "" }]
+  projects: [{ name: "", desc: "" }],
 };
 
 // PDF styles
 const styles = StyleSheet.create({
   page: {
-    flexDirection: 'column',
-    backgroundColor: '#FFFFFF',
+    flexDirection: "column",
+    backgroundColor: "#FFFFFF",
     padding: 30,
-    fontFamily: 'Helvetica',
+    fontFamily: "Helvetica",
     fontSize: 10,
     lineHeight: 1.4,
   },
@@ -29,13 +38,13 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
-    color: '#000000',
+    color: "#000000",
   },
   contact: {
     fontSize: 10,
-    color: '#666666',
+    color: "#666666",
     marginBottom: 16,
   },
   section: {
@@ -43,52 +52,52 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
+    fontWeight: "bold",
+    textTransform: "uppercase",
     marginBottom: 8,
     paddingBottom: 4,
     borderBottomWidth: 1,
-    borderBottomColor: '#CCCCCC',
-    color: '#000000',
+    borderBottomColor: "#CCCCCC",
+    color: "#000000",
   },
   text: {
     fontSize: 10,
     lineHeight: 1.4,
-    color: '#333333',
+    color: "#333333",
     marginBottom: 4,
   },
   skillsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 6,
   },
   skillChip: {
-    backgroundColor: '#F3F4F6',
-    color: '#000000',
+    backgroundColor: "#F3F4F6",
+    color: "#000000",
     padding: 4,
     borderRadius: 12,
     fontSize: 9,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: "#D1D5DB",
   },
   experienceItem: {
     marginBottom: 16,
   },
   jobTitle: {
     fontSize: 11,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontWeight: "bold",
+    color: "#000000",
     marginBottom: 2,
   },
   jobDetails: {
     fontSize: 10,
-    color: '#666666',
+    color: "#666666",
     marginBottom: 6,
   },
   bulletPoint: {
     fontSize: 10,
-    color: '#333333',
+    color: "#333333",
     marginLeft: 12,
     marginBottom: 2,
   },
@@ -97,26 +106,26 @@ const styles = StyleSheet.create({
   },
   degree: {
     fontSize: 11,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontWeight: "bold",
+    color: "#000000",
     marginBottom: 2,
   },
   school: {
     fontSize: 10,
-    color: '#666666',
+    color: "#666666",
   },
   projectItem: {
     marginBottom: 12,
   },
   projectName: {
     fontSize: 11,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontWeight: "bold",
+    color: "#000000",
     marginBottom: 2,
   },
   projectDesc: {
     fontSize: 10,
-    color: '#333333',
+    color: "#333333",
   },
 });
 
@@ -128,7 +137,8 @@ const ResumePDF = ({ profile }) => (
       <View style={styles.header}>
         <Text style={styles.name}>{profile.name}</Text>
         <Text style={styles.contact}>
-          {profile.email}{profile.phone ? ` | ${profile.phone}` : ''}
+          {profile.email}
+          {profile.phone ? ` | ${profile.phone}` : ""}
         </Text>
       </View>
 
@@ -155,14 +165,17 @@ const ResumePDF = ({ profile }) => (
       )}
 
       {/* Education */}
-      {profile.education.some(edu => edu.degree || edu.college || edu.year) && (
+      {profile.education.some(
+        (edu) => edu.degree || edu.college || edu.year
+      ) && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Education</Text>
           {profile.education.map((edu, idx) => (
             <View key={idx} style={styles.educationItem}>
               <Text style={styles.degree}>{edu.degree}</Text>
               <Text style={styles.school}>
-                {edu.college}{edu.year ? ` | ${edu.year}` : ''}
+                {edu.college}
+                {edu.year ? ` | ${edu.year}` : ""}
               </Text>
             </View>
           ))}
@@ -170,13 +183,16 @@ const ResumePDF = ({ profile }) => (
       )}
 
       {/* Experience */}
-      {profile.experience.some(exp => exp.title || exp.company || exp.duration) && (
+      {profile.experience.some(
+        (exp) => exp.title || exp.company || exp.duration
+      ) && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Experience</Text>
           {profile.experience.map((exp, idx) => (
             <View key={idx} style={styles.experienceItem}>
               <Text style={styles.jobTitle}>
-                {exp.title}{exp.company ? ` @ ${exp.company}` : ''}
+                {exp.title}
+                {exp.company ? ` @ ${exp.company}` : ""}
               </Text>
               <Text style={styles.jobDetails}>{exp.duration}</Text>
               {exp.details.filter(Boolean).map((detail, detailIdx) => (
@@ -190,7 +206,7 @@ const ResumePDF = ({ profile }) => (
       )}
 
       {/* Projects */}
-      {profile.projects.some(proj => proj.name || proj.desc) && (
+      {profile.projects.some((proj) => proj.name || proj.desc) && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Projects</Text>
           {profile.projects.map((proj, idx) => (
@@ -216,7 +232,7 @@ const ResumeBuilder = () => {
     const fetchUserData = async () => {
       try {
         const user = auth.currentUser;
-        console.log("Firebase current user:", user); // Debug log
+        console.log("Firebase current user:", user);
 
         if (!user) {
           console.log("No user logged in");
@@ -225,31 +241,31 @@ const ResumeBuilder = () => {
         }
 
         const token = await user.getIdToken();
-        console.log("Got auth token"); // Debug log
+        console.log("Got auth token");
 
-        // Fix the API URL by removing the duplicate /api
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        console.log("API URL:", apiUrl); // Debug log
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+        console.log("API URL:", apiUrl);
 
-        // Remove the extra /api from the URL
         const response = await fetch(`${apiUrl}/auth/current`, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
 
-        console.log("Response status:", response.status); // Debug log
+        console.log("Response status:", response.status);
 
         if (!response.ok) {
           const errorData = await response.json();
           console.error("API Error:", errorData);
-          throw new Error(`Failed to fetch profile: ${errorData.message || response.status}`);
+          throw new Error(
+            `Failed to fetch profile: ${errorData.message || response.status}`
+          );
         }
 
         const data = await response.json();
-        console.log("Received user data:", data); // Debug log
+        console.log("Received user data:", data);
 
         if (data.success && data.user) {
           setProfile({
@@ -257,25 +273,32 @@ const ResumeBuilder = () => {
             email: data.user.email || "",
             phone: data.user.phoneNumber || "",
             summary: data.user.resume?.summary || "",
-            skills: Array.isArray(data.user.resume?.skills) ? data.user.resume.skills : [""],
-            education: Array.isArray(data.user.resume?.education) ? 
-              data.user.resume.education.map(edu => ({
-                degree: edu.degree || "",
-                college: edu.institution || "",
-                year: edu.graduationYear || ""
-              })) : [{ degree: "", college: "", year: "" }],
-            experience: Array.isArray(data.user.resume?.experience) ?
-              data.user.resume.experience.map(exp => ({
-                title: exp.title || "",
-                company: exp.company || "",
-                duration: exp.duration || "",
-                details: Array.isArray(exp.details) ? exp.details : [exp.details || ""]
-              })) : [{ title: "", company: "", duration: "", details: [""] }],
-            projects: Array.isArray(data.user.resume?.projects) ?
-              data.user.resume.projects.map(proj => ({
-                name: proj.title || "",
-                desc: proj.description || ""
-              })) : [{ name: "", desc: "" }]
+            skills: Array.isArray(data.user.resume?.skills)
+              ? data.user.resume.skills
+              : [""],
+            education: Array.isArray(data.user.resume?.education)
+              ? data.user.resume.education.map((edu) => ({
+                  degree: edu.degree || "",
+                  college: edu.institution || "",
+                  year: edu.graduationYear || "",
+                }))
+              : [{ degree: "", college: "", year: "" }],
+            experience: Array.isArray(data.user.resume?.experience)
+              ? data.user.resume.experience.map((exp) => ({
+                  title: exp.title || "",
+                  company: exp.company || "",
+                  duration: exp.duration || "",
+                  details: Array.isArray(exp.details)
+                    ? exp.details
+                    : [exp.details || ""],
+                }))
+              : [{ title: "", company: "", duration: "", details: [""] }],
+            projects: Array.isArray(data.user.resume?.projects)
+              ? data.user.resume.projects.map((proj) => ({
+                  name: proj.title || "",
+                  desc: proj.description || "",
+                }))
+              : [{ name: "", desc: "" }],
           });
         } else {
           console.error("Invalid user data format:", data);
@@ -293,7 +316,7 @@ const ResumeBuilder = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center bg-background">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
@@ -345,37 +368,42 @@ You are a world-class resume writer. Given the following JSON resume, improve th
 
 ${JSON.stringify(profile, null, 2)}
       `;
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "llama3-70b-8192",
-          messages: [
-            { role: "system", content: "You are a resume improvement assistant." },
-            { role: "user", content: prompt },
-          ],
-          max_tokens: 2048,
-        }),
-      });
+      const res = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "llama3-70b-8192",
+            messages: [
+              {
+                role: "system",
+                content: "You are a resume improvement assistant.",
+              },
+              { role: "user", content: prompt },
+            ],
+            max_tokens: 2048,
+          }),
+        }
+      );
       const data = await res.json();
       console.log(data);
-      // Try to parse improved JSON from AI response
       let improved = null;
       try {
-        // Try to extract JSON from ```json ... ```
-        const match = data.choices[0].message.content.match(/```json\s*([\s\S]*?)\s*```/);
+        const match = data.choices[0].message.content.match(
+          /```json\s*([\s\S]*?)\s*```/
+        );
         if (match) {
           improved = JSON.parse(match[1]);
         } else {
-          // Try to extract JSON from ``` ... ```
-          const match2 = data.choices[0].message.content.match(/```([\s\S]*?)```/);
+          const match2 =
+            data.choices[0].message.content.match(/```([\s\S]*?)```/);
           if (match2) {
             improved = JSON.parse(match2[1]);
           } else {
-            // Try to parse as plain JSON
             improved = JSON.parse(data.choices[0].message.content);
           }
         }
@@ -392,346 +420,486 @@ ${JSON.stringify(profile, null, 2)}
 
   // --- Resume Section ---
   return (
-    <div className="min-h-screen bg-background py-8 px-2 md:px-8">
-      <div className="max-w-5xl mx-auto">
-        {/* Top Buttons */}
-        <div className="flex flex-wrap gap-4 justify-end mb-6">
-          <PDFDownloadLink
-            document={<ResumePDF profile={profile} />}
-            fileName={`${profile.name.replace(/\s/g, "_") || "resume"}.pdf`}
-            className="bg-primary text-white font-bold px-6 py-2 rounded hover:bg-primary/90 transition inline-block text-center"
-          >
-            {({ blob, url, loading, error }) =>
-              loading ? 'Generating PDF...' : 'Download as PDF'
-            }
-          </PDFDownloadLink>
-          <button
-            className="bg-black text-white font-bold px-6 py-2 rounded hover:bg-gray-900 transition flex items-center gap-2"
-            onClick={enhanceWithAI}
-            disabled={loadingAI}
-            type="button"
-          >
-            {loadingAI ? (
-              <span className="animate-spin mr-2 w-4 h-4 border-b-2 border-white rounded-full"></span>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" /></svg>
-            )}
-            Enhance with AI
-          </button>
+    <div className="h-screen flex flex-col bg-background">
+      {/* Header with Action Buttons */}
+      <div className="flex-shrink-0 bg-card border-b p-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-primary">Resume Builder</h1>
+          <div className="flex gap-3">
+            <PDFDownloadLink
+              document={<ResumePDF profile={profile} />}
+              fileName={`${profile.name.replace(/\s/g, "_") || "resume"}.pdf`}
+              className="bg-primary text-white font-bold px-4 py-2 rounded hover:bg-primary/90 transition inline-block text-center text-sm"
+            >
+              {({ blob, url, loading, error }) =>
+                loading ? "Generating PDF..." : "Download PDF"
+              }
+            </PDFDownloadLink>
+            <button
+              className="bg-black text-white font-bold px-4 py-2 rounded hover:bg-gray-900 transition flex items-center gap-2 text-sm"
+              onClick={enhanceWithAI}
+              disabled={loadingAI}
+              type="button"
+            >
+              {loadingAI ? (
+                <span className="animate-spin mr-2 w-4 h-4 border-b-2 border-white rounded-full"></span>
+              ) : (
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 4v16m8-8H4" />
+                </svg>
+              )}
+              Enhance with AI
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content - Side by Side */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Panel - Input Form */}
+        <div className="w-1/2 border-r bg-card">
+          <ScrollArea className="h-full">
+            <div className="p-6">
+              <h2 className="text-xl font-bold mb-4 text-primary">
+                Resume Details
+              </h2>
+              <div className="space-y-4">
+                <input
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  name="name"
+                  value={profile.name}
+                  onChange={handleChange}
+                  placeholder="Full Name"
+                  type="text"
+                />
+                <input
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  name="email"
+                  value={profile.email}
+                  onChange={handleChange}
+                  placeholder="Email"
+                  type="email"
+                />
+                <input
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  name="phone"
+                  value={profile.phone}
+                  onChange={handleChange}
+                  placeholder="Phone"
+                  type="text"
+                />
+                <textarea
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  name="summary"
+                  value={profile.summary}
+                  onChange={handleChange}
+                  placeholder="Professional Summary"
+                  rows={3}
+                />
+
+                {/* Skills Section */}
+                <div>
+                  <label className="font-semibold text-sm mb-2 block">
+                    Skills
+                  </label>
+                  <div className="space-y-2">
+                    {profile.skills.map((skill, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <input
+                          className="flex-1 border rounded px-3 py-1 text-sm"
+                          value={skill}
+                          onChange={(e) =>
+                            handleSkillChange(idx, e.target.value)
+                          }
+                          placeholder={`Skill #${idx + 1}`}
+                          type="text"
+                        />
+                        <button
+                          type="button"
+                          className="text-red-500 px-2 py-1 hover:bg-red-50 rounded"
+                          onClick={() => removeSkill(idx)}
+                          disabled={profile.skills.length === 1}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90"
+                      onClick={addSkill}
+                    >
+                      + Add Skill
+                    </button>
+                  </div>
+                </div>
+
+                {/* Education Section */}
+                <div>
+                  <label className="font-semibold text-sm mb-2 block">
+                    Education
+                  </label>
+                  <div className="space-y-3">
+                    {profile.education.map((edu, idx) => (
+                      <div key={idx} className="border rounded p-3 bg-gray-50">
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={edu.degree}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "education",
+                              idx,
+                              "degree",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Degree"
+                          type="text"
+                        />
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={edu.college}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "education",
+                              idx,
+                              "college",
+                              e.target.value
+                            )
+                          }
+                          placeholder="College"
+                          type="text"
+                        />
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={edu.year}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "education",
+                              idx,
+                              "year",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Year"
+                          type="text"
+                        />
+                        <button
+                          type="button"
+                          className="text-red-500 text-sm hover:bg-red-50 px-2 py-1 rounded"
+                          onClick={() => removeSection("education", idx)}
+                          disabled={profile.education.length === 1}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90"
+                      onClick={() =>
+                        addSection("education", {
+                          degree: "",
+                          college: "",
+                          year: "",
+                        })
+                      }
+                    >
+                      + Add Education
+                    </button>
+                  </div>
+                </div>
+
+                {/* Experience Section */}
+                <div>
+                  <label className="font-semibold text-sm mb-2 block">
+                    Experience
+                  </label>
+                  <div className="space-y-3">
+                    {profile.experience.map((exp, idx) => (
+                      <div key={idx} className="border rounded p-3 bg-gray-50">
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={exp.title}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "experience",
+                              idx,
+                              "title",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Job Title"
+                          type="text"
+                        />
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={exp.company}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "experience",
+                              idx,
+                              "company",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Company"
+                          type="text"
+                        />
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={exp.duration}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "experience",
+                              idx,
+                              "duration",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Duration"
+                          type="text"
+                        />
+                        <textarea
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={exp.details.join("\n")}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "experience",
+                              idx,
+                              "details",
+                              e.target.value.split("\n")
+                            )
+                          }
+                          placeholder="Job responsibilities (one per line)"
+                          rows={3}
+                        />
+                        <button
+                          type="button"
+                          className="text-red-500 text-sm hover:bg-red-50 px-2 py-1 rounded"
+                          onClick={() => removeSection("experience", idx)}
+                          disabled={profile.experience.length === 1}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90"
+                      onClick={() =>
+                        addSection("experience", {
+                          title: "",
+                          company: "",
+                          duration: "",
+                          details: [""],
+                        })
+                      }
+                    >
+                      + Add Experience
+                    </button>
+                  </div>
+                </div>
+
+                {/* Projects Section */}
+                <div>
+                  <label className="font-semibold text-sm mb-2 block">
+                    Projects
+                  </label>
+                  <div className="space-y-3">
+                    {profile.projects.map((proj, idx) => (
+                      <div key={idx} className="border rounded p-3 bg-gray-50">
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={proj.name}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "projects",
+                              idx,
+                              "name",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Project Name"
+                          type="text"
+                        />
+                        <textarea
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={proj.desc}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "projects",
+                              idx,
+                              "desc",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Project Description"
+                          rows={2}
+                        />
+                        <button
+                          type="button"
+                          className="text-red-500 text-sm hover:bg-red-50 px-2 py-1 rounded"
+                          onClick={() => removeSection("projects", idx)}
+                          disabled={profile.projects.length === 1}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90"
+                      onClick={() =>
+                        addSection("projects", { name: "", desc: "" })
+                      }
+                    >
+                      + Add Project
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Input Form */}
-          <div className="bg-card p-6 rounded-xl shadow border border-border">
-            <h2 className="text-2xl font-bold mb-4 text-primary">Resume Details</h2>
-            <div className="space-y-3">
-              <input
-                className="w-full border rounded px-3 py-2"
-                name="name"
-                value={profile.name}
-                onChange={handleChange}
-                placeholder="Full Name"
-                type="text"
-              />
-              <input
-                className="w-full border rounded px-3 py-2"
-                name="email"
-                value={profile.email}
-                onChange={handleChange}
-                placeholder="Email"
-                type="email"
-              />
-              <input
-                className="w-full border rounded px-3 py-2"
-                name="phone"
-                value={profile.phone}
-                onChange={handleChange}
-                placeholder="Phone"
-                type="text"
-              />
-              <textarea
-                className="w-full border rounded px-3 py-2"
-                name="summary"
-                value={profile.summary}
-                onChange={handleChange}
-                placeholder="Professional Summary"
-                rows={3}
-              />
-              <div>
-                <label className="font-semibold">Skills</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {profile.skills.map((skill, idx) => (
-                    <div key={idx} className="flex items-center gap-1">
-                      <input
-                        className="border rounded px-3 py-1"
-                        value={skill}
-                        onChange={(e) => handleSkillChange(idx, e.target.value)}
-                        placeholder={`Skill #${idx + 1}`}
-                        type="text"
-                      />
-                      <button
-                        type="button"
-                        className="text-red-500 px-2"
-                        onClick={() => removeSkill(idx)}
-                        disabled={profile.skills.length === 1}
-                        title="Remove skill"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    className="bg-primary text-white px-2 rounded text-lg"
-                    onClick={addSkill}
-                    title="Add skill"
-                  >
-                    +
-                  </button>
+        {/* Right Panel - Resume Preview */}
+        <div className="w-1/2 bg-gray-50">
+          <ScrollArea className="h-full">
+            <div className="p-6">
+              <div
+                ref={resumeRef}
+                className="bg-white rounded-lg shadow-lg p-8 mx-auto"
+                style={{
+                  width: "8.5in",
+                  minHeight: "11in",
+                  fontFamily: "Arial, sans-serif",
+                  fontSize: "14px",
+                  lineHeight: "1.5",
+                  color: "#000",
+                }}
+              >
+                {/* Header */}
+                <div className="mb-6">
+                  <h1 className="text-3xl font-bold text-black mb-2">
+                    {profile.name}
+                  </h1>
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                    <span>{profile.email}</span>
+                    <span>{profile.phone}</span>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="font-semibold">Education</label>
-                {profile.education.map((edu, idx) => (
-                  <div key={idx} className="mb-2 border-b pb-2">
-                    <input
-                      className="w-full border rounded px-3 py-1 mb-1"
-                      value={edu.degree}
-                      onChange={(e) =>
-                        handleArrayChange("education", idx, "degree", e.target.value)
-                      }
-                      placeholder="Degree"
-                      type="text"
-                    />
-                    <input
-                      className="w-full border rounded px-3 py-1 mb-1"
-                      value={edu.college}
-                      onChange={(e) =>
-                        handleArrayChange("education", idx, "college", e.target.value)
-                      }
-                      placeholder="College"
-                      type="text"
-                    />
-                    <input
-                      className="w-full border rounded px-3 py-1"
-                      value={edu.year}
-                      onChange={(e) =>
-                        handleArrayChange("education", idx, "year", e.target.value)
-                      }
-                      placeholder="Year"
-                      type="text"
-                    />
-                    <button
-                      type="button"
-                      className="text-red-500 mt-1"
-                      onClick={() => removeSection("education", idx)}
-                      disabled={profile.education.length === 1}
-                      title="Remove education"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  className="bg-primary text-white px-3 py-1 rounded mt-1"
-                  onClick={() =>
-                    addSection("education", { degree: "", college: "", year: "" })
-                  }
-                >
-                  + Add Education
-                </button>
-              </div>
-              <div>
-                <label className="font-semibold">Experience</label>
-                {profile.experience.map((exp, idx) => (
-                  <div key={idx} className="mb-2 border-b pb-2">
-                    <input
-                      className="w-full border rounded px-3 py-1 mb-1"
-                      value={exp.title}
-                      onChange={(e) =>
-                        handleArrayChange("experience", idx, "title", e.target.value)
-                      }
-                      placeholder="Title"
-                      type="text"
-                    />
-                    <input
-                      className="w-full border rounded px-3 py-1 mb-1"
-                      value={exp.company}
-                      onChange={(e) =>
-                        handleArrayChange("experience", idx, "company", e.target.value)
-                      }
-                      placeholder="Company"
-                      type="text"
-                    />
-                    <input
-                      className="w-full border rounded px-3 py-1 mb-1"
-                      value={exp.duration}
-                      onChange={(e) =>
-                        handleArrayChange("experience", idx, "duration", e.target.value)
-                      }
-                      placeholder="Duration"
-                      type="text"
-                    />
-                    <textarea
-                      className="w-full border rounded px-3 py-1"
-                      value={exp.details.join("\n")}
-                      onChange={(e) =>
-                        handleArrayChange(
-                          "experience",
-                          idx,
-                          "details",
-                          e.target.value.split("\n")
-                        )
-                      }
-                      placeholder="Details (one per line)"
-                      rows={2}
-                    />
-                    <button
-                      type="button"
-                      className="text-red-500 mt-1"
-                      onClick={() => removeSection("experience", idx)}
-                      disabled={profile.experience.length === 1}
-                      title="Remove experience"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  className="bg-primary text-white px-3 py-1 rounded mt-1"
-                  onClick={() =>
-                    addSection("experience", {
-                      title: "",
-                      company: "",
-                      duration: "",
-                      details: [""],
-                    })
-                  }
-                >
-                  + Add Experience
-                </button>
-              </div>
-              <div>
-                <label className="font-semibold">Projects</label>
-                {profile.projects.map((proj, idx) => (
-                  <div key={idx} className="mb-2 border-b pb-2">
-                    <input
-                      className="w-full border rounded px-3 py-1 mb-1"
-                      value={proj.name}
-                      onChange={(e) =>
-                        handleArrayChange("projects", idx, "name", e.target.value)
-                      }
-                      placeholder="Project Name"
-                      type="text"
-                    />
-                    <textarea
-                      className="w-full border rounded px-3 py-1"
-                      value={proj.desc}
-                      onChange={(e) =>
-                        handleArrayChange("projects", idx, "desc", e.target.value)
-                      }
-                      placeholder="Description"
-                      rows={2}
-                    />
-                    <button
-                      type="button"
-                      className="text-red-500 mt-1"
-                      onClick={() => removeSection("projects", idx)}
-                      disabled={profile.projects.length === 1}
-                      title="Remove project"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  className="bg-primary text-white px-3 py-1 rounded mt-1"
-                  onClick={() =>
-                    addSection("projects", { name: "", desc: "" })
-                  }
-                >
-                  + Add Project
-                </button>
-              </div>
-            </div>
-          </div>
 
-          {/* Resume Preview */}
-          <div
-            ref={resumeRef}
-            id="resume-content"
-            className="bg-white rounded-xl shadow p-10 border border-gray-200 min-h-[900px]"
-            style={{
-              fontFamily: "Arial, sans-serif",
-              width: "210mm",
-              minHeight: "297mm",
-              padding: "20mm",
-              margin: "auto",
-              color: "rgb(0, 0, 0)",
-              backgroundColor: "rgb(255, 255, 255)",
-              wordWrap: "break-word",
-              overflowWrap: "break-word",
-              lineHeight: "1.5"
-            }}
-          >
-            <h1 className="text-3xl font-bold text-black mb-1 tracking-tight">{profile.name}</h1>
-            <div className="flex flex-wrap gap-6 text-sm mb-6 text-gray-700">
-              <span>{profile.email}</span>
-              <span>{profile.phone}</span>
-            </div>
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-black mb-1 tracking-wide uppercase border-b border-gray-300 pb-1">Professional Summary</h2>
-              <p className="text-gray-900">{profile.summary}</p>
-            </div>
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-black mb-1 tracking-wide uppercase border-b border-gray-300 pb-1">Skills</h2>
-              <ul className="flex flex-wrap gap-2">
-                {profile.skills.filter(Boolean).map((skill, idx) => (
-                  <li
-                    key={idx}
-                    className="bg-gray-100 text-black px-4 py-1 rounded-full text-xs font-semibold border border-gray-300 tracking-wide"
-                  >
-                    {skill}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-black mb-1 tracking-wide uppercase border-b border-gray-300 pb-1">Education</h2>
-              {profile.education.map((edu, idx) => (
-                <div key={idx} className="mb-2">
-                  <div className="font-semibold text-black">{edu.degree}</div>
-                  <div className="text-sm text-gray-700">{edu.college} | {edu.year}</div>
-                </div>
-              ))}
-            </div>
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-black mb-1 tracking-wide uppercase border-b border-gray-300 pb-1">Experience</h2>
-              {profile.experience.map((exp, idx) => (
-                <div key={idx} className="mb-4">
-                  <div className="font-semibold text-black">{exp.title} <span className="text-gray-700">@ {exp.company}</span></div>
-                  <div className="text-sm text-gray-600 mb-1">{exp.duration}</div>
-                  <ul className="list-disc ml-6 text-sm text-gray-800">
-                    {exp.details.filter(Boolean).map((d, i) => (
-                      <li key={i}>{d}</li>
+                {/* Professional Summary */}
+                {profile.summary && (
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-black mb-2 uppercase border-b border-gray-300 pb-1">
+                      Professional Summary
+                    </h2>
+                    <p className="text-gray-800 text-sm leading-relaxed">
+                      {profile.summary}
+                    </p>
+                  </div>
+                )}
+
+                {/* Skills */}
+                {profile.skills.filter(Boolean).length > 0 && (
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-black mb-2 uppercase border-b border-gray-300 pb-1">
+                      Skills
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.skills.filter(Boolean).map((skill, idx) => (
+                        <span
+                          key={idx}
+                          className="bg-gray-100 text-black px-3 py-1 rounded-full text-sm font-medium border border-gray-300"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Education */}
+                {profile.education.some(
+                  (edu) => edu.degree || edu.college || edu.year
+                ) && (
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-black mb-2 uppercase border-b border-gray-300 pb-1">
+                      Education
+                    </h2>
+                    {profile.education.map((edu, idx) => (
+                      <div key={idx} className="mb-3">
+                        <div className="font-semibold text-black">
+                          {edu.degree}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {edu.college} | {edu.year}
+                        </div>
+                      </div>
                     ))}
-                  </ul>
-                </div>
-              ))}
+                  </div>
+                )}
+
+                {/* Experience */}
+                {profile.experience.some(
+                  (exp) => exp.title || exp.company || exp.duration
+                ) && (
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-black mb-2 uppercase border-b border-gray-300 pb-1">
+                      Experience
+                    </h2>
+                    {profile.experience.map((exp, idx) => (
+                      <div key={idx} className="mb-4">
+                        <div className="font-semibold text-black">
+                          {exp.title}{" "}
+                          {exp.company && (
+                            <span className="text-gray-700">
+                              @ {exp.company}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-600 mb-2">
+                          {exp.duration}
+                        </div>
+                        <ul className="list-disc ml-5 text-sm text-gray-800">
+                          {exp.details.filter(Boolean).map((detail, i) => (
+                            <li key={i} className="mb-1">
+                              {detail}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Projects */}
+                {profile.projects.some((proj) => proj.name || proj.desc) && (
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-black mb-2 uppercase border-b border-gray-300 pb-1">
+                      Projects
+                    </h2>
+                    {profile.projects.map((proj, idx) => (
+                      <div key={idx} className="mb-3">
+                        <div className="font-semibold text-black">
+                          {proj.name}
+                        </div>
+                        <div className="text-sm text-gray-800">{proj.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-black mb-1 tracking-wide uppercase border-b border-gray-300 pb-1">Projects</h2>
-              {profile.projects.map((proj, idx) => (
-                <div key={idx} className="mb-3">
-                  <div className="font-semibold text-black">{proj.name}</div>
-                  <div className="text-sm text-gray-800">{proj.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+          </ScrollArea>
         </div>
       </div>
     </div>
