@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './components/dashboard/Profile';
 import Latex from './components/dashboard/Latex';
 import Interview from './components/dashboard/Interview';
+import InterviewPrep from './pages/InterviewPrep';
 import Moat from './pages/Moat';
 
 
@@ -44,6 +45,7 @@ const App = () => {
         <Route path="/profile" element={user ? <Profile /> : <Login />} />
         <Route path="/latex" element={user ? <Latex /> : <Login />} />
         <Route path="/interview" element={user ? <Interview /> : <Login />} />
+        <Route path="/interviewprep" element={user ? <InterviewPrep /> : <Login />} />
         <Route path="/moat" element={user ? <Moat /> : <Login />} />
       </Routes>
     </BrowserRouter>
