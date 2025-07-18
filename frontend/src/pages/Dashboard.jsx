@@ -33,6 +33,7 @@ import {
   BarChart3,
   FileUser,
   Lightbulb,
+  Target,
 } from "lucide-react";
 
 import Profile from "../components/Dashboard/Profile";
@@ -45,6 +46,7 @@ import ResumeBuilder from "../components/dashboard/ResumeBuilder";
 import Achievements from "../components/dashboard/Achievements";
 import ProfileAnalytics from "../components/dashboard/ProfileAnalytics";
 import ProjectRecommendations from "../components/dashboard/ProjectRecommendations";
+import ColdEmail from "../components/dashboard/ColdEmail";
 
 const sidebarItems = [
   { id: "profile", label: "Profile", icon: User },
@@ -53,6 +55,7 @@ const sidebarItems = [
   { id: "skillmap", label: "SkillMap", icon: Globe },
   { id: "resume", label: "Resume Builder", icon: FileUser },
   { id: "projects", label: "Project Ideas", icon: Lightbulb },
+  { id: "coldemail", label: "Cold Email", icon: Target },
   { id: "achievements", label: "Achievements", icon: Award },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "tests", label: "Tests", icon: PenTool },
@@ -137,6 +140,7 @@ const Dashboard = () => {
       skillmap: <SkillMap />,
       resume: <ResumeBuilder />,
       projects: <ProjectRecommendations />,
+      coldemail: <ColdEmail />,
       achievements: <Achievements />,
       analytics: <ProfileAnalytics />,
       tests: <Tests />,
@@ -151,6 +155,7 @@ const Dashboard = () => {
     "skillmap",
     "resume",
     "projects",
+    "coldemail",
     "achievements",
     "analytics",
   ];
