@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const resumeMatcherController = require('../controllers/resumeMatcherController');
+const { verifyFirebaseToken } = require('../middleware/auth');
+const resumeController = require('../controllers/resumeController');
 
 // POST /api/match-resume
-router.post('/match-resume', resumeMatcherController.matchResumeWithJobs);
+router.post('/match-resume',verifyFirebaseToken, resumeController.matchResumeWithJobs);
 
-module.exports = resumeRouter;
+module.exports = router;

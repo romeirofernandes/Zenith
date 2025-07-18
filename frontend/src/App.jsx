@@ -5,6 +5,10 @@ import Login from './pages/Login';;
 import {BrowserRouter, Routes, Route } from 'react-router-dom'
 import Landing from './pages/Landing'
 import SkillMap from './components/SkillMap';
+import Dashboard from './pages/Dashboard';
+import Profile from './components/dashboard/Profile';
+import Latex from './components/dashboard/Latex';
+import Interview from './components/dashboard/Interview';
 
 
 const App = () => {
@@ -36,6 +40,9 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         {/* <Route path="/dashboard" element={user ? <Dashboard user={user} /> : <Login />} /> */}
         <Route path="/skillmap" element={<SkillMap />} />
+          <Route path="/profile" element={user ? <Profile /> : <Login />} />
+        <Route path="/latex" element={user ? <Latex /> : <Login />} />
+        <Route path="/interview" element={user ? <Interview /> : <Login />} />
       </Routes>
     </BrowserRouter>
   )

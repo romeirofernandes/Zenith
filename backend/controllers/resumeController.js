@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const resumeMatcherController = {
+const resumeController = {
   matchResumeWithJobs: async (req, res) => {
     try {
       const { resume, jobDescriptions } = req.body;
@@ -34,4 +34,4 @@ const resumeMatcherController = {
   }
 };
 
-module.exports = resumeMatcherController;
+module.exports = resumeController;
