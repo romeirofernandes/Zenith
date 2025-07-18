@@ -7,8 +7,11 @@ import {
 } from "framer-motion";
 import { RiMenu4Line, RiCloseLine } from "react-icons/ri";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
   const ref = useRef(null);
   const { scrollY } = useScroll({
     target: ref,
@@ -92,8 +95,8 @@ const Navbar = () => {
               </motion.button>
             ))}
           </motion.nav>
-          <Button size="sm" className="ml-auto">
-            Get Started
+          <Button size="sm" className="ml-auto" onClick={() => navigate("/login")}>
+            Sign Up
           </Button>
         </div>
       </motion.div>
@@ -162,8 +165,14 @@ const Navbar = () => {
                   {item}
                 </motion.button>
               ))}
-              <Button size="sm" className="w-full mt-2">
-                Get Started
+              <Button
+                size="sm"
+                className="w-full mt-2"
+                onClick={() => {
+                  navigate("/login");
+                }}
+              >
+                Sign Up
               </Button>
             </div>
           </motion.div>

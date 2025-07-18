@@ -59,6 +59,8 @@ const userSchema = new mongoose.Schema({
     default: Date.now
   },
   resume: {
+    softskills: [String],
+    resumeText: String,
     skills: [String],
     experience: [
       {
