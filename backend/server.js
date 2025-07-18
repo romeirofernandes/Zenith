@@ -3,7 +3,6 @@ const cors = require('cors');
 const connectDB = require('./config/database');
 require('dotenv').config();
 const interviewRoutes = require('./routes/interviewRoutes');
-const softSkillsRoutes = require('./routes/softSkillsRoutes');
 
 // Connect to database
 connectDB();
@@ -28,12 +27,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", require("./routes/authRoutes"));
 
 app.use("/api/resume", require("./routes/resumeRoutes"));
-app.use('/api/jobs', jobRoutes);
-const softSkillsRoutes = require("./routes/softSkillsRoutes");
-app.use("/soft-skills", softSkillsRoutes);
-
-app.use('/soft-skills', softSkillsRoutes);
-
+app.use('/api/jobs', require("./routes/jobRoutes"));
+app.use("/api/soft-skills", require("./routes/softSkillsRoutes"));
 app.use('/api/interview', interviewRoutes);
 
 // Health check

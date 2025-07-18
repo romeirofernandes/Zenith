@@ -4,7 +4,7 @@ const path = require('path');
 const FormData = require('form-data');
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const GROQ_MODEL = "llama3-70b-8192"; // or your preferred model
+const GROQ_MODEL = "llama3-70b-8192"; 
 
 function extractJSONArray(str) {
   const match = str.match(/\[([\s\S]*?)\]/);
