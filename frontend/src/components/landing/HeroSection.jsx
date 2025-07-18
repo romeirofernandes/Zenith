@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { MoveRight, PhoneCall } from "lucide-react";
+import { MoveRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -21,9 +21,9 @@ function DemoGradientContainer() {
       </div>
       <div className="w-full overflow-hidden rounded-xl border border-border">
         <img
-          src="https://placehold.co/800x400?text=Demo+Image"
+          src="/dashboard.png"
           alt="Demo placeholder"
-          className="aspect-[16/9] h-auto w-full object-cover"
+          className="aspect-[16/9] h-auto w-full object-fit"
         />
       </div>
     </motion.div>
@@ -44,6 +44,13 @@ function HeroSection() {
     }, 2000);
     return () => clearTimeout(timeoutId);
   }, [titleNumber, titles]);
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <div className="relative mx-auto my-10 flex max-w-5xl flex-col items-center justify-center">
@@ -109,8 +116,13 @@ function HeroSection() {
           >
             Get Started <MoveRight className="w-4 h-4" />
           </Button>
-          <Button size="lg" className="w-60 gap-2" variant="outline">
-            Jump on a call <PhoneCall className="w-4 h-4" />
+          <Button
+            size="lg"
+            className="w-60 gap-2"
+            variant="outline"
+            onClick={() => scrollToSection("features")}
+          >
+            Learn More
           </Button>
         </motion.div>
         <DemoGradientContainer />
