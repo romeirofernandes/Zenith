@@ -14,6 +14,7 @@ import Moat from "./pages/Moat";
 import Tests from "./components/dashboard/Tests";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { Toaster } from "sonner";
+import Achievements from "./components/Achievements";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -58,6 +59,7 @@ const App = () => {
           />
           <Route path="/moat" element={user ? <Moat /> : <Login />} />
           <Route path="/tests" element={user ? <Tests /> : <Login />} />
+          <Route path="/achievements" element={user ? <Achievements /> : <Login />} />
         </Routes>
         <Toaster
           position="top-right"
