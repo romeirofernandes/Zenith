@@ -26,6 +26,12 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 
+const skillMapData = require('./skillmap-data.json');
+
+app.get('/api/skillmap', (req, res) => {
+  res.json(skillMapData);
+});
+
 app.use("/api/resume", require("./routes/resumeRoutes"));
 app.use('/api/jobs', require("./routes/jobRoutes"));
 app.use("/api/soft-skills", require("./routes/softSkillsRoutes"));

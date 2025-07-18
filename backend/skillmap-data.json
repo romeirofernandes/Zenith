@@ -1,0 +1,471 @@
+{
+  "United States": {
+    "region": "North America",
+    "flag": "🇺🇸",
+    "population": "334M",
+    "developers": "4.2M",
+    "avgSalary": "$125,000",
+    "color": "#FFE5E5",
+    "borderColor": "#FF6B6B",
+    "coordinates": [37.0902, -95.7129],
+    "zoom": 4,
+    "bounds": [[24.396308, -125.0], [49.384358, -66.93457]],
+    "cities": [
+      {
+        "name": "San Francisco",
+        "coordinates": [37.7749, -122.4194],
+        "developers": "350k",
+        "avgSalary": "$160,000",
+        "population": "874k",
+        "techCompanies": 2450,
+        "color": "#FFB3BA",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 70, "growth": "+2.5%", "salary": "$150k", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 60, "growth": "+4.0%", "salary": "$165k", "color": "#3776AB" },
+          { "name": "Go", "percentage": 30, "growth": "+7.0%", "salary": "$170k", "color": "#00ADD8" },
+          { "name": "TypeScript", "percentage": 45, "growth": "+6.0%", "salary": "$155k", "color": "#3178C6" },
+          { "name": "Rust", "percentage": 25, "growth": "+12.0%", "salary": "$180k", "color": "#000000" }
+        ],
+        "futureJobs": [
+          { "role": "AI Research Engineer", "growth": "+50%", "demand": "Very High", "avg_salary": "$200k" },
+          { "role": "Quantum Computing Engineer", "growth": "+45%", "demand": "High", "avg_salary": "$190k" },
+          { "role": "AR/VR Developer", "growth": "+40%", "demand": "High", "avg_salary": "$170k" }
+        ],
+        "techTrends": [
+          { "trend": "AI/ML Research", "adoption": 95, "impact": "Very High" },
+          { "trend": "Quantum Computing", "adoption": 25, "impact": "Emerging" },
+          { "trend": "Web3 Development", "adoption": 60, "impact": "High" }
+        ]
+      },
+      {
+        "name": "New York",
+        "coordinates": [40.7128, -74.0060],
+        "developers": "300k",
+        "avgSalary": "$140,000",
+        "population": "8.3M",
+        "techCompanies": 1850,
+        "color": "#FFDFBA",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 68, "growth": "+2.2%", "salary": "$140k", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 55, "growth": "+3.8%", "salary": "$150k", "color": "#3776AB" },
+          { "name": "TypeScript", "percentage": 40, "growth": "+5.0%", "salary": "$145k", "color": "#3178C6" },
+          { "name": "React", "percentage": 50, "growth": "+4.0%", "salary": "$142k", "color": "#61DAFB" },
+          { "name": "Java", "percentage": 35, "growth": "+1.5%", "salary": "$135k", "color": "#ED8B00" }
+        ],
+        "futureJobs": [
+          { "role": "Fintech Engineer", "growth": "+55%", "demand": "Very High", "avg_salary": "$175k" },
+          { "role": "Digital Banking Specialist", "growth": "+48%", "demand": "High", "avg_salary": "$160k" },
+          { "role": "Blockchain Developer", "growth": "+42%", "demand": "High", "avg_salary": "$165k" }
+        ],
+        "techTrends": [
+          { "trend": "Fintech Innovation", "adoption": 88, "impact": "Very High" },
+          { "trend": "Digital Banking", "adoption": 82, "impact": "High" },
+          { "trend": "Cryptocurrency", "adoption": 65, "impact": "Growing" }
+        ]
+      },
+      {
+        "name": "Austin",
+        "coordinates": [30.2672, -97.7431],
+        "developers": "120k",
+        "avgSalary": "$130,000",
+        "population": "965k",
+        "techCompanies": 950,
+        "color": "#FFFFBA",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 65, "growth": "+2.0%", "salary": "$125k", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 50, "growth": "+3.5%", "salary": "$135k", "color": "#3776AB" },
+          { "name": "React", "percentage": 45, "growth": "+3.8%", "salary": "$128k", "color": "#61DAFB" },
+          { "name": "Node.js", "percentage": 42, "growth": "+4.2%", "salary": "$130k", "color": "#339933" }
+        ],
+        "futureJobs": [
+          { "role": "Cloud Engineer", "growth": "+38%", "demand": "High", "avg_salary": "$145k" },
+          { "role": "DevOps Engineer", "growth": "+35%", "demand": "High", "avg_salary": "$140k" }
+        ],
+        "techTrends": [
+          { "trend": "Cloud Computing", "adoption": 85, "impact": "High" },
+          { "trend": "DevOps Culture", "adoption": 78, "impact": "High" }
+        ]
+      },
+      {
+        "name": "Seattle",
+        "coordinates": [47.6062, -122.3321],
+        "developers": "180k",
+        "avgSalary": "$145,000",
+        "population": "749k",
+        "techCompanies": 1200,
+        "color": "#BAE1FF",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 72, "growth": "+2.8%", "salary": "$142k", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 58, "growth": "+4.5%", "salary": "$155k", "color": "#3776AB" },
+          { "name": "Java", "percentage": 48, "growth": "+2.0%", "salary": "$148k", "color": "#ED8B00" },
+          { "name": "C#", "percentage": 35, "growth": "+2.2%", "salary": "$145k", "color": "#239120" }
+        ],
+        "futureJobs": [
+          { "role": "Cloud Solutions Architect", "growth": "+45%", "demand": "Very High", "avg_salary": "$180k" },
+          { "role": "Machine Learning Engineer", "growth": "+42%", "demand": "Very High", "avg_salary": "$170k" }
+        ],
+        "techTrends": [
+          { "trend": "Cloud-First Development", "adoption": 92, "impact": "Very High" },
+          { "trend": "AI Integration", "adoption": 80, "impact": "High" }
+        ]
+      }
+    ],
+    "topSkills": [
+      { "name": "JavaScript", "percentage": 63.61, "growth": "+2.1%", "salary": "$115k", "color": "#F7DF1E" },
+      { "name": "Python", "percentage": 49.28, "growth": "+4.2%", "salary": "$125k", "color": "#3776AB" },
+      { "name": "TypeScript", "percentage": 38.87, "growth": "+6.8%", "salary": "$135k", "color": "#3178C6" },
+      { "name": "React", "percentage": 40.58, "growth": "+3.5%", "salary": "$130k", "color": "#61DAFB" },
+      { "name": "Rust", "percentage": 13.05, "growth": "+12.3%", "salary": "$155k", "color": "#000000" }
+    ],
+    "futureJobs": [
+      { "role": "AI and Machine Learning Engineers", "growth": "+40%", "demand": "Very High", "avg_salary": "$165k" },
+      { "role": "Data Scientists and Analysts", "growth": "+35%", "demand": "High", "avg_salary": "$140k" },
+      { "role": "Cybersecurity Engineers", "growth": "+28%", "demand": "Very High", "avg_salary": "$155k" },
+      { "role": "Software and Applications Developers", "growth": "+25%", "demand": "High", "avg_salary": "$125k" },
+      { "role": "Cloud Computing Specialists", "growth": "+30%", "demand": "Very High", "avg_salary": "$145k" }
+    ],
+    "techTrends": [
+      { "trend": "AI/ML Integration", "adoption": 78, "impact": "High" },
+      { "trend": "Cloud-Native Development", "adoption": 85, "impact": "Very High" },
+      { "trend": "WebAssembly", "adoption": 23, "impact": "Growing" },
+      { "trend": "Quantum Computing", "adoption": 10, "impact": "Emerging" }
+    ],
+    "learningPaths": [
+      { "platform": "Coursera", "course": "Google AI Certificate", "rating": 4.8, "students": "2.3M", "price": "$49/month", "duration": "6 months" },
+      { "platform": "Udacity", "course": "React Nanodegree", "rating": 4.7, "students": "850k", "price": "$399/month", "duration": "4 months" }
+    ],
+    "jobMarket": {
+      "openings": "2.1M",
+      "growth": "+15%",
+      "competitiveness": "High",
+      "remoteRatio": "68%"
+    }
+  },
+  "India": {
+    "region": "Asia",
+    "flag": "🇮🇳",
+    "population": "1.4B",
+    "developers": "5.8M",
+    "avgSalary": "₹12,50,000",
+    "color": "#FFF8E1",
+    "borderColor": "#FFB74D",
+    "coordinates": [20.5937, 78.9629],
+    "zoom": 5,
+    "bounds": [[6.4627, 68.1097], [35.6745, 97.3954]],
+    "cities": [
+      {
+        "name": "Bangalore",
+        "coordinates": [12.9716, 77.5946],
+        "developers": "1.2M",
+        "avgSalary": "₹18L",
+        "population": "12.3M",
+        "techCompanies": 4500,
+        "color": "#FFECB3",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 75, "growth": "+4.2%", "salary": "₹20L", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 65, "growth": "+6.0%", "salary": "₹22L", "color": "#3776AB" },
+          { "name": "React", "percentage": 60, "growth": "+7.0%", "salary": "₹21L", "color": "#61DAFB" },
+          { "name": "Java", "percentage": 55, "growth": "+3.5%", "salary": "₹19L", "color": "#ED8B00" },
+          { "name": "Node.js", "percentage": 50, "growth": "+5.5%", "salary": "₹20L", "color": "#339933" }
+        ],
+        "futureJobs": [
+          { "role": "AI/ML Engineer", "growth": "+65%", "demand": "Very High", "avg_salary": "₹35L" },
+          { "role": "Full Stack Developer", "growth": "+45%", "demand": "Very High", "avg_salary": "₹25L" },
+          { "role": "DevOps Engineer", "growth": "+40%", "demand": "High", "avg_salary": "₹28L" }
+        ],
+        "techTrends": [
+          { "trend": "AI/ML Development", "adoption": 85, "impact": "Very High" },
+          { "trend": "Cloud Computing", "adoption": 78, "impact": "High" },
+          { "trend": "Microservices", "adoption": 70, "impact": "High" }
+        ]
+      },
+      {
+        "name": "Hyderabad",
+        "coordinates": [17.3850, 78.4867],
+        "developers": "800k",
+        "avgSalary": "₹16L",
+        "population": "10.0M",
+        "techCompanies": 2800,
+        "color": "#E1F5FE",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 70, "growth": "+3.8%", "salary": "₹18L", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 60, "growth": "+5.5%", "salary": "₹19L", "color": "#3776AB" },
+          { "name": "Java", "percentage": 58, "growth": "+3.2%", "salary": "₹17L", "color": "#ED8B00" },
+          { "name": "C#", "percentage": 40, "growth": "+4.0%", "salary": "₹18L", "color": "#239120" }
+        ],
+        "futureJobs": [
+          { "role": "Cloud Engineer", "growth": "+50%", "demand": "Very High", "avg_salary": "₹25L" },
+          { "role": "Data Engineer", "growth": "+45%", "demand": "High", "avg_salary": "₹22L" }
+        ],
+        "techTrends": [
+          { "trend": "Cloud Migration", "adoption": 82, "impact": "Very High" },
+          { "trend": "Data Engineering", "adoption": 75, "impact": "High" }
+        ]
+      },
+      {
+        "name": "Pune",
+        "coordinates": [18.5204, 73.8567],
+        "developers": "600k",
+        "avgSalary": "₹15L",
+        "population": "7.2M",
+        "techCompanies": 2200,
+        "color": "#F3E5F5",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 68, "growth": "+3.2%", "salary": "₹16L", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 55, "growth": "+4.8%", "salary": "₹17L", "color": "#3776AB" },
+          { "name": "Java", "percentage": 52, "growth": "+2.8%", "salary": "₹16L", "color": "#ED8B00" },
+          { "name": "React", "percentage": 48, "growth": "+5.2%", "salary": "₹17L", "color": "#61DAFB" }
+        ],
+        "futureJobs": [
+          { "role": "Frontend Developer", "growth": "+40%", "demand": "High", "avg_salary": "₹20L" },
+          { "role": "Backend Developer", "growth": "+38%", "demand": "High", "avg_salary": "₹19L" }
+        ],
+        "techTrends": [
+          { "trend": "Frontend Frameworks", "adoption": 80, "impact": "High" },
+          { "trend": "API Development", "adoption": 75, "impact": "High" }
+        ]
+      },
+      {
+        "name": "Mumbai",
+        "coordinates": [19.0760, 72.8777],
+        "developers": "450k",
+        "avgSalary": "₹17L",
+        "population": "20.4M",
+        "techCompanies": 1800,
+        "color": "#E8F5E8",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 66, "growth": "+3.0%", "salary": "₹18L", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 52, "growth": "+4.5%", "salary": "₹19L", "color": "#3776AB" },
+          { "name": "Java", "percentage": 50, "growth": "+2.5%", "salary": "₹17L", "color": "#ED8B00" }
+        ],
+        "futureJobs": [
+          { "role": "Fintech Developer", "growth": "+60%", "demand": "Very High", "avg_salary": "₹30L" },
+          { "role": "Mobile App Developer", "growth": "+45%", "demand": "High", "avg_salary": "₹22L" }
+        ],
+        "techTrends": [
+          { "trend": "Fintech Innovation", "adoption": 88, "impact": "Very High" },
+          { "trend": "Mobile Development", "adoption": 82, "impact": "High" }
+        ]
+      }
+    ],
+    "topSkills": [
+      { "name": "JavaScript", "percentage": 65.82, "growth": "+3.2%", "salary": "₹15L", "color": "#F7DF1E" },
+      { "name": "Python", "percentage": 52.65, "growth": "+6.8%", "salary": "₹18L", "color": "#3776AB" },
+      { "name": "React", "percentage": 47.13, "growth": "+8.5%", "salary": "₹16L", "color": "#61DAFB" },
+      { "name": "TypeScript", "percentage": 35.29, "growth": "+11.2%", "salary": "₹19L", "color": "#3178C6" },
+      { "name": "Go", "percentage": 12.74, "growth": "+18.9%", "salary": "₹22L", "color": "#00ADD8" }
+    ],
+    "futureJobs": [
+      { "role": "Digital Banking Specialists", "growth": "+55%", "demand": "Very High", "avg_salary": "₹25L" },
+      { "role": "Mobile App Developers", "growth": "+42%", "demand": "Very High", "avg_salary": "₹18L" },
+      { "role": "EdTech Platform Engineers", "growth": "+48%", "demand": "High", "avg_salary": "₹22L" },
+      { "role": "E-commerce Specialists", "growth": "+38%", "demand": "High", "avg_salary": "₹20L" },
+      { "role": "Digital Marketing Technologists", "growth": "+35%", "demand": "Growing", "avg_salary": "₹16L" }
+    ],
+    "techTrends": [
+      { "trend": "Mobile-First Development", "adoption": 89, "impact": "Very High" },
+      { "trend": "Fintech Innovation", "adoption": 76, "impact": "High" },
+      { "trend": "EdTech Solutions", "adoption": 68, "impact": "Growing" }
+    ],
+    "learningPaths": [
+      { "platform": "Unacademy", "course": "Full Stack Development", "rating": 4.6, "students": "3.2M", "price": "₹999/month", "duration": "6 months" },
+      { "platform": "Scaler", "course": "Software Engineering", "rating": 4.8, "students": "650k", "price": "₹2999/month", "duration": "12 months" }
+    ],
+    "jobMarket": {
+      "openings": "3.2M",
+      "growth": "+25%",
+      "competitiveness": "Very High",
+      "remoteRatio": "52%"
+    }
+  },
+  "Germany": {
+    "region": "Europe",
+    "flag": "🇩🇪",
+    "population": "83M",
+    "developers": "950k",
+    "avgSalary": "€75,000",
+    "color": "#E8F5E8",
+    "borderColor": "#66BB6A",
+    "coordinates": [51.1657, 10.4515],
+    "zoom": 6,
+    "bounds": [[47.2701, 5.8663], [55.0815, 15.0419]],
+    "cities": [
+      {
+        "name": "Berlin",
+        "coordinates": [52.52, 13.405],
+        "developers": "250k",
+        "avgSalary": "€80k",
+        "population": "3.7M",
+        "techCompanies": 1200,
+        "color": "#C8E6C9",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 72, "growth": "+2.0%", "salary": "€75k", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 60, "growth": "+4.5%", "salary": "€82k", "color": "#3776AB" },
+          { "name": "TypeScript", "percentage": 48, "growth": "+7.0%", "salary": "€85k", "color": "#3178C6" },
+          { "name": "Go", "percentage": 22, "growth": "+9.0%", "salary": "€90k", "color": "#00ADD8" }
+        ],
+        "futureJobs": [
+          { "role": "Sustainability Tech Engineer", "growth": "+55%", "demand": "Very High", "avg_salary": "€95k" },
+          { "role": "IoT Developer", "growth": "+42%", "demand": "High", "avg_salary": "€85k" }
+        ],
+        "techTrends": [
+          { "trend": "Green Tech", "adoption": 85, "impact": "Very High" },
+          { "trend": "IoT Solutions", "adoption": 72, "impact": "High" }
+        ]
+      },
+      {
+        "name": "Munich",
+        "coordinates": [48.1351, 11.582],
+        "developers": "150k",
+        "avgSalary": "€85k",
+        "population": "1.5M",
+        "techCompanies": 800,
+        "color": "#DCEDC8",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 68, "growth": "+1.8%", "salary": "€80k", "color": "#F7DF1E" },
+          { "name": "Go", "percentage": 20, "growth": "+8.0%", "salary": "€90k", "color": "#00ADD8" },
+          { "name": "Python", "percentage": 55, "growth": "+4.0%", "salary": "€85k", "color": "#3776AB" }
+        ],
+        "futureJobs": [
+          { "role": "Automotive Software Engineer", "growth": "+48%", "demand": "Very High", "avg_salary": "€100k" }
+        ],
+        "techTrends": [
+          { "trend": "Automotive Tech", "adoption": 90, "impact": "Very High" }
+        ]
+      },
+      {
+        "name": "Hamburg",
+        "coordinates": [53.5511, 9.9937],
+        "developers": "85k",
+        "avgSalary": "€78k",
+        "population": "1.9M",
+        "techCompanies": 450,
+        "color": "#F1F8E9",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 65, "growth": "+2.2%", "salary": "€75k", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 52, "growth": "+4.2%", "salary": "€80k", "color": "#3776AB" }
+        ],
+        "futureJobs": [
+          { "role": "Maritime Tech Developer", "growth": "+35%", "demand": "Growing", "avg_salary": "€85k" }
+        ],
+        "techTrends": [
+          { "trend": "Maritime Technology", "adoption": 65, "impact": "Growing" }
+        ]
+      }
+    ],
+    "topSkills": [
+      { "name": "JavaScript", "percentage": 61.45, "growth": "+1.8%", "salary": "€68k", "color": "#F7DF1E" },
+      { "name": "Python", "percentage": 45.32, "growth": "+5.1%", "salary": "€78k", "color": "#3776AB" },
+      { "name": "TypeScript", "percentage": 42.18, "growth": "+8.2%", "salary": "€82k", "color": "#3178C6" },
+      { "name": "Go", "percentage": 15.87, "growth": "+9.4%", "salary": "€85k", "color": "#00ADD8" },
+      { "name": "Rust", "percentage": 18.92, "growth": "+15.7%", "salary": "€95k", "color": "#000000" }
+    ],
+    "futureJobs": [
+      { "role": "Renewable Energy Engineers", "growth": "+45%", "demand": "Very High", "avg_salary": "€85k" },
+      { "role": "Industrial IoT Specialists", "growth": "+38%", "demand": "High", "avg_salary": "€78k" },
+      { "role": "Robotics Engineers", "growth": "+32%", "demand": "High", "avg_salary": "€92k" },
+      { "role": "Sustainability Specialists", "growth": "+35%", "demand": "Growing", "avg_salary": "€70k" },
+      { "role": "Data Scientists", "growth": "+30%", "demand": "High", "avg_salary": "€82k" }
+    ],
+    "techTrends": [
+      { "trend": "Industry 4.0", "adoption": 82, "impact": "Very High" },
+      { "trend": "Green Computing", "adoption": 71, "impact": "High" },
+      { "trend": "Automotive Tech", "adoption": 65, "impact": "High" }
+    ],
+    "learningPaths": [
+      { "platform": "edX", "course": "MIT Full Stack", "rating": 4.9, "students": "1.8M", "price": "€299", "duration": "8 months" },
+      { "platform": "Codecademy", "course": "Advanced JavaScript", "rating": 4.5, "students": "920k", "price": "€25/month", "duration": "3 months" }
+    ],
+    "jobMarket": {
+      "openings": "450k",
+      "growth": "+12%",
+      "competitiveness": "Medium",
+      "remoteRatio": "45%"
+    }
+  },
+  "United Kingdom": {
+    "region": "Europe",
+    "flag": "🇬🇧",
+    "population": "67M",
+    "developers": "1.1M",
+    "avgSalary": "£65,000",
+    "color": "#E3F2FD",
+    "borderColor": "#42A5F5",
+    "coordinates": [55.3781, -3.4360],
+    "zoom": 6,
+    "bounds": [[49.9599, -8.1821], [60.8447, 1.7627]],
+    "cities": [
+      {
+        "name": "London",
+        "coordinates": [51.5074, -0.1278],
+        "developers": "400k",
+        "avgSalary": "£75k",
+        "population": "9.5M",
+        "techCompanies": 2500,
+        "color": "#BBDEFB",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 70, "growth": "+2.5%", "salary": "£70k", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 58, "growth": "+4.8%", "salary": "£78k", "color": "#3776AB" },
+          { "name": "TypeScript", "percentage": 45, "growth": "+7.2%", "salary": "£82k", "color": "#3178C6" },
+          { "name": "React", "percentage": 42, "growth": "+4.0%", "salary": "£75k", "color": "#61DAFB" }
+        ],
+        "futureJobs": [
+          { "role": "Fintech Engineer", "growth": "+60%", "demand": "Very High", "avg_salary": "£95k" },
+          { "role": "RegTech Specialist", "growth": "+45%", "demand": "High", "avg_salary": "£85k" }
+        ],
+        "techTrends": [
+          { "trend": "Fintech Innovation", "adoption": 92, "impact": "Very High" },
+          { "trend": "RegTech", "adoption": 75, "impact": "High" }
+        ]
+      },
+      {
+        "name": "Manchester",
+        "coordinates": [53.4808, -2.2426],
+        "developers": "85k",
+        "avgSalary": "£60k",
+        "population": "2.7M",
+        "techCompanies": 650,
+        "color": "#C5E1A5",
+        "topSkills": [
+          { "name": "JavaScript", "percentage": 65, "growth": "+2.0%", "salary": "£58k", "color": "#F7DF1E" },
+          { "name": "Python", "percentage": 50, "growth": "+4.2%", "salary": "£62k", "color": "#3776AB" }
+        ],
+        "futureJobs": [
+          { "role": "Digital Health Engineer", "growth": "+40%", "demand": "High", "avg_salary": "£68k" }
+        ],
+        "techTrends": [
+          { "trend": "Digital Health", "adoption": 70, "impact": "High" }
+        ]
+      }
+    ],
+    "topSkills": [
+      { "name": "JavaScript", "percentage": 62.34, "growth": "+2.3%", "salary": "£58k", "color": "#F7DF1E" },
+      { "name": "Python", "percentage": 46.85, "growth": "+4.7%", "salary": "£68k", "color": "#3776AB" },
+      { "name": "TypeScript", "percentage": 41.92, "growth": "+7.1%", "salary": "£72k", "color": "#3178C6" },
+      { "name": "React", "percentage": 38.76, "growth": "+3.8%", "salary": "£70k", "color": "#61DAFB" },
+      { "name": "Rust", "percentage": 16.43, "growth": "+13.2%", "salary": "£85k", "color": "#000000" }
+    ],
+    "futureJobs": [
+      { "role": "Financial Technology Engineers", "growth": "+50%", "demand": "Very High", "avg_salary": "£95k" },
+      { "role": "RegTech Specialists", "growth": "+40%", "demand": "High", "avg_salary": "£85k" },
+      { "role": "Climate Tech Developers", "growth": "+38%", "demand": "Growing", "avg_salary": "£75k" },
+      { "role": "Digital Health Engineers", "growth": "+35%", "demand": "High", "avg_salary": "£78k" },
+      { "role": "Blockchain Developers", "growth": "+32%", "demand": "Growing", "avg_salary": "£88k" }
+    ],
+    "techTrends": [
+      { "trend": "Fintech Innovation", "adoption": 84, "impact": "Very High" },
+      { "trend": "Regulatory Tech", "adoption": 67, "impact": "High" },
+      { "trend": "Green Tech", "adoption": 59, "impact": "Growing" }
+    ],
+    "learningPaths": [
+      { "platform": "FutureLearn", "course": "Digital Skills", "rating": 4.6, "students": "1.5M", "price": "£39/month", "duration": "4 months" },
+      { "platform": "Codecademy", "course": "Web Development", "rating": 4.4, "students": "780k", "price": "£25/month", "duration": "5 months" }
+    ],
+    "jobMarket": {
+      "openings": "380k",
+      "growth": "+18%",
+      "competitiveness": "High",
+      "remoteRatio": "71%"
+    }
+  }
+}
