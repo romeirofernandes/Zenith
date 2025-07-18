@@ -1,18 +1,23 @@
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('./config/database');
-require('dotenv').config();
-const interviewRoutes = require('./routes/interviewRoutes');
-const achievementRoutes = require('./routes/achievementRoutes');
+const express = require("express");
+const cors = require("cors");
+const connectDB = require("./config/database");
+require("dotenv").config();
+const interviewRoutes = require("./routes/interviewRoutes");
+const achievementRoutes = require("./routes/achievementRoutes");
+const fetchAndSaveJobs = require("./controllers/jobsfetch"); // Import the job fetcher
 
 // Connect to database
-connectDB();
+connectDB().then(() => {
+  console.log("✅ MongoDB connected.");
+
+  // Trigger the job fetcher after MongoDB connection
+  fetchAndSaveJobs();
+});
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
@@ -27,16 +32,16 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 
-const skillMapData = require('./skillmap-data.json');
+const skillMapData = require("./skillmap-data.json");
 
-app.get('/api/skillmap', (req, res) => {
+app.get("/api/skillmap", (req, res) => {
   res.json(skillMapData);
 });
 
 app.use("/api/resume", require("./routes/resumeRoutes"));
-app.use('/api/jobs', require("./routes/jobRoutes"));
+app.use("/api/jobs", require("./routes/jobRoutes"));
 app.use("/api/soft-skills", require("./routes/softSkillsRoutes"));
-app.use('/api/interview', interviewRoutes);
+app.use("/api/interview", interviewRoutes);
 app.use("/api/profile", require("./routes/profileRoutes"));
 app.use("/api/moat", require("./routes/moatRoutes"));
 app.use("/api/achievements", achievementRoutes);
