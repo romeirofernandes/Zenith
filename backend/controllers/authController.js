@@ -166,8 +166,47 @@ const authController = {
       console.error('Account deletion error:', error);
       res.status(500).json({ success: false, message: error.message });
     }
-  }
+  },
 
+  // Get current user
+  getCurrentUser: async (req, res) => {
+    try {
+      const user = await User.findOne({ firebaseUid: req.user.uid });
+      
+      if (!user) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'User not found' 
+        });
+      }
+
+      // Return user data including resume if it exists
+      res.json({
+        success: true,
+        user: {
+          id: user._id,
+          firebaseUid: user.firebaseUid,
+          email: user.email,
+          displayName: user.displayName,
+          phoneNumber: user.phoneNumber,
+          role: user.role,
+          resume: user.resume || {},
+          fullName: user.getFullName(),
+          profile: user.profile || {},
+          preferences: user.preferences || {},
+          lastLogin: user.lastLogin,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        }
+      });
+    } catch (error) {
+      console.error('Get current user error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: error.message 
+      });
+    }
+  }
 
 };
 
