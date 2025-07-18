@@ -92,6 +92,102 @@ const profileController = {
       res.status(500).json({ error: "Failed to update profile" });
     }
   },
+
+  async getProfileAnalytics(req, res) {
+    try {
+      const user = await User.findByFirebaseUid(req.user.uid).lean();
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Gather analytics data
+      const skillsCount = user?.resume?.skills?.length || 0;
+      const certificationsCount = user?.resume?.certifications?.length || 0;
+      const jobsApplied = user?.jobsApplied?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
+      const learningPaths = user?.learningPaths?.length || 0;
+      const interviewPrep = user?.interviewPrepCount || 0;
+      const softskillsCount = user?.resume?.softskills?.length || 0;
+
+      // Pie chart data
+      const pieData = [
+        { name: "Skills", value: skillsCount },
+        { name: "Certifications", value: certificationsCount },
+        { name: "Learning Paths", value: learningPaths },
+        { name: "Wishlist", value: wishlistCount },
+        { name: "Interview Prep", value: interviewPrep },
+        { name: "Soft Skills", value: softskillsCount },
+      ];
+
+      // Bar chart data
+      const barData = [
+        {
+          name: "You",
+          "Jobs Applied": jobsApplied,
+          "Wishlist": wishlistCount,
+          "Certifications": certificationsCount,
+          "Skills": skillsCount,
+        },
+      ];
+
+      // Timeline data (example: experience, certifications, learning paths)
+      const timeline = [];
+      if (Array.isArray(user?.resume?.experience)) {
+        user.resume.experience.forEach((exp) => {
+          if (exp.startDate) {
+            timeline.push({
+              type: "Experience",
+              label: exp.title || exp.company || "Experience",
+              date: exp.startDate,
+            });
+          }
+        });
+      }
+      if (Array.isArray(user?.resume?.certifications)) {
+        user.resume.certifications.forEach((cert) => {
+          if (cert.date) {
+            timeline.push({
+              type: "Certification",
+              label: cert.name || "Certification",
+              date: cert.date,
+            });
+          }
+        });
+      }
+      if (Array.isArray(user?.learningPaths)) {
+        user.learningPaths.forEach((lp) => {
+          if (lp.startedAt) {
+            timeline.push({
+              type: "Learning Path",
+              label: lp.name || "Learning Path",
+              date: lp.startedAt,
+            });
+          }
+        });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          pieData,
+          barData,
+          timeline,
+          stats: {
+            skillsCount,
+            certificationsCount,
+            jobsApplied,
+            wishlistCount,
+            learningPaths,
+            interviewPrep,
+            softskillsCount,
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching profile analytics:", error);
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  },
 };
 
 module.exports = profileController;

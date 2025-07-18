@@ -15,6 +15,7 @@ import Tests from "./components/dashboard/Tests";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { Toaster } from "sonner";
 import Achievements from "./components/Achievements";
+import ProfileAnalytics from "./components/ProfileAnalytics";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -60,6 +61,7 @@ const App = () => {
           <Route path="/moat" element={user ? <Moat /> : <Login />} />
           <Route path="/tests" element={user ? <Tests /> : <Login />} />
           <Route path="/achievements" element={user ? <Achievements /> : <Login />} />
+          <Route path="/analytics" element={user ? <ProfileAnalytics /> : <Login />} />
         </Routes>
         <Toaster
           position="top-right"

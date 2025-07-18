@@ -10,4 +10,6 @@ router.post(
   profileController.completeProfile
 );
 
+router.get("/analytics", verifyFirebaseToken, profileController.getProfileAnalytics);
+
 module.exports = router;
