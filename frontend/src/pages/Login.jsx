@@ -5,6 +5,8 @@ import {
   signInWithPopup 
 } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
+import { useNavigate } from 'react-router-dom';
+
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,6 +14,9 @@ const Login = () => {
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  const navigate = useNavigate();
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +31,8 @@ const Login = () => {
         await signInWithEmailAndPassword(auth, email, password);
         setMessage('Login successful!');
       }
+
+        navigate('/dashboard'); 
       // Firebase onAuthStateChanged will handle the state update automatically
     } catch (error) {
       setMessage(error.message);
@@ -38,6 +45,7 @@ const Login = () => {
     try {
       await signInWithPopup(auth, googleProvider);
       setMessage('Google login successful!');
+        navigate('/dashboard');
       // Firebase onAuthStateChanged will handle the state update automatically
     } catch (error) {
       setMessage(error.message);
