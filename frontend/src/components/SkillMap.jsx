@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MapContainer, TileLayer, GeoJSON, Marker, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import {
@@ -12,7 +12,7 @@ import { BiWorld, BiTrendingUp } from "react-icons/bi";
 import {
   SiReact, SiJavascript, SiPython, SiTypescript, SiRust, SiGo
 } from "react-icons/si";
-import customGeo from "../../src/custom.geo.json";
+// import customGeo from "../../src/custom.geo.json";
 
 // --- DATA ---
 const stackOverflowData = {
