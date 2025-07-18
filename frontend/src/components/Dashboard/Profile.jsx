@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Upload,
   FileText,
@@ -51,6 +54,7 @@ const Profile = ({
     },
   });
 
+  const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -179,6 +183,46 @@ const Profile = ({
     }
   };
 
+  const addArrayItem = (section, item) => {
+    setProfileData((prev) => ({
+      ...prev,
+      resume: {
+        ...prev.resume,
+        [section]: [...prev.resume[section], item],
+      },
+    }));
+  };
+
+  const removeArrayItem = (section, index) => {
+    setProfileData((prev) => ({
+      ...prev,
+      resume: {
+        ...prev.resume,
+        [section]: prev.resume[section].filter((_, i) => i !== index),
+      },
+    }));
+  };
+
+  const updateArrayItem = (section, index, field, value) => {
+    setProfileData((prev) => ({
+      ...prev,
+      resume: {
+        ...prev.resume,
+        [section]: prev.resume[section].map((item, i) =>
+          i === index ? { ...item, [field]: value } : item
+        ),
+      },
+    }));
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground text-xl">Loading user...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-6">
@@ -200,168 +244,228 @@ const Profile = ({
           <TabsTrigger value="resume">Resume</TabsTrigger>
         </TabsList>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Address</h3>
+        <TabsContent value="basic">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Personal Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="street">Street</Label>
+                  <Label htmlFor="firstName">First Name</Label>
                   <Input
-                    id="street"
-                    value={profileData.profile.address.street}
+                    id="firstName"
+                    value={profileData.profile.firstName}
+                    onChange={(e) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        profile: { ...prev.profile, firstName: e.target.value },
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    value={profileData.profile.lastName}
+                    onChange={(e) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        profile: { ...prev.profile, lastName: e.target.value },
+                      }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <Input
+                    id="dateOfBirth"
+                    type="date"
+                    value={profileData.profile.dateOfBirth}
                     onChange={(e) =>
                       setProfileData((prev) => ({
                         ...prev,
                         profile: {
                           ...prev.profile,
-                          address: {
-                            ...prev.profile.address,
-                            street: e.target.value,
-                          },
+                          dateOfBirth: e.target.value,
                         },
                       }))
                     }
                   />
                 </div>
                 <div>
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="gender">Gender</Label>
                   <Input
-                    id="city"
-                    value={profileData.profile.address.city}
+                    id="gender"
+                    value={profileData.profile.gender}
                     onChange={(e) =>
                       setProfileData((prev) => ({
                         ...prev,
-                        profile: {
-                          ...prev.profile,
-                          address: {
-                            ...prev.profile.address,
-                            city: e.target.value,
-                          },
-                        },
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="state">State</Label>
-                  <Input
-                    id="state"
-                    value={profileData.profile.address.state}
-                    onChange={(e) =>
-                      setProfileData((prev) => ({
-                        ...prev,
-                        profile: {
-                          ...prev.profile,
-                          address: {
-                            ...prev.profile.address,
-                            state: e.target.value,
-                          },
-                        },
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="country">Country</Label>
-                  <Input
-                    id="country"
-                    value={profileData.profile.address.country}
-                    onChange={(e) =>
-                      setProfileData((prev) => ({
-                        ...prev,
-                        profile: {
-                          ...prev.profile,
-                          address: {
-                            ...prev.profile.address,
-                            country: e.target.value,
-                          },
-                        },
-                      }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="zipCode">Zip Code</Label>
-                  <Input
-                    id="zipCode"
-                    value={profileData.profile.address.zipCode}
-                    onChange={(e) =>
-                      setProfileData((prev) => ({
-                        ...prev,
-                        profile: {
-                          ...prev.profile,
-                          address: {
-                            ...prev.profile.address,
-                            zipCode: e.target.value,
-                          },
-                        },
+                        profile: { ...prev.profile, gender: e.target.value },
                       }))
                     }
                   />
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Resume Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="softskills">Soft Skills</Label>
-                <Input
-                  id="softskills"
-                  value={profileData.resume.softskills.join(", ")}
-                  onChange={(e) =>
-                    setProfileData((prev) => ({
-                      ...prev,
-                      resume: {
-                        ...prev.resume,
-                        softskills: e.target.value
-                          .split(",")
-                          .map((skill) => skill.trim()),
-                      },
-                    }))
-                  }
-                />
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Address</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="street">Street</Label>
+                    <Input
+                      id="street"
+                      value={profileData.profile.address.street}
+                      onChange={(e) =>
+                        setProfileData((prev) => ({
+                          ...prev,
+                          profile: {
+                            ...prev.profile,
+                            address: {
+                              ...prev.profile.address,
+                              street: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      value={profileData.profile.address.city}
+                      onChange={(e) =>
+                        setProfileData((prev) => ({
+                          ...prev,
+                          profile: {
+                            ...prev.profile,
+                            address: {
+                              ...prev.profile.address,
+                              city: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state">State</Label>
+                    <Input
+                      id="state"
+                      value={profileData.profile.address.state}
+                      onChange={(e) =>
+                        setProfileData((prev) => ({
+                          ...prev,
+                          profile: {
+                            ...prev.profile,
+                            address: {
+                              ...prev.profile.address,
+                              state: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="country">Country</Label>
+                    <Input
+                      id="country"
+                      value={profileData.profile.address.country}
+                      onChange={(e) =>
+                        setProfileData((prev) => ({
+                          ...prev,
+                          profile: {
+                            ...prev.profile,
+                            address: {
+                              ...prev.profile.address,
+                              country: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="zipCode">Zip Code</Label>
+                    <Input
+                      id="zipCode"
+                      value={profileData.profile.address.zipCode}
+                      onChange={(e) =>
+                        setProfileData((prev) => ({
+                          ...prev,
+                          profile: {
+                            ...prev.profile,
+                            address: {
+                              ...prev.profile.address,
+                              zipCode: e.target.value,
+                            },
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <Label htmlFor="resumeText">Resume Text</Label>
-                <Input
-                  id="resumeText"
-                  value={profileData.resume.resumeText}
-                  onChange={(e) =>
-                    setProfileData((prev) => ({
-                      ...prev,
-                      resume: { ...prev.resume, resumeText: e.target.value },
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="skills">Skills</Label>
-                <Input
-                  id="skills"
-                  value={profileData.resume.skills.join(", ")}
-                  onChange={(e) =>
-                    setProfileData((prev) => ({
-                      ...prev,
-                      resume: {
-                        ...prev.resume,
-                        skills: e.target.value
-                          .split(",")
-                          .map((skill) => skill.trim()),
-                      },
-                    }))
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="summary">Summary</Label>
-                <Input
-                  id="summary"
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="resume">
+          <div className="space-y-6">
+            {/* Resume Upload Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Resume Upload
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-center w-full">
+                  <label
+                    htmlFor="resume-upload"
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-4 text-gray-500" />
+                      <p className="mb-2 text-sm text-gray-500">
+                        <span className="font-semibold">Click to upload</span>{" "}
+                        your resume
+                      </p>
+                      <p className="text-xs text-gray-500">PDF files only</p>
+                    </div>
+                    <input
+                      id="resume-upload"
+                      type="file"
+                      accept=".pdf"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      disabled={isUploading}
+                    />
+                  </label>
+                </div>
+                {isUploading && (
+                  <div className="mt-4 text-center text-sm text-gray-500">
+                    Extracting resume information...
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Resume Summary */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Professional Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  placeholder="Enter your professional summary"
                   value={profileData.resume.summary}
                   onChange={(e) =>
                     setProfileData((prev) => ({
@@ -369,6 +473,7 @@ const Profile = ({
                       resume: { ...prev.resume, summary: e.target.value },
                     }))
                   }
+                  rows={4}
                 />
               </CardContent>
             </Card>
