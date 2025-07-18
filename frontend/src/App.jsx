@@ -5,9 +5,9 @@ import Login from './pages/Login';;
 import {BrowserRouter, Routes, Route } from 'react-router-dom'
 import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard';
-import Profile from './components/Dashboard/Profile';
-import Latex from './components/Dashboard/Latex';
-import Interview from './components/Dashboard/Interview';
+import Profile from './components/dashboard/Profile';
+import Latex from './components/dashboard/Latex';
+import Interview from './components/dashboard/Interview';
 
 
 const App = () => {
