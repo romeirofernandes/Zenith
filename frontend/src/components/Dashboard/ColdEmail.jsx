@@ -20,33 +20,56 @@ import {
   ChevronRight,
   Copy,
   Download,
-  Sparkles,
   Target,
   Mail,
-  Globe,
   Building,
-  Users,
   Code,
   Lightbulb,
   TrendingUp,
   Clock,
   Star,
+  RefreshCw,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import mermaid from "mermaid";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
-// Initialize Mermaid
+// Initialize Mermaid with optimized configuration for faster rendering
 mermaid.initialize({
-  startOnLoad: true,
+  startOnLoad: false,
   theme: "default",
   securityLevel: "loose",
+  fontFamily: "inherit",
+  flowchart: {
+    useMaxWidth: true,
+    htmlLabels: false, // Disable HTML labels for faster rendering
+    curve: "basis",
+  },
   themeCSS: `
-    .node rect { fill: #f8fafc; stroke: #3b82f6; stroke-width: 2px; }
-    .node.clickable { cursor: pointer; }
-    .edgePath .path { stroke: #6b7280; stroke-width: 2px; stroke-dasharray: 5,5; }
-    .edgeLabel { background-color: #ffffff; }
+    .node rect { 
+      fill: #f8fafc; 
+      stroke: #3b82f6; 
+      stroke-width: 2px; 
+      rx: 8px;
+    }
+    .node text { 
+      font-size: 12px; 
+      fill: #1e293b;
+    }
+    .edgePath .path { 
+      stroke: #6b7280; 
+      stroke-width: 2px; 
+    }
+    .edgeLabel { 
+      background-color: #ffffff; 
+      font-size: 10px;
+    }
   `,
 });
+
+const STORAGE_KEY = "coldEmailData";
 
 const ColdEmail = () => {
   const [formData, setFormData] = useState({
@@ -70,13 +93,82 @@ const ColdEmail = () => {
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [expandedSteps, setExpandedSteps] = useState(new Set());
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        if (parsed.formData) {
+          setFormData(parsed.formData);
+        }
+        if (parsed.results) {
+          setResults(parsed.results);
+
+          // Re-render Mermaid chart if it exists with optimized timing
+          if (parsed.results.mermaidChart) {
+            setTimeout(() => {
+              renderMermaidChart(parsed.results.mermaidChart);
+            }, 100); // Reduced from 500ms
+          }
+        }
+      } catch (error) {
+        console.error("Error loading saved data:", error);
+      }
+    }
+  }, []);
+
+  // Save data to localStorage whenever formData or results change
+  useEffect(() => {
+    if (formData.startupName || results.roadmap.length > 0) {
+      const dataToSave = { formData, results };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+    }
+  }, [formData, results]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  const resetData = () => {
+    const emptyFormData = {
+      startupName: "",
+      website: "",
+      industry: "",
+      targetRole: "",
+      founderName: "",
+      founderEmail: "",
+      additionalInfo: "",
+    };
+    const emptyResults = {
+      roadmap: [],
+      extraFeatures: [],
+      coldEmail: "",
+      mermaidChart: "",
+      techStack: [],
+      timeline: "",
+      marketAnalysis: "",
+    };
+
+    setFormData(emptyFormData);
+    setResults(emptyResults);
+    setExpandedSteps(new Set());
+    localStorage.removeItem(STORAGE_KEY);
+
+    // Clear mermaid container
+    const container = document.getElementById("mermaid-container");
+    if (container) {
+      container.innerHTML =
+        '<p class="text-muted-foreground text-center">Chart will render here...</p>';
+    }
+
+    toast.success("Data cleared successfully!");
   };
 
   // Helper function to ensure arrays
@@ -98,9 +190,44 @@ const ColdEmail = () => {
       coldEmail: data.coldEmail || "",
       mermaidChart: data.mermaidChart || "",
       techStack: ensureArray(data.techStack || []),
-      timeline: data.timeline || "",
+      timeline: data.timeline || "14 days",
       marketAnalysis: data.marketAnalysis || "",
     };
+  };
+
+  const renderMermaidChart = async (chartCode) => {
+    try {
+      const container = document.getElementById("mermaid-container");
+      if (!container) return;
+
+      console.log("Rendering Mermaid chart:", chartCode);
+
+      // Clear previous content immediately
+      container.innerHTML =
+        '<div class="text-center py-4"><div class="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div><p class="text-xs text-muted-foreground mt-2">Rendering chart...</p></div>';
+
+      // Create a unique ID for this chart
+      const chartId = `mermaid-chart-${Date.now()}`;
+
+      // Use mermaid.render method with error handling
+      const { svg } = await mermaid.render(chartId, chartCode);
+
+      // Set the SVG content immediately
+      container.innerHTML = svg;
+
+      console.log("Mermaid chart rendered successfully");
+    } catch (error) {
+      console.error("Mermaid render error:", error);
+      const container = document.getElementById("mermaid-container");
+      if (container) {
+        container.innerHTML = `
+          <div class="text-center py-8">
+            <p class="text-muted-foreground mb-2">Chart rendering failed</p>
+            <p class="text-xs text-muted-foreground">Please try regenerating the strategy</p>
+          </div>
+        `;
+      }
+    }
   };
 
   const generateWithGemini = async () => {
@@ -117,49 +244,99 @@ You are an expert product strategist and business analyst. Analyze the startup "
         formData.startupName
       }" at ${
         formData.website
-      } and provide a JSON response with the following structure:
+      } and create a RAPID DEVELOPMENT STRATEGY that can be completed in exactly 14 days by a skilled developer.
+
+Focus on creating a minimal viable competitor. Respond with a clean JSON structure (no markdown, no code blocks):
 
 {
   "roadmap": [
     {
-      "name": "Phase 1: Market Research & Analysis",
-      "duration": "2-3 weeks",
-      "objectives": "Understand market landscape and user needs",
-      "requirements": "Research tools, competitor analysis framework",
-      "deliverables": "Market analysis report, user persona documentation"
+      "name": "Day 1-2: Market Research & MVP Planning",
+      "duration": "2 days",
+      "objectives": "Quick competitor analysis and define core features for MVP",
+      "requirements": "Research tools, basic wireframing",
+      "deliverables": "Feature list, basic wireframes, tech stack decision"
+    },
+    {
+      "name": "Day 3-4: Project Setup & Architecture",
+      "duration": "2 days",
+      "objectives": "Set up development environment and basic structure",
+      "requirements": "Development tools, hosting setup",
+      "deliverables": "Working environment, basic routing, database schema"
+    },
+    {
+      "name": "Day 5-7: Core Feature Development",
+      "duration": "3 days",
+      "objectives": "Implement main functionality",
+      "requirements": "Frontend and backend development",
+      "deliverables": "Core features working"
+    },
+    {
+      "name": "Day 8-10: UI/UX Implementation",
+      "duration": "3 days",
+      "objectives": "Design and implement user interface",
+      "requirements": "UI components, styling",
+      "deliverables": "Polished user interface"
+    },
+    {
+      "name": "Day 11-12: Testing & Bug Fixes",
+      "duration": "2 days",
+      "objectives": "Test functionality and fix issues",
+      "requirements": "Testing tools",
+      "deliverables": "Stable application"
+    },
+    {
+      "name": "Day 13-14: Deployment & Launch",
+      "duration": "2 days",
+      "objectives": "Deploy to production and launch",
+      "requirements": "Hosting service, domain",
+      "deliverables": "Live application"
     }
   ],
   "extraFeatures": [
-    "AI-powered feature suggestion",
-    "Advanced analytics dashboard", 
-    "Enhanced mobile experience"
+    "AI-powered suggestions",
+    "Advanced analytics dashboard",
+    "Mobile-first design",
+    "API integrations",
+    "Real-time notifications"
   ],
   "techStack": [
     "React/Next.js",
-    "Node.js/Express", 
-    "PostgreSQL",
-    "Redis",
-    "AWS/Vercel"
+    "Node.js/Express",
+    "PostgreSQL/Supabase",
+    "Tailwind CSS",
+    "Vercel/Netlify"
   ],
-  "timeline": "6-8 months",
-  "marketAnalysis": "Brief market opportunity analysis...",
-  "mermaidChart": "graph TB\\nA[Market Research] -.-> B[MVP Design]\\nB -.-> C[Development]\\nC -.-> D[Testing]",
-  "coldEmail": "Subject: Impressed by ${
+  "timeline": "14 days",
+  "marketAnalysis": "Brief analysis of market position and opportunities for ${
     formData.startupName
-  } - Built a competitive analysis\\n\\nHi ${
-        formData.founderName || "[Founder Name]"
-      },\\n\\nI've been following ${
-        formData.startupName
-      } and am genuinely impressed by your approach to [specific feature]. As a ${
+  }...",
+  "mermaidChart": "graph TB\\n    A[Day 1-2: Research] --> B[Day 3-4: Setup]\\n    B --> C[Day 5-7: Core Features]\\n    C --> D[Day 8-10: UI Implementation]\\n    D --> E[Day 11-12: Testing]\\n    E --> F[Day 13-14: Deployment]\\n    \\n    style A fill:#e1f5fe\\n    style B fill:#f3e5f5\\n    style C fill:#e8f5e8\\n    style D fill:#fff3e0\\n    style E fill:#fce4ec\\n    style F fill:#e0f2f1",
+  "coldEmail": "Subject: Built a ${formData.startupName} competitor - Seeking ${
         formData.targetRole || "developer"
-      } passionate about this space, I decided to build a competitive analysis and prototype.\\n\\nI'd love to discuss how my additional features like [mention 2-3 key innovations] could benefit your product strategy.\\n\\nWould you be open to a brief call?\\n\\nBest regards,\\n[Your Name]"
+      } opportunity\\n\\nHi ${
+        formData.founderName || "[Founder Name]"
+      },\\n\\nI'm a ${
+        formData.targetRole || "developer"
+      } who's been genuinely impressed by ${
+        formData.startupName
+      }'s approach to [specific area]. To demonstrate my skills and understanding of your market, I built a competitive analysis and functional prototype.\\n\\nMy version includes your core features plus additional innovations like:\\n• [Feature 1 from analysis]\\n• [Feature 2 from analysis]\\n• [Feature 3 from analysis]\\n\\nI'd love to discuss how my rapid development skills and fresh perspective could contribute to ${
+        formData.startupName
+      }'s growth. The prototype showcases my ability to quickly understand complex products and execute efficiently.\\n\\nWould you be open to a brief call to discuss potential opportunities?\\n\\nBest regards,\\n[Your Name]\\n\\nP.S. Happy to share the prototype and technical breakdown if you're interested."
 }
 
 Industry: ${formData.industry || "Tech"}
-Target Role: ${formData.targetRole || "Software Engineer"}
+Target Role: ${formData.targetRole || "Software Engineer"}  
 Additional Context: ${formData.additionalInfo}
 
-Create 8-10 roadmap phases. Ensure all arrays contain multiple items. Provide only valid JSON - no markdown formatting. `;
+IMPORTANT: 
+- Create exactly 6 roadmap phases covering 14 days total
+- Each phase should be 2-3 days maximum
+- Focus on MVP features that can realistically be built quickly
+- Provide clean JSON only, no markdown formatting or code blocks
+- Escape newlines properly in JSON strings using \\n
+- Make sure mermaidChart is a valid mermaid flowchart syntax
+`;
 
       console.log("Sending request to Gemini API...");
 
@@ -212,27 +389,154 @@ Create 8-10 roadmap phases. Ensure all arrays contain multiple items. Provide on
       const content = data.candidates[0].content.parts[0].text;
       console.log("Generated Content:", content);
 
-      // Try multiple parsing strategies
+      // Enhanced JSON parsing with better error handling
       let parsedResults = null;
 
+      // Clean the content first
+      let cleanContent = content.trim();
+
+      // Remove any markdown code block formatting
+      cleanContent = cleanContent
+        .replace(/```json\s*/g, "")
+        .replace(/```\s*$/g, "")
+        .replace(/^```/g, "")
+        .replace(/```$/g, "");
+
+      // Try parsing strategies
       try {
-        // First, try to parse as direct JSON
-        parsedResults = JSON.parse(content);
+        // Strategy 1: Direct parse
+        parsedResults = JSON.parse(cleanContent);
+        console.log("Direct JSON parse successful");
       } catch (e) {
-        console.log("Direct JSON parse failed, trying markdown extraction...");
+        console.log("Direct JSON parse failed:", e.message);
 
-        // Try to extract from markdown code blocks
-        const jsonMatch =
-          content.match(/```json\s*([\s\S]*?)\s*```/) ||
-          content.match(/```\s*([\s\S]*?)\s*```/) ||
-          content.match(/\{[\s\S]*\}/);
-
-        if (jsonMatch) {
-          try {
-            parsedResults = JSON.parse(jsonMatch[1] || jsonMatch[0]);
-          } catch (e2) {
-            console.error("Markdown JSON parse failed:", e2);
+        try {
+          // Strategy 2: Extract JSON object from text
+          const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            parsedResults = JSON.parse(jsonMatch[0]);
+            console.log("Regex JSON parse successful");
           }
+        } catch (e2) {
+          console.log("Regex JSON parse failed:", e2.message);
+
+          // Strategy 3: Create fallback with proper cold email
+          const fallbackData = {
+            roadmap: [
+              {
+                name: "Day 1-2: Market Research & Planning",
+                duration: "2 days",
+                objectives: "Analyze competitor and define MVP features",
+                requirements: "Research tools, wireframing software",
+                deliverables: "Feature list, wireframes, tech stack decision",
+              },
+              {
+                name: "Day 3-4: Project Setup & Architecture",
+                duration: "2 days",
+                objectives:
+                  "Set up development environment and basic structure",
+                requirements: "Development tools, hosting setup",
+                deliverables:
+                  "Working environment, basic routing, database schema",
+              },
+              {
+                name: "Day 5-7: Core Feature Development",
+                duration: "3 days",
+                objectives: "Implement main functionality",
+                requirements: "Frontend and backend development",
+                deliverables: "Core features working",
+              },
+              {
+                name: "Day 8-10: UI/UX Implementation",
+                duration: "3 days",
+                objectives: "Design and implement user interface",
+                requirements: "UI components, styling",
+                deliverables: "Polished user interface",
+              },
+              {
+                name: "Day 11-12: Testing & Bug Fixes",
+                duration: "2 days",
+                objectives: "Test functionality and fix issues",
+                requirements: "Testing tools",
+                deliverables: "Stable application",
+              },
+              {
+                name: "Day 13-14: Deployment & Launch",
+                duration: "2 days",
+                objectives: "Deploy to production and launch",
+                requirements: "Hosting service, domain",
+                deliverables: "Live application",
+              },
+            ],
+            extraFeatures: [
+              "AI-powered suggestions",
+              "Advanced analytics dashboard",
+              "Mobile-first design",
+              "API integrations",
+              "Real-time notifications",
+            ],
+            techStack: [
+              "React/Next.js",
+              "Node.js/Express",
+              "PostgreSQL/Supabase",
+              "Tailwind CSS",
+              "Vercel/Netlify",
+            ],
+            timeline: "14 days",
+            marketAnalysis: `Analysis of ${
+              formData.startupName
+            }: This startup operates in the ${
+              formData.industry || "tech"
+            } space. By building a competitor with additional features, we can identify market gaps and demonstrate technical capabilities to potential employers.`,
+            mermaidChart: `graph TB
+    A[Day 1-2: Research] --> B[Day 3-4: Setup]
+    B --> C[Day 5-7: Core Features]
+    C --> D[Day 8-10: UI Implementation]
+    D --> E[Day 11-12: Testing]
+    E --> F[Day 13-14: Deployment]
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#e8f5e8
+    style D fill:#fff3e0
+    style E fill:#fce4ec
+    style F fill:#e0f2f1`,
+            coldEmail: `Subject: Built a ${
+              formData.startupName
+            } competitor - Seeking ${
+              formData.targetRole || "developer"
+            } opportunity
+
+Hi ${formData.founderName || "[Founder Name]"},
+
+I'm a ${formData.targetRole || "developer"} who's been genuinely impressed by ${
+              formData.startupName
+            }'s innovative approach to ${
+              formData.industry || "your industry"
+            }. To demonstrate my skills and understanding of your market, I built a competitive analysis and functional prototype.
+
+My version includes your core features plus additional innovations like:
+• Advanced analytics dashboard with real-time insights
+• AI-powered user recommendations
+• Enhanced mobile experience with offline capabilities
+
+The prototype showcases my ability to quickly understand complex products and execute efficiently. I'd love to discuss how my rapid development skills and fresh perspective could contribute to ${
+              formData.startupName
+            }'s growth.
+
+Would you be open to a brief call to explore potential opportunities?
+
+Best regards,
+[Your Name]
+
+P.S. I'd be happy to share the prototype and technical breakdown if you're interested in seeing the implementation details.`,
+          };
+
+          parsedResults = fallbackData;
+          console.log("Using fallback data structure");
+          toast.error(
+            "AI response parsing failed, using fallback structure. Please try regenerating for better results."
+          );
         }
       }
 
@@ -248,27 +552,11 @@ Create 8-10 roadmap phases. Ensure all arrays contain multiple items. Provide on
 
       setResults(normalizedResults);
 
-      // Render Mermaid chart if available
+      // Render Mermaid chart if available with faster timing
       if (normalizedResults.mermaidChart) {
         setTimeout(() => {
-          try {
-            const container = document.getElementById("mermaid-container");
-            if (container) {
-              mermaid
-                .render("mermaid-chart", normalizedResults.mermaidChart)
-                .then(({ svg }) => {
-                  container.innerHTML = svg;
-                })
-                .catch((err) => {
-                  console.error("Mermaid render error:", err);
-                  container.innerHTML =
-                    '<p class="text-muted-foreground">Chart rendering failed</p>';
-                });
-            }
-          } catch (mermaidError) {
-            console.error("Mermaid error:", mermaidError);
-          }
-        }, 500);
+          renderMermaidChart(normalizedResults.mermaidChart);
+        }, 200); // Reduced from 1000ms
       }
 
       toast.success("Strategy generated successfully!");
@@ -301,39 +589,226 @@ Create 8-10 roadmap phases. Ensure all arrays contain multiple items. Provide on
     }
   };
 
-  const downloadRoadmap = () => {
-    const content = `# ${formData.startupName} Competitor Strategy
+  const downloadAsPDF = async () => {
+    if (!results.roadmap.length) {
+      toast.error("No strategy to export. Please generate a strategy first.");
+      return;
+    }
 
-## Roadmap
-${results.roadmap
-  .map(
-    (phase, index) => `
-### ${index + 1}. ${phase.name}
-- **Duration**: ${phase.duration}
-- **Objectives**: ${phase.objectives}
-- **Requirements**: ${phase.requirements}
-- **Deliverables**: ${phase.deliverables}
-`
-  )
-  .join("\n")}
+    setIsExporting(true);
+    try {
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      let yPosition = 20;
 
-## Extra Features
-${results.extraFeatures.map((feature) => `- ${feature}`).join("\n")}
+      // Helper function to add new page if needed
+      const checkNewPage = (requiredSpace = 20) => {
+        if (yPosition + requiredSpace > pageHeight - 20) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      };
 
-## Tech Stack
-${results.techStack.map((tech) => `- ${tech}`).join("\n")}
+      // Title
+      pdf.setFontSize(24);
+      pdf.setFont(undefined, "bold");
+      pdf.text(`${formData.startupName} Competitor Strategy`, 20, yPosition);
+      yPosition += 15;
 
-## Cold Email
-${results.coldEmail}
-`;
+      // Subtitle with timeline
+      pdf.setFontSize(14);
+      pdf.setFont(undefined, "normal");
+      pdf.text(`Development Timeline: ${results.timeline}`, 20, yPosition);
+      yPosition += 15;
 
-    const blob = new Blob([content], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${formData.startupName}_strategy.md`;
-    a.click();
-    URL.revokeObjectURL(url);
+      // Company details
+      pdf.setFontSize(12);
+      pdf.setFont(undefined, "bold");
+      pdf.text("Target Company Details:", 20, yPosition);
+      yPosition += 8;
+
+      pdf.setFont(undefined, "normal");
+      pdf.text(`Company: ${formData.startupName}`, 25, yPosition);
+      yPosition += 6;
+      pdf.text(`Website: ${formData.website}`, 25, yPosition);
+      yPosition += 6;
+      if (formData.industry) {
+        pdf.text(`Industry: ${formData.industry}`, 25, yPosition);
+        yPosition += 6;
+      }
+      if (formData.targetRole) {
+        pdf.text(`Target Role: ${formData.targetRole}`, 25, yPosition);
+        yPosition += 6;
+      }
+      yPosition += 10;
+
+      // Development Roadmap
+      checkNewPage(30);
+      pdf.setFontSize(16);
+      pdf.setFont(undefined, "bold");
+      pdf.text("Development Roadmap", 20, yPosition);
+      yPosition += 12;
+
+      results.roadmap.forEach((phase, index) => {
+        checkNewPage(25);
+
+        // Phase title
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, "bold");
+        pdf.text(`${index + 1}. ${phase.name}`, 20, yPosition);
+        yPosition += 8;
+
+        // Phase details
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, "normal");
+
+        if (phase.duration) {
+          pdf.text(`Duration: ${phase.duration}`, 25, yPosition);
+          yPosition += 5;
+        }
+
+        if (phase.objectives) {
+          const objectivesLines = pdf.splitTextToSize(
+            `Objectives: ${phase.objectives}`,
+            pageWidth - 50
+          );
+          pdf.text(objectivesLines, 25, yPosition);
+          yPosition += objectivesLines.length * 5;
+        }
+
+        if (phase.requirements) {
+          const reqLines = pdf.splitTextToSize(
+            `Requirements: ${phase.requirements}`,
+            pageWidth - 50
+          );
+          pdf.text(reqLines, 25, yPosition);
+          yPosition += reqLines.length * 5;
+        }
+
+        if (phase.deliverables) {
+          const delLines = pdf.splitTextToSize(
+            `Deliverables: ${phase.deliverables}`,
+            pageWidth - 50
+          );
+          pdf.text(delLines, 25, yPosition);
+          yPosition += delLines.length * 5;
+        }
+
+        yPosition += 8;
+      });
+
+      // Competitive Edge Features
+      checkNewPage(20);
+      pdf.setFontSize(16);
+      pdf.setFont(undefined, "bold");
+      pdf.text("Competitive Edge Features", 20, yPosition);
+      yPosition += 10;
+
+      pdf.setFontSize(10);
+      pdf.setFont(undefined, "normal");
+      results.extraFeatures.forEach((feature) => {
+        checkNewPage(6);
+        pdf.text(`• ${feature}`, 25, yPosition);
+        yPosition += 6;
+      });
+      yPosition += 10;
+
+      // Tech Stack
+      checkNewPage(20);
+      pdf.setFontSize(16);
+      pdf.setFont(undefined, "bold");
+      pdf.text("Recommended Tech Stack", 20, yPosition);
+      yPosition += 10;
+
+      pdf.setFontSize(10);
+      pdf.setFont(undefined, "normal");
+      results.techStack.forEach((tech) => {
+        checkNewPage(6);
+        pdf.text(`• ${tech}`, 25, yPosition);
+        yPosition += 6;
+      });
+      yPosition += 10;
+
+      // Market Analysis
+      if (results.marketAnalysis) {
+        checkNewPage(20);
+        pdf.setFontSize(16);
+        pdf.setFont(undefined, "bold");
+        pdf.text("Market Analysis", 20, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, "normal");
+        const analysisLines = pdf.splitTextToSize(
+          results.marketAnalysis,
+          pageWidth - 40
+        );
+
+        analysisLines.forEach((line) => {
+          checkNewPage(6);
+          pdf.text(line, 20, yPosition);
+          yPosition += 6;
+        });
+        yPosition += 10;
+      }
+
+      // Cold Email Template
+      if (results.coldEmail) {
+        checkNewPage(20);
+        pdf.setFontSize(16);
+        pdf.setFont(undefined, "bold");
+        pdf.text("Cold Email Template", 20, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, "normal");
+        const emailLines = pdf.splitTextToSize(
+          results.coldEmail,
+          pageWidth - 40
+        );
+
+        emailLines.forEach((line) => {
+          checkNewPage(6);
+          pdf.text(line, 20, yPosition);
+          yPosition += 6;
+        });
+      }
+
+      // Capture and add Mermaid chart if it exists
+      const mermaidContainer = document.getElementById("mermaid-container");
+      if (mermaidContainer && mermaidContainer.querySelector("svg")) {
+        try {
+          checkNewPage(100);
+          pdf.setFontSize(16);
+          pdf.setFont(undefined, "bold");
+          pdf.text("Development Flow Chart", 20, yPosition);
+          yPosition += 15;
+
+          const canvas = await html2canvas(mermaidContainer, {
+            backgroundColor: "#ffffff",
+            scale: 2,
+          });
+
+          const imgData = canvas.toDataURL("image/png");
+          const imgWidth = pageWidth - 40;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+          pdf.addImage(imgData, "PNG", 20, yPosition, imgWidth, imgHeight);
+        } catch (error) {
+          console.error("Error adding chart to PDF:", error);
+        }
+      }
+
+      // Save the PDF
+      pdf.save(`${formData.startupName}_Strategy.pdf`);
+      toast.success("Strategy exported as PDF successfully!");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to export PDF. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -347,13 +822,15 @@ ${results.coldEmail}
               Strategy Generator
             </h1>
             <p className="text-muted-foreground text-sm">
-              Build better products, get noticed by founders
+              Build a competitor in days, get noticed by founders
             </p>
           </div>
-          <Badge variant="outline" className="flex items-center gap-1 text-xs">
-            <Sparkles className="w-3 h-3" />
-            Gemini 2.0
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Button onClick={resetData} variant="outline" size="sm">
+              <RefreshCw className="w-3 h-3 mr-1" />
+              Reset
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -485,7 +962,7 @@ ${results.coldEmail}
                     {isGenerating ? (
                       <>
                         <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                        Generating...
+                        Generating Plan...
                       </>
                     ) : (
                       <>
@@ -522,12 +999,22 @@ ${results.coldEmail}
                         {formData.startupName} Strategy
                       </h2>
                       <Button
-                        onClick={downloadRoadmap}
+                        onClick={downloadAsPDF}
+                        disabled={isExporting}
                         variant="outline"
                         size="sm"
                       >
-                        <Download className="w-4 h-4 mr-1" />
-                        Export
+                        {isExporting ? (
+                          <>
+                            <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-1" />
+                            Exporting...
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="w-4 h-4 mr-1" />
+                            Export PDF
+                          </>
+                        )}
                       </Button>
                     </div>
 
@@ -543,12 +1030,13 @@ ${results.coldEmail}
                       <TabsContent value="roadmap" className="space-y-3 mt-4">
                         <div className="flex items-center gap-2 mb-3">
                           <MapPin className="w-4 h-4 text-primary" />
-                          <h3 className="font-semibold">Development Roadmap</h3>
-                          {results.timeline && (
-                            <Badge variant="secondary" className="text-xs">
-                              {results.timeline}
-                            </Badge>
-                          )}
+                          <h3 className="font-semibold">Development Plan</h3>
+                          <Badge
+                            variant="secondary"
+                            className="text-xs bg-green-100 text-green-700"
+                          >
+                            {results.timeline}
+                          </Badge>
                         </div>
 
                         <div className="space-y-2">
@@ -571,8 +1059,8 @@ ${results.coldEmail}
                                           </CardTitle>
                                           {phase.duration && (
                                             <div className="flex items-center gap-1 mt-1">
-                                              <Clock className="w-3 h-3 text-muted-foreground" />
-                                              <span className="text-xs text-muted-foreground">
+                                              <Clock className="w-3 h-3 text-green-600" />
+                                              <span className="text-xs text-green-600 font-medium">
                                                 {phase.duration}
                                               </span>
                                             </div>
@@ -642,8 +1130,12 @@ ${results.coldEmail}
                           <CardContent>
                             <div
                               id="mermaid-container"
-                              className="w-full h-64 border rounded p-2 bg-muted/5 text-xs"
-                            />
+                              className="w-full min-h-[400px] border rounded p-4 bg-muted/5 flex items-center justify-center"
+                            >
+                              <p className="text-muted-foreground text-center">
+                                Chart will render here...
+                              </p>
+                            </div>
                           </CardContent>
                         </Card>
                       </TabsContent>
@@ -654,7 +1146,7 @@ ${results.coldEmail}
                             <CardHeader className="pb-3">
                               <CardTitle className="flex items-center gap-2 text-sm">
                                 <Lightbulb className="w-4 h-4" />
-                                Competitive Features
+                                Competitive Edge Features
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -676,7 +1168,7 @@ ${results.coldEmail}
                             <CardHeader className="pb-3">
                               <CardTitle className="flex items-center gap-2 text-sm">
                                 <Code className="w-4 h-4" />
-                                Tech Stack
+                                Recommended Tech Stack
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -744,10 +1236,10 @@ ${results.coldEmail}
                                     Copy
                                   </Button>
                                 </div>
-                                <div className="mt-3 p-2 bg-background rounded border">
-                                  <pre className="whitespace-pre-wrap text-xs">
+                                <div className="mt-3 p-3 bg-background rounded border">
+                                  <div className="text-xs whitespace-pre-wrap">
                                     {results.coldEmail}
-                                  </pre>
+                                  </div>
                                 </div>
                               </div>
 
@@ -757,14 +1249,15 @@ ${results.coldEmail}
                                     window.open(
                                       `mailto:${
                                         formData.founderEmail
-                                      }?subject=Regarding ${
+                                      }?subject=Built a ${
                                         formData.startupName
-                                      }&body=${encodeURIComponent(
+                                      } competitor - Seeking opportunity&body=${encodeURIComponent(
                                         results.coldEmail
                                       )}`
                                     )
                                   }
                                   className="flex-1"
+                                  size="sm"
                                 >
                                   <Send className="w-3 h-3 mr-1" />
                                   Send Email
