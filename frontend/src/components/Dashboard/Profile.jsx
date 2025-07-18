@@ -56,7 +56,6 @@ const Profile = ({
 
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  // const { toast } = toast();
 
   useEffect(() => {
     if (userProfile) {
@@ -240,10 +239,9 @@ const Profile = ({
       </div>
 
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="basic">Basic Info</TabsTrigger>
           <TabsTrigger value="resume">Resume</TabsTrigger>
-          <TabsTrigger value="account">Account</TabsTrigger>
         </TabsList>
 
         <TabsContent value="basic">
@@ -797,34 +795,6 @@ const Profile = ({
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
-
-        <TabsContent value="account">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Email</Label>
-                  <Input value={user.email} disabled />
-                </div>
-                <div>
-                  <Label>Firebase UID</Label>
-                  <Input value={user.uid} disabled />
-                </div>
-                <div>
-                  <Label>Display Name</Label>
-                  <Input value={user.displayName || "Not set"} disabled />
-                </div>
-                <div>
-                  <Label>Email Verified</Label>
-                  <Input value={user.emailVerified ? "Yes" : "No"} disabled />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>

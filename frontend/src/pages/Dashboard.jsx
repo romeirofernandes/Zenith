@@ -61,7 +61,7 @@ const Dashboard = () => {
     try {
       const token = await currentUser.getIdToken();
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/profile`,
+        `${import.meta.env.VITE_API_URL}/profile/profile`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -70,6 +70,7 @@ const Dashboard = () => {
       );
 
       const data = await response.json();
+      console.log("Profile data:", data); 
       if (data.success) {
         setUserProfile(data.user);
       }

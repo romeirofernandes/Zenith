@@ -13,7 +13,8 @@ import pdfplumber
 import requests
 import os
 import json
-
+import dotenv
+dotenv.load_dotenv()
 app = FastAPI()
 
 app.add_middleware(
@@ -26,8 +27,8 @@ app.add_middleware(
 
 
 # Replace these with your actual keys or load from .env
-# GROQ_API_KEY="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"
-# GROQ_MODEL = 'llama3-8b-8192'  # Example model
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+GROQ_MODEL = 'llama3-8b-8192'  # Example model
 
 
 @app.post("/extract_resume")
