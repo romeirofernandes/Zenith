@@ -38,7 +38,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
-        {/* <Route path="/dashboard" element={user ? <Dashboard user={user} /> : <Login />} /> */}
+        <Route path="/dashboard" element={user ? <Dashboard user={user} /> : <Login />} />
         <Route path="/skillmap" element={<SkillMap />} />
           <Route path="/profile" element={user ? <Profile /> : <Login />} />
         <Route path="/latex" element={user ? <Latex /> : <Login />} />
