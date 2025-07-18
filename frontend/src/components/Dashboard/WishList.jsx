@@ -34,8 +34,10 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const WishList = () => {
+  const navigate = useNavigate();
   const [wishlistJobs, setWishlistJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -97,6 +99,10 @@ const WishList = () => {
       console.error("Error removing from wishlist:", error);
       toast.error("Something went wrong");
     }
+  };
+
+  const handleAnalyzeJob = (jobId) => {
+    navigate(`/moat?jobId=${jobId}`);
   };
 
   const formatDate = (dateString) => {
@@ -452,10 +458,11 @@ const WishList = () => {
                       <Button
                         className="bg-blue-600 hover:bg-blue-700"
                         disabled={isExpired(job.application_deadline)}
+                        onClick={() => handleAnalyzeJob(job._id)}
                       >
                         {isExpired(job.application_deadline)
                           ? "Expired"
-                          : "Apply Now"}
+                          : "Analyze Job Fit"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -465,10 +472,9 @@ const WishList = () => {
                   size="sm"
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                   disabled={isExpired(job.application_deadline)}
+                  onClick={() => handleAnalyzeJob(job._id)}
                 >
-                  {isExpired(job.application_deadline)
-                    ? "Expired"
-                    : "Apply Now"}
+                  {isExpired(job.application_deadline) ? "Expired" : "Analyze Job Fit"}
                 </Button>
               </div>
             </CardContent>

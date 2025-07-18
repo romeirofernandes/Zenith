@@ -1,6 +1,7 @@
 require("dotenv").config();
 const User = require("../models/User");
 const Job = require("../models/Jobs");
+const Roadmap = require("../models/Roadmap");
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_MODEL = "llama3-8b-8192";
@@ -328,6 +329,35 @@ Return only the JSON array, no additional text.
           if (parsedRoadmap && Array.isArray(parsedRoadmap)) {
             roadmap = parsedRoadmap;
             console.log("Roadmap generated successfully");
+
+            // Save the roadmap to database
+            try {
+              // Check if a roadmap already exists for this user and job
+              let existingRoadmap = await Roadmap.findOne({ 
+                userId: userId, 
+                jobId: jobId 
+              });
+
+              if (existingRoadmap) {
+                // Update existing roadmap
+                existingRoadmap.steps = roadmap;
+                existingRoadmap.lastUpdated = new Date();
+                await existingRoadmap.save();
+                console.log("Roadmap updated in database");
+              } else {
+                // Create new roadmap
+                const newRoadmap = new Roadmap({
+                  userId: userId,
+                  jobId: jobId,
+                  steps: roadmap
+                });
+                await newRoadmap.save();
+                console.log("New roadmap saved to database");
+              }
+            } catch (dbError) {
+              console.error("Error saving roadmap to database:", dbError);
+              // Continue execution even if save fails
+            }
           }
         }
       } catch (error) {
