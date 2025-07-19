@@ -6,8 +6,10 @@ import {
   Text,
   View,
   StyleSheet,
+  Font,
 } from "@react-pdf/renderer";
-import { auth } from "../../config/firebase";
+// import { auth } from "../config/firebase";
+import { auth } from "@/config/firebase";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Empty profile template
@@ -134,7 +136,7 @@ const ResumePDF = ({ profile }) => (
     <Page size="A4" style={styles.page}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.name}>{profile.firstName} {profile.lastName}</Text>
+        <Text style={styles.name}>{profile.name}</Text>
         <Text style={styles.contact}>
           {profile.email}
           {profile.phone ? ` | ${profile.phone}` : ""}
@@ -150,7 +152,7 @@ const ResumePDF = ({ profile }) => (
       )}
 
       {/* Skills */}
-      {(profile.skills || []).filter(Boolean).length > 0 && (
+      {profile.skills.filter(Boolean).length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Skills</Text>
           <View style={styles.skillsContainer}>
@@ -224,19 +226,7 @@ const ResumeBuilder = () => {
   const [profile, setProfile] = useState(emptyProfile);
   const [loadingAI, setLoadingAI] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [currentStep, setCurrentStep] = useState(1);
   const resumeRef = useRef();
-
-  // Steps configuration
-  const steps = [
-    { id: 1, title: "Personal Details" },
-    { id: 2, title: "Professional Summary" },
-    { id: 3, title: "Skills" },
-    { id: 4, title: "Education" },
-    { id: 5, title: "Experience" },
-    { id: 6, title: "Projects" },
-    { id: 7, title: "Review & Download" },
-  ];
 
   // Fetch user data when component mounts
   useEffect(() => {
@@ -324,7 +314,16 @@ const ResumeBuilder = () => {
     fetchUserData();
   }, []);
 
-  // Handlers for form inputs
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  // --- Handlers for dynamic sections ---
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
@@ -361,20 +360,7 @@ const ResumeBuilder = () => {
     setProfile({ ...profile, skills: updated });
   };
 
-  // Navigation functions
-  const nextStep = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  // AI Resume Enhancement
+  // --- AI Resume Enhancement ---
   const enhanceWithAI = async () => {
     setLoadingAI(true);
     try {
@@ -433,15 +419,7 @@ ${JSON.stringify(profile, null, 2)}
     setLoadingAI(false);
   };
 
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
-
+  // --- Resume Section ---
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header with Action Buttons */}
@@ -483,221 +461,143 @@ ${JSON.stringify(profile, null, 2)}
         </div>
       </div>
 
-      {/* Progress Steps */}
-      <div className="bg-white border-b">
-        <div className="flex overflow-x-auto py-2 px-4">
-          {steps.map((step) => (
-            <div
-              key={step.id}
-              className={`flex-shrink-0 px-4 py-2 border-b-2 ${
-                currentStep === step.id
-                  ? "border-primary text-primary font-medium"
-                  : "border-transparent text-gray-500"
-              }`}
-            >
-              {step.title}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Content */}
+      {/* Main Content - Side by Side */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Input Form */}
-        <div className="w-1/3 border-r bg-card">
+        <div className="w-1/2 border-r bg-card">
           <ScrollArea className="h-full">
             <div className="p-6">
-              {/* Step 1: Personal Details */}
-              {currentStep === 1 && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold mb-4 text-primary">
-                    Personal Details
-                  </h2>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Full Name
-                      </label>
-                      <input
-                        className="w-full border rounded px-3 py-2 text-sm"
-                        name="name"
-                        value={profile.name}
-                        onChange={handleChange}
-                        placeholder="John Doe"
-                        type="text"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email
-                      </label>
-                      <input
-                        className="w-full border rounded px-3 py-2 text-sm"
-                        name="email"
-                        value={profile.email}
-                        onChange={handleChange}
-                        placeholder="john@example.com"
-                        type="email"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone
-                      </label>
-                      <input
-                        className="w-full border rounded px-3 py-2 text-sm"
-                        name="phone"
-                        value={profile.phone}
-                        onChange={handleChange}
-                        placeholder="(123) 456-7890"
-                        type="text"
-                      />
-                    </div>
+              <h2 className="text-xl font-bold mb-4 text-primary">
+                Resume Details
+              </h2>
+              <div className="space-y-4">
+                <input
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  name="name"
+                  value={profile.name}
+                  onChange={handleChange}
+                  placeholder="Full Name"
+                  type="text"
+                />
+                <input
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  name="email"
+                  value={profile.email}
+                  onChange={handleChange}
+                  placeholder="Email"
+                  type="email"
+                />
+                <input
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  name="phone"
+                  value={profile.phone}
+                  onChange={handleChange}
+                  placeholder="Phone"
+                  type="text"
+                />
+                <textarea
+                  className="w-full border rounded px-3 py-2 text-sm"
+                  name="summary"
+                  value={profile.summary}
+                  onChange={handleChange}
+                  placeholder="Professional Summary"
+                  rows={3}
+                />
+
+                {/* Skills Section */}
+                <div>
+                  <label className="font-semibold text-sm mb-2 block">
+                    Skills
+                  </label>
+                  <div className="space-y-2">
+                    {profile.skills.map((skill, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <input
+                          className="flex-1 border rounded px-3 py-1 text-sm"
+                          value={skill}
+                          onChange={(e) =>
+                            handleSkillChange(idx, e.target.value)
+                          }
+                          placeholder={`Skill #${idx + 1}`}
+                          type="text"
+                        />
+                        <button
+                          type="button"
+                          className="text-red-500 px-2 py-1 hover:bg-red-50 rounded"
+                          onClick={() => removeSkill(idx)}
+                          disabled={profile.skills.length === 1}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90"
+                      onClick={addSkill}
+                    >
+                      + Add Skill
+                    </button>
                   </div>
                 </div>
-              )}
 
-              {/* Step 2: Professional Summary */}
-              {currentStep === 2 && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold mb-4 text-primary">
-                    Professional Summary
-                  </h2>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Write a brief summary of your professional background and
-                      key skills
-                    </label>
-                    <textarea
-                      className="w-full border rounded px-3 py-2 text-sm"
-                      name="summary"
-                      value={profile.summary}
-                      onChange={handleChange}
-                      placeholder="Experienced software engineer with 5+ years in web development..."
-                      rows={6}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: Skills */}
-              {currentStep === 3 && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold mb-4 text-primary">Skills</h2>
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      List your key skills and technologies
-                    </label>
-                    <div className="space-y-2">
-                      {profile.skills.map((skill, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <input
-                            className="flex-1 border rounded px-3 py-1 text-sm"
-                            value={skill}
-                            onChange={(e) =>
-                              handleSkillChange(idx, e.target.value)
-                            }
-                            placeholder={`Skill #${idx + 1}`}
-                            type="text"
-                          />
-                          <button
-                            type="button"
-                            className="text-red-500 px-2 py-1 hover:bg-red-50 rounded"
-                            onClick={() => removeSkill(idx)}
-                            disabled={profile.skills.length === 1}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90"
-                        onClick={addSkill}
-                      >
-                        + Add Skill
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 4: Education */}
-              {currentStep === 4 && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold mb-4 text-primary">
+                {/* Education Section */}
+                <div>
+                  <label className="font-semibold text-sm mb-2 block">
                     Education
-                  </h2>
+                  </label>
                   <div className="space-y-3">
                     {profile.education.map((edu, idx) => (
-                      <div
-                        key={idx}
-                        className="border rounded p-3 bg-gray-50 space-y-2"
-                      >
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Degree
-                          </label>
-                          <input
-                            className="w-full border rounded px-3 py-1 text-sm"
-                            value={edu.degree}
-                            onChange={(e) =>
-                              handleArrayChange(
-                                "education",
-                                idx,
-                                "degree",
-                                e.target.value
-                              )
-                            }
-                            placeholder="Bachelor of Science in Computer Science"
-                            type="text"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Institution
-                          </label>
-                          <input
-                            className="w-full border rounded px-3 py-1 text-sm"
-                            value={edu.college}
-                            onChange={(e) =>
-                              handleArrayChange(
-                                "education",
-                                idx,
-                                "college",
-                                e.target.value
-                              )
-                            }
-                            placeholder="University of California"
-                            type="text"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Graduation Year
-                          </label>
-                          <input
-                            className="w-full border rounded px-3 py-1 text-sm"
-                            value={edu.year}
-                            onChange={(e) =>
-                              handleArrayChange(
-                                "education",
-                                idx,
-                                "year",
-                                e.target.value
-                              )
-                            }
-                            placeholder="2020"
-                            type="text"
-                          />
-                        </div>
+                      <div key={idx} className="border rounded p-3 bg-gray-50">
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={edu.degree}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "education",
+                              idx,
+                              "degree",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Degree"
+                          type="text"
+                        />
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={edu.college}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "education",
+                              idx,
+                              "college",
+                              e.target.value
+                            )
+                          }
+                          placeholder="College"
+                          type="text"
+                        />
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={edu.year}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "education",
+                              idx,
+                              "year",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Year"
+                          type="text"
+                        />
                         <button
                           type="button"
                           className="text-red-500 text-sm hover:bg-red-50 px-2 py-1 rounded"
                           onClick={() => removeSection("education", idx)}
                           disabled={profile.education.length === 1}
                         >
-                          Remove Education
+                          Remove
                         </button>
                       </div>
                     ))}
@@ -716,103 +616,78 @@ ${JSON.stringify(profile, null, 2)}
                     </button>
                   </div>
                 </div>
-              )}
 
-              {/* Step 5: Experience */}
-              {currentStep === 5 && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold mb-4 text-primary">
-                    Work Experience
-                  </h2>
+                {/* Experience Section */}
+                <div>
+                  <label className="font-semibold text-sm mb-2 block">
+                    Experience
+                  </label>
                   <div className="space-y-3">
                     {profile.experience.map((exp, idx) => (
-                      <div
-                        key={idx}
-                        className="border rounded p-3 bg-gray-50 space-y-2"
-                      >
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Job Title
-                          </label>
-                          <input
-                            className="w-full border rounded px-3 py-1 text-sm"
-                            value={exp.title}
-                            onChange={(e) =>
-                              handleArrayChange(
-                                "experience",
-                                idx,
-                                "title",
-                                e.target.value
-                              )
-                            }
-                            placeholder="Software Engineer"
-                            type="text"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Company
-                          </label>
-                          <input
-                            className="w-full border rounded px-3 py-1 text-sm"
-                            value={exp.company}
-                            onChange={(e) =>
-                              handleArrayChange(
-                                "experience",
-                                idx,
-                                "company",
-                                e.target.value
-                              )
-                            }
-                            placeholder="Tech Corp Inc."
-                            type="text"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Duration
-                          </label>
-                          <input
-                            className="w-full border rounded px-3 py-1 text-sm"
-                            value={exp.duration}
-                            onChange={(e) =>
-                              handleArrayChange(
-                                "experience",
-                                idx,
-                                "duration",
-                                e.target.value
-                              )
-                            }
-                            placeholder="Jan 2020 - Present"
-                            type="text"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Responsibilities & Achievements
-                          </label>
-                          <textarea
-                            className="w-full border rounded px-3 py-1 text-sm"
-                            value={exp.details.join("\n")}
-                            onChange={(e) =>
-                              handleArrayChange(
-                                "experience",
-                                idx,
-                                "details",
-                                e.target.value.split("\n")
-                              )
-                            }
-                            placeholder="• Developed new features for web application\n• Optimized performance by 30%\n• Led team of 5 developers"
-                            rows={4}
-                          />
-                        </div>
+                      <div key={idx} className="border rounded p-3 bg-gray-50">
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={exp.title}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "experience",
+                              idx,
+                              "title",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Job Title"
+                          type="text"
+                        />
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={exp.company}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "experience",
+                              idx,
+                              "company",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Company"
+                          type="text"
+                        />
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={exp.duration}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "experience",
+                              idx,
+                              "duration",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Duration"
+                          type="text"
+                        />
+                        <textarea
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={exp.details.join("\n")}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "experience",
+                              idx,
+                              "details",
+                              e.target.value.split("\n")
+                            )
+                          }
+                          placeholder="Job responsibilities (one per line)"
+                          rows={3}
+                        />
                         <button
                           type="button"
                           className="text-red-500 text-sm hover:bg-red-50 px-2 py-1 rounded"
                           onClick={() => removeSection("experience", idx)}
                           disabled={profile.experience.length === 1}
                         >
-                          Remove Experience
+                          Remove
                         </button>
                       </div>
                     ))}
@@ -832,65 +707,50 @@ ${JSON.stringify(profile, null, 2)}
                     </button>
                   </div>
                 </div>
-              )}
 
-              {/* Step 6: Projects */}
-              {currentStep === 6 && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold mb-4 text-primary">
+                {/* Projects Section */}
+                <div>
+                  <label className="font-semibold text-sm mb-2 block">
                     Projects
-                  </h2>
+                  </label>
                   <div className="space-y-3">
                     {profile.projects.map((proj, idx) => (
-                      <div
-                        key={idx}
-                        className="border rounded p-3 bg-gray-50 space-y-2"
-                      >
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Project Name
-                          </label>
-                          <input
-                            className="w-full border rounded px-3 py-1 text-sm"
-                            value={proj.name}
-                            onChange={(e) =>
-                              handleArrayChange(
-                                "projects",
-                                idx,
-                                "name",
-                                e.target.value
-                              )
-                            }
-                            placeholder="E-commerce Website"
-                            type="text"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Description
-                          </label>
-                          <textarea
-                            className="w-full border rounded px-3 py-1 text-sm"
-                            value={proj.desc}
-                            onChange={(e) =>
-                              handleArrayChange(
-                                "projects",
-                                idx,
-                                "desc",
-                                e.target.value
-                              )
-                            }
-                            placeholder="Built a full-stack e-commerce platform with React and Node.js..."
-                            rows={4}
-                          />
-                        </div>
+                      <div key={idx} className="border rounded p-3 bg-gray-50">
+                        <input
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={proj.name}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "projects",
+                              idx,
+                              "name",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Project Name"
+                          type="text"
+                        />
+                        <textarea
+                          className="w-full border rounded px-3 py-1 mb-2 text-sm"
+                          value={proj.desc}
+                          onChange={(e) =>
+                            handleArrayChange(
+                              "projects",
+                              idx,
+                              "desc",
+                              e.target.value
+                            )
+                          }
+                          placeholder="Project Description"
+                          rows={2}
+                        />
                         <button
                           type="button"
                           className="text-red-500 text-sm hover:bg-red-50 px-2 py-1 rounded"
                           onClick={() => removeSection("projects", idx)}
                           disabled={profile.projects.length === 1}
                         >
-                          Remove Project
+                          Remove
                         </button>
                       </div>
                     ))}
@@ -905,62 +765,18 @@ ${JSON.stringify(profile, null, 2)}
                     </button>
                   </div>
                 </div>
-              )}
-
-              {/* Step 7: Review */}
-              {currentStep === 7 && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold mb-4 text-primary">
-                    Review Your Resume
-                  </h2>
-                  <div className="bg-blue-50 border border-blue-200 rounded p-4">
-                    <h3 className="font-medium text-blue-800 mb-2">
-                      Ready to Download
-                    </h3>
-                    <p className="text-sm text-blue-700">
-                      Review your resume on the right panel. If everything looks
-                      good, click "Download PDF" above. You can also go back to
-                      edit any section.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Navigation Buttons */}
-              <div className="flex justify-between mt-8">
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  disabled={currentStep === 1}
-                  className={`px-4 py-2 rounded ${
-                    currentStep === 1
-                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                >
-                  Previous
-                </button>
-                {currentStep < steps.length ? (
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
-                  >
-                    Next
-                  </button>
-                ) : null}
               </div>
             </div>
           </ScrollArea>
         </div>
 
         {/* Right Panel - Resume Preview */}
-        <div className="w-2/3 bg-gray-50">
+        <div className="w-1/2 bg-gray-50">
           <ScrollArea className="h-full">
-            <div className="p-8 flex justify-center">
+            <div className="p-6">
               <div
                 ref={resumeRef}
-                className="bg-white rounded-lg shadow-lg p-10"
+                className="bg-white rounded-lg shadow-lg p-8 mx-auto"
                 style={{
                   width: "8.5in",
                   minHeight: "11in",
@@ -971,20 +787,20 @@ ${JSON.stringify(profile, null, 2)}
                 }}
               >
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-6">
                   <h1 className="text-3xl font-bold text-black mb-2">
-                    {profile.name || "Your Name"}
+                    {profile.name}
                   </h1>
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                    {profile.email && <span>{profile.email}</span>}
-                    {profile.phone && <span>{profile.phone}</span>}
+                    <span>{profile.email}</span>
+                    <span>{profile.phone}</span>
                   </div>
                 </div>
 
                 {/* Professional Summary */}
                 {profile.summary && (
-                  <div className="mb-8">
-                    <h2 className="text-lg font-bold text-black mb-3 uppercase border-b border-gray-300 pb-1">
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-black mb-2 uppercase border-b border-gray-300 pb-1">
                       Professional Summary
                     </h2>
                     <p className="text-gray-800 text-sm leading-relaxed">
@@ -995,12 +811,12 @@ ${JSON.stringify(profile, null, 2)}
 
                 {/* Skills */}
                 {profile.skills.filter(Boolean).length > 0 && (
-                  <div className="mb-8">
-                    <h2 className="text-lg font-bold text-black mb-3 uppercase border-b border-gray-300 pb-1">
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-black mb-2 uppercase border-b border-gray-300 pb-1">
                       Skills
                     </h2>
                     <div className="flex flex-wrap gap-2">
-                      {(profile.skills || []).filter(Boolean).map((skill, idx) => (
+                      {profile.skills.filter(Boolean).map((skill, idx) => (
                         <span
                           key={idx}
                           className="bg-gray-100 text-black px-3 py-1 rounded-full text-sm font-medium border border-gray-300"
@@ -1016,17 +832,17 @@ ${JSON.stringify(profile, null, 2)}
                 {profile.education.some(
                   (edu) => edu.degree || edu.college || edu.year
                 ) && (
-                  <div className="mb-8">
-                    <h2 className="text-lg font-bold text-black mb-3 uppercase border-b border-gray-300 pb-1">
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-black mb-2 uppercase border-b border-gray-300 pb-1">
                       Education
                     </h2>
                     {profile.education.map((edu, idx) => (
-                      <div key={idx} className="mb-4">
+                      <div key={idx} className="mb-3">
                         <div className="font-semibold text-black">
                           {edu.degree}
                         </div>
                         <div className="text-sm text-gray-600">
-                          {edu.college} {edu.year && `| ${edu.year}`}
+                          {edu.college} | {edu.year}
                         </div>
                       </div>
                     ))}
@@ -1037,17 +853,16 @@ ${JSON.stringify(profile, null, 2)}
                 {profile.experience.some(
                   (exp) => exp.title || exp.company || exp.duration
                 ) && (
-                  <div className="mb-8">
-                    <h2 className="text-lg font-bold text-black mb-3 uppercase border-b border-gray-300 pb-1">
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-black mb-2 uppercase border-b border-gray-300 pb-1">
                       Experience
                     </h2>
                     {profile.experience.map((exp, idx) => (
-                      <div key={idx} className="mb-5">
+                      <div key={idx} className="mb-4">
                         <div className="font-semibold text-black">
-                          {exp.title}
+                          {exp.title}{" "}
                           {exp.company && (
                             <span className="text-gray-700">
-                              {" "}
                               @ {exp.company}
                             </span>
                           )}
@@ -1055,9 +870,11 @@ ${JSON.stringify(profile, null, 2)}
                         <div className="text-sm text-gray-600 mb-2">
                           {exp.duration}
                         </div>
-                        <ul className="list-disc ml-5 text-sm text-gray-800 space-y-1">
+                        <ul className="list-disc ml-5 text-sm text-gray-800">
                           {exp.details.filter(Boolean).map((detail, i) => (
-                            <li key={i}>{detail}</li>
+                            <li key={i} className="mb-1">
+                              {detail}
+                            </li>
                           ))}
                         </ul>
                       </div>
@@ -1067,18 +884,16 @@ ${JSON.stringify(profile, null, 2)}
 
                 {/* Projects */}
                 {profile.projects.some((proj) => proj.name || proj.desc) && (
-                  <div className="mb-8">
-                    <h2 className="text-lg font-bold text-black mb-3 uppercase border-b border-gray-300 pb-1">
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold text-black mb-2 uppercase border-b border-gray-300 pb-1">
                       Projects
                     </h2>
                     {profile.projects.map((proj, idx) => (
-                      <div key={idx} className="mb-4">
+                      <div key={idx} className="mb-3">
                         <div className="font-semibold text-black">
                           {proj.name}
                         </div>
-                        <div className="text-sm text-gray-800">
-                          {proj.desc}
-                        </div>
+                        <div className="text-sm text-gray-800">{proj.desc}</div>
                       </div>
                     ))}
                   </div>
