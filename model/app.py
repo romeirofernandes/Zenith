@@ -19,7 +19,12 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://zenith-sos.vercel.app",
+        "https://6pdzh3cp-8000.inc1.devtunnels.ms",
+        "https://sos-cnw9.onrender.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,6 +34,8 @@ app.add_middleware(
 # Replace these with your actual keys or load from .env
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 GROQ_MODEL = 'llama3-8b-8192'  # Example model
+print(f"GROQ_API_KEY loaded: {'Yes' if GROQ_API_KEY else 'No'}")
+print(f"GROQ_API_KEY (first 10 chars): {GROQ_API_KEY[:10] if GROQ_API_KEY else 'None'}")
 
 
 @app.post("/extract_resume")
