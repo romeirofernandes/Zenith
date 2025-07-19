@@ -126,6 +126,7 @@ export default function ProctoredTest({ topic, testData, difficulty, onNewTest, 
 
         initDetection();
 
+        // Fix: function name should be camelCase and consistent everywhere
         const endTestDueToCheating = (reason) => {
             setCheatReason(reason);
             setIsSubmitted(true);
@@ -349,14 +350,14 @@ export default function ProctoredTest({ topic, testData, difficulty, onNewTest, 
                             </button>
                         </div>
 
-                        <div className="mt-8 border-t pt-6">
+                        {/* <div className="mt-8 border-t pt-6">
                             <h3 className="font-semibold mb-3">Test History</h3>
                             <div className="bg-gray-50 p-4 rounded-lg">
                                 <p className="text-sm text-gray-600">
                                     Your test results have been saved to your browser's local storage.
                                 </p>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 )}
             </div>
@@ -373,12 +374,13 @@ export default function ProctoredTest({ topic, testData, difficulty, onNewTest, 
                 msUserSelect: 'none',
             }}
         >
+            {/* Camera window fixed on the screen */}
             <div
                 style={{
-                    position: 'absolute',
+                    position: 'fixed',
                     top: 24,
                     right: 24,
-                    zIndex: 50,
+                    zIndex: 1000,
                     background: 'rgba(255,255,255,0.8)',
                     borderRadius: '12px',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.07)',

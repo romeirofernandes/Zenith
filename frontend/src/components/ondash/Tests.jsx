@@ -289,6 +289,7 @@ export default function Tests() {
         {
           role: "user",
           content: `You are a JSON API. Respond ONLY with strict JSON. Generate 5 MCQ questions on ${topicName} at ${difficulty} difficulty level. 
+                    Make the questions challenging and require higher-order thinking, not just recall. 
                     Provide 4 options for each question and indicate the correct answer. Include the specific topic/subtopic for each question.
                     The JSON should be in this format: 
                     {   
