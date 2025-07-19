@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, Loader2, Search } from "lucide-react";
+import { Lightbulb, Loader2, Search, Rocket, Github } from "lucide-react"; // Added Rocket and GitHub icons
 
 const ProjectRecommendations = () => {
   const [jobType, setJobType] = useState("");
@@ -75,7 +75,7 @@ const ProjectRecommendations = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-10 px-4">
+    <div className="max-w-5xl mx-auto py-10 px-4">
       <h1 className="text-3xl font-bold mb-6 text-primary text-center">
         Project Recommendations for Your Dream Job
       </h1>
@@ -101,8 +101,19 @@ const ProjectRecommendations = () => {
               onChange={e => setJobType(e.target.value)}
               required
             />
-            <Button type="submit" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin w-5 h-5" /> : "Get Projects"}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="flex items-center gap-2 transition-colors hover:bg-blue-700"
+            >
+              {loading ? (
+                <Loader2 className="animate-spin w-5 h-5" />
+              ) : (
+                <>
+                  <Rocket className="w-4 h-4" />
+                  Get Projects
+                </>
+              )}
             </Button>
           </form>
         </CardContent>
@@ -116,9 +127,9 @@ const ProjectRecommendations = () => {
       )}
 
       {recommendations.length > 0 && (
-        <div className="space-y-8">
+        <div className="flex flex-col gap-8">
           {recommendations.map((proj, idx) => (
-            <Card key={proj.title + idx} className="shadow-lg">
+            <Card key={proj.title + idx} className="shadow-lg w-full">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <Lightbulb className="w-6 h-6 text-primary" />
@@ -126,37 +137,61 @@ const ProjectRecommendations = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="mb-2 text-gray-700">{proj.description}</div>
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {proj.technologies?.map((tech, i) => (
-                    <Badge key={i} variant="outline" className="text-xs">{tech}</Badge>
-                  ))}
-                </div>
-                {proj.difficulty && (
-                  <div className="mb-2 text-xs text-gray-500">
-                    Difficulty: {proj.difficulty}
+                <div className="flex flex-row gap-6 flex-wrap items-start">
+                  {/* Left: Project Info */}
+                  <div className="flex-1 min-w-[220px]">
+                    <div className="mb-2 text-gray-700">{proj.description}</div>
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {proj.technologies?.map((tech, i) => (
+                        <Badge key={i} variant="outline" className="text-xs">{tech}</Badge>
+                      ))}
+                    </div>
+                    {proj.difficulty && (
+                      <div className="mb-2 text-xs text-gray-500">
+                        Difficulty: {proj.difficulty}
+                      </div>
+                    )}
+                    <div className="flex flex-wrap gap-3 items-center mt-2">
+                      {proj.github && (
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="flex items-center gap-2 text-xs px-3 py-1 hover:bg-blue-50 hover:text-blue-700 transition"
+                        >
+                          <a
+                            href={proj.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Github className="w-4 h-4 mr-1" />
+                            GitHub
+                          </a>
+                        </Button>
+                      )}
+                      {proj.youtube && (
+                        <a
+                          href={proj.youtube}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-red-600 underline text-xs"
+                        >
+                          YouTube
+                        </a>
+                      )}
+                    </div>
                   </div>
-                )}
-                <div className="flex flex-wrap gap-3 items-center mt-2">
+                  {/* Right: Gitdiagram iframe */}
                   {proj.github && (
-                    <a
-                      href={proj.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline text-xs"
-                    >
-                      GitHub
-                    </a>
-                  )}
-                  {proj.youtube && (
-                    <a
-                      href={proj.youtube}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-red-600 underline text-xs"
-                    >
-                      YouTube
-                    </a>
+                    <div className="flex-1 min-w-[320px] max-w-xl">
+                      <iframe
+                        title="Gitdiagram"
+                        src={proj.github.replace('github.com', 'gitdiagram.com')}
+                        width="100%"
+                        height="300"
+                        style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                        allowFullScreen
+                      ></iframe>
+                    </div>
                   )}
                 </div>
               </CardContent>
