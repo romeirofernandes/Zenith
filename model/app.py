@@ -19,7 +19,12 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173",'https://zenith-sos.vercel.app','https://6pdzh3cp-8000.inc1.devtunnels.ms','https://sos-cnw9.onrender.com'],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://zenith-sos.vercel.app",
+        "https://6pdzh3cp-8000.inc1.devtunnels.ms",
+        "https://sos-cnw9.onrender.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
