@@ -150,7 +150,7 @@ const ResumePDF = ({ profile }) => (
       )}
 
       {/* Skills */}
-      {profile.skills.filter(Boolean).length > 0 && (
+      {(profile.skills || []).filter(Boolean).length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Skills</Text>
           <View style={styles.skillsContainer}>
@@ -1000,7 +1000,7 @@ ${JSON.stringify(profile, null, 2)}
                       Skills
                     </h2>
                     <div className="flex flex-wrap gap-2">
-                      {profile.skills.filter(Boolean).map((skill, idx) => (
+                      {(profile.skills || []).filter(Boolean).map((skill, idx) => (
                         <span
                           key={idx}
                           className="bg-gray-100 text-black px-3 py-1 rounded-full text-sm font-medium border border-gray-300"
