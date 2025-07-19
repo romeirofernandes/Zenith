@@ -2,8 +2,9 @@ import { useEffect, useState, useRef } from 'react';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import '@tensorflow/tfjs';
+import { marked } from 'marked';
 
-export default function ProctoredTest({ topic, testData }) {
+export default function ProctoredTest({ topic, testData, difficulty, onRetakeTest, onNewTest }) {
     const videoRef = useRef(null);
     const [phoneDetected, setPhoneDetected] = useState(false);
     const [currentAnswers, setCurrentAnswers] = useState(Array(testData.questions.length).fill(null));
@@ -12,8 +13,12 @@ export default function ProctoredTest({ topic, testData }) {
     const [cheatReason, setCheatReason] = useState('');
     const [cameraError, setCameraError] = useState('');
     const [usingMobileNet, setUsingMobileNet] = useState(false);
+    const [weakAreas, setWeakAreas] = useState([]);
+    const [selectedWeakArea, setSelectedWeakArea] = useState(null);
+    const [learningResources, setLearningResources] = useState(null);
+    const [loadingResources, setLoadingResources] = useState(false);
 
-    // End test if phone detected
+    // Phone detection and proctoring logic (keep exactly the same)
     useEffect(() => {
         if (phoneDetected && !isSubmitted) {
             setCheatReason('Mobile phone detected in camera. Test ended.');
@@ -22,10 +27,15 @@ export default function ProctoredTest({ topic, testData }) {
     }, [phoneDetected, isSubmitted]);
 
     useEffect(() => {
-        // Request camera permission and stream
         async function enableCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 320, height: 240 } });
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: "user", 
+                        width: 320, 
+                        height: 240 
+                    } 
+                });
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
                 }
@@ -76,7 +86,6 @@ export default function ProctoredTest({ topic, testData }) {
             document.removeEventListener('contextmenu', handleContextMenu);
             document.removeEventListener('copy', handleCopy);
             document.removeEventListener('keydown', handleKeyDown);
-            // Stop camera stream on unmount
             if (videoRef.current && videoRef.current.srcObject) {
                 const tracks = videoRef.current.srcObject.getTracks();
                 tracks.forEach(track => track.stop());
@@ -100,7 +109,6 @@ export default function ProctoredTest({ topic, testData }) {
                 ) {
                     const predictions = await model.detect(videoRef.current);
 
-                    // Try to detect "cell phone" or "camera" with lower threshold for "cell phone"
                     const foundPhone = predictions.some(
                         (p) =>
                             (
@@ -115,7 +123,6 @@ export default function ProctoredTest({ topic, testData }) {
                         setPhoneDetected(true);
                         setUsingMobileNet(false);
                     } else {
-                        // If COCO-SSD fails, try MobileNet classification
                         if (!mobileNetModel) {
                             mobileNetModel = await mobilenet.load();
                         }
@@ -149,13 +156,68 @@ export default function ProctoredTest({ topic, testData }) {
 
     const handleSubmit = () => {
         let calculatedScore = 0;
+        const incorrectTopics = new Set();
+        
         testData.questions.forEach((q, index) => {
-            if (q.options[q.answer] === q.options[currentAnswers[index]]) {
+            if (currentAnswers[index] === q.correctAnswer) {
                 calculatedScore++;
+            } else {
+                if (q.topic) incorrectTopics.add(q.topic);
             }
         });
+        
         setScore(calculatedScore);
+        setWeakAreas(Array.from(incorrectTopics));
         setIsSubmitted(true);
+        
+        const testResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+        testResults.push({
+            topic,
+            difficulty,
+            score: calculatedScore,
+            total: testData.questions.length,
+            date: new Date().toISOString(),
+            weakAreas: Array.from(incorrectTopics)
+        });
+        localStorage.setItem('testResults', JSON.stringify(testResults));
+    };
+
+    const handleLearnTopic = async (topic) => {
+        setSelectedWeakArea(topic);
+        setLoadingResources(true);
+        try {
+            const apiKey = import.meta.env.VITE_GROQ_API_KEY;
+            const endpoint = import.meta.env.VITE_GROQ_API_ENDPOINT;
+
+            const messages = [
+                {
+                    role: 'user',
+                    content: `Provide a detailed explanation of ${topic} in the context of ${topic}. 
+                    Include key concepts, examples, and 2 practice questions with answers. 
+                    Format your response in Markdown with headings, bullet points, and code blocks where appropriate.`
+                }
+            ];
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'llama3-8b-8192',
+                    messages,
+                    temperature: 0.2
+                })
+            });
+
+            const data = await response.json();
+            setLearningResources(data.choices?.[0]?.message?.content || `# ${topic}\n\nCould not fetch learning resources. Please search online for "${topic} in ${topic}".`);
+        } catch (err) {
+            setLearningResources(`# ${topic}\n\nCould not fetch learning resources. Please search online for "${topic} in ${topic}".`);
+        } finally {
+            setLoadingResources(false);
+        }
     };
 
     if (isSubmitted && cheatReason) {
@@ -163,15 +225,113 @@ export default function ProctoredTest({ topic, testData }) {
             <div className="p-8 text-center">
                 <h1 className="text-3xl font-bold mb-4 text-red-600">Test Ended</h1>
                 <p className="text-xl">{cheatReason}</p>
+                <button 
+                    onClick={onNewTest}
+                    className="mt-6 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                    Start Over
+                </button>
             </div>
         );
     }
 
     if (isSubmitted) {
         return (
-            <div className="p-8 text-center">
-                <h1 className="text-3xl font-bold mb-4">Test Completed</h1>
-                <p className="text-xl">Your Score: {score} / {testData.questions.length}</p>
+            <div className="p-8 max-w-4xl mx-auto">
+                {selectedWeakArea ? (
+                    <div>
+                        <button 
+                            onClick={() => setSelectedWeakArea(null)}
+                            className="mb-4 flex items-center text-blue-600 hover:text-blue-800"
+                        >
+                            ← Back to results
+                        </button>
+                        {loadingResources ? (
+                            <div className="flex justify-center items-center h-64">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                            </div>
+                        ) : (
+                            <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: marked(learningResources) }} />
+                        )}
+                        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <h3 className="font-bold mb-2">Ready to test your knowledge?</h3>
+                            <div className="flex space-x-4 mt-4">
+                                <button 
+                                    onClick={onRetakeTest}
+                                    className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                >
+                                    Retry This Test
+                                </button>
+                                <button 
+                                    onClick={onNewTest}
+                                    className="px-6 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                >
+                                    Take Different Test
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div>
+                        <h1 className="text-3xl font-bold mb-2">Test Completed</h1>
+                        <div className="mb-4">
+                            <p className="text-xl">
+                                Topic: <span className="font-semibold">{topic}</span> ({difficulty})
+                            </p>
+                            <p className="text-xl">
+                                Score: <span className="font-semibold">{score} / {testData.questions.length}</span> ({Math.round((score / testData.questions.length) * 100)}%)
+                            </p>
+                        </div>
+                        
+                        {weakAreas.length > 0 ? (
+                            <div className="mb-8">
+                                <h2 className="text-2xl font-semibold mb-4">Areas to Improve</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {weakAreas.map((area, index) => (
+                                        <div 
+                                            key={index} 
+                                            className="p-4 border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                                            onClick={() => handleLearnTopic(area)}
+                                        >
+                                            <h3 className="font-medium text-lg">{area}</h3>
+                                            <button className="mt-2 text-blue-600 hover:text-blue-800 text-sm">
+                                                Learn this topic →
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mb-8 p-4 bg-green-50 rounded-lg">
+                                <h2 className="text-xl font-semibold text-green-800">Great job! You answered all questions correctly.</h2>
+                            </div>
+                        )}
+                        
+                        <div className="flex space-x-4">
+                            <button 
+                                onClick={onNewTest}
+                                className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            >
+                                Take Another Test
+                            </button>
+                            <button 
+                                onClick={onRetakeTest}
+                                className="px-6 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                            >
+                                Retry This Test
+                            </button>
+                        </div>
+
+                        <div className="mt-8 border-t pt-6">
+                            <h3 className="font-semibold mb-3">Test History</h3>
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <p className="text-sm text-gray-600">
+                                    Your test results have been saved to your browser's local storage.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
@@ -186,7 +346,6 @@ export default function ProctoredTest({ topic, testData }) {
                 msUserSelect: 'none',
             }}
         >
-            {/* Camera feed at top right */}
             <div
                 style={{
                     position: 'absolute',
@@ -217,7 +376,7 @@ export default function ProctoredTest({ topic, testData }) {
                 )}
             </div>
 
-            <h1 className="text-2xl font-bold mb-4">Proctored Test: {topic}</h1>
+            <h1 className="text-2xl font-bold mb-4">Proctored Test: {topic} ({difficulty})</h1>
             {cameraError && (
                 <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
                     {cameraError}
