@@ -90,7 +90,6 @@ export default function ProctoredTest({ topic, testData }) {
         let mobileNetModel;
 
         async function loadModelAndDetect() {
-            // Try COCO-SSD first
             model = await cocoSsd.load();
             interval = setInterval(async () => {
                 if (
@@ -100,27 +99,37 @@ export default function ProctoredTest({ topic, testData }) {
                     !isSubmitted
                 ) {
                     const predictions = await model.detect(videoRef.current);
+
+                    // Try to detect "cell phone" or "camera" with lower threshold for "cell phone"
                     const foundPhone = predictions.some(
                         (p) =>
-                            (p.class === 'cell phone' || p.class === 'mobile phone' || p.class === 'phone') &&
-                            p.score > 0.8 &&
-                            p.bbox && p.bbox[2] * p.bbox[3] > 5000
+                            (
+                                (p.class === 'cell phone' && p.score > 0.1) ||
+                                (p.class === 'camera' && p.score > 0.1) ||
+                                (p.class === 'remote' && p.score > 0.1)
+                            ) &&
+                            p.bbox && p.bbox[2] * p.bbox[3] > 4000
                     );
+
                     if (foundPhone) {
                         setPhoneDetected(true);
+                        setUsingMobileNet(false);
                     } else {
                         // If COCO-SSD fails, try MobileNet classification
                         if (!mobileNetModel) {
                             mobileNetModel = await mobilenet.load();
                         }
                         const result = await mobileNetModel.classify(videoRef.current);
-                        // Look for any class containing "cell phone", "mobile", "smartphone"
                         const foundMobileNet = result.some(
                             (r) =>
-                                (r.className.toLowerCase().includes('cell phone') ||
-                                 r.className.toLowerCase().includes('mobile') ||
-                                 r.className.toLowerCase().includes('smartphone')) &&
-                                r.probability > 0.5
+                                (
+                                    r.className.toLowerCase().includes('cell phone') ||
+                                    r.className.toLowerCase().includes('mobile') ||
+                                    r.className.toLowerCase().includes('smartphone') ||
+                                    r.className.toLowerCase().includes('camera') ||
+                                    r.className.toLowerCase().includes('lens')
+                                ) &&
+                                r.probability > 0.4
                         );
                         setUsingMobileNet(true);
                         setPhoneDetected(foundMobileNet);
