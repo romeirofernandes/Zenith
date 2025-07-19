@@ -66,7 +66,7 @@ const WishList = () => {
 
       console.log("Fetching wishlist for UID:", uid);
       const response = await fetch(
-        `http://localhost:5000/api/jobs/wishlist/user/${uid}`
+        `${import.meta.env.VITE_API_URL}/jobs/wishlist/user/${uid}`
       );
       const data = await response.json();
 

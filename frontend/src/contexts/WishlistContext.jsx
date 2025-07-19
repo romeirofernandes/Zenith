@@ -36,7 +36,7 @@ export const WishlistProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:5000/api/jobs/wishlist/user/${uid}`
+        `${import.meta.env.VITE_API_URL}/jobs/wishlist/user/${uid}`
       );
       const data = await response.json();
 
@@ -60,7 +60,7 @@ export const WishlistProvider = ({ children }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/jobs/wishlist/${jobId}`,
+        `${import.meta.env.VITE_API_URL}/jobs/wishlist/${jobId}`,
         {
           method: "POST",
           headers: {
@@ -90,7 +90,7 @@ export const WishlistProvider = ({ children }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/jobs/wishlist/${jobId}`,
+        `${import.meta.env.VITE_API_URL}/jobs/wishlist/${jobId}`,
         {
           method: "DELETE",
           headers: {

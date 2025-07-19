@@ -47,7 +47,7 @@ const SkillMap = () => {
   const mapRef = useRef();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/skillmap")
+    fetch(`${import.meta.env.VITE_API_URL}/skillmap`)
       .then((res) => res.json())
       .then((json) => setSkillMapData(json))
       .catch((err) => console.error("Failed to fetch skill map data:", err));
