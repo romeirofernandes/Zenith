@@ -20,7 +20,7 @@ const resumeController = {
       }
 
       // Call FastAPI backend
-      const response = await axios.post('http://localhost:8000/match', {
+      const response = await axios.post('https://6pdzh3cp-8000.inc1.devtunnels.ms/match', {
         resume,
         job_descriptions: jobDescriptions
       });

@@ -120,7 +120,7 @@ const Profile = ({
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/extract_resume", {
+      const response = await fetch("https://6pdzh3cp-8000.inc1.devtunnels.ms/extract_resume", {
         method: "POST",
         body: formData,
       });
