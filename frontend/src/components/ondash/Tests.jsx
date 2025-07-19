@@ -45,6 +45,130 @@ const topics = [
     }
 ];
 
+// Fallback test data for all topics
+const fallbackTests = {
+    Aptitude: {
+        questions: [
+            {
+                question: "What is the next number in the sequence: 2, 4, 8, 16, ?",
+                options: ["18", "20", "24", "32"]
+            },
+            {
+                question: "If 5x = 20, what is x?",
+                options: ["2", "3", "4", "5"]
+            },
+            {
+                question: "Which is the odd one out: Apple, Banana, Carrot, Mango?",
+                options: ["Apple", "Banana", "Carrot", "Mango"]
+            },
+            {
+                question: "What is 15% of 200?",
+                options: ["15", "20", "25", "30"]
+            },
+            {
+                question: "If a train travels 60 km in 1.5 hours, what is its speed?",
+                options: ["30 km/h", "40 km/h", "45 km/h", "60 km/h"]
+            }
+        ]
+    },
+    DSA: {
+        questions: [
+            {
+                question: "Which data structure uses FIFO order?",
+                options: ["Stack", "Queue", "Tree", "Graph"]
+            },
+            {
+                question: "What is the time complexity of binary search?",
+                options: ["O(n)", "O(log n)", "O(n log n)", "O(1)"]
+            },
+            {
+                question: "Which sorting algorithm is NOT stable?",
+                options: ["Merge Sort", "Bubble Sort", "Quick Sort", "Insertion Sort"]
+            },
+            {
+                question: "Which data structure is used for recursion?",
+                options: ["Queue", "Stack", "Heap", "Graph"]
+            },
+            {
+                question: "What is the maximum number of children a binary tree node can have?",
+                options: ["1", "2", "3", "4"]
+            }
+        ]
+    },
+    SQL: {
+        questions: [
+            {
+                question: "Which SQL command is used to remove all records from a table?",
+                options: ["DELETE", "REMOVE", "DROP", "TRUNCATE"]
+            },
+            {
+                question: "What does the acronym SQL stand for?",
+                options: ["Structured Query Language", "Simple Query Language", "Sequential Query Language", "Standard Query Language"]
+            },
+            {
+                question: "Which clause is used to filter records?",
+                options: ["WHERE", "ORDER BY", "GROUP BY", "HAVING"]
+            },
+            {
+                question: "Which function returns the number of rows?",
+                options: ["SUM()", "COUNT()", "AVG()", "MAX()"]
+            },
+            {
+                question: "Which JOIN returns all rows from both tables?",
+                options: ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL OUTER JOIN"]
+            }
+        ]
+    },
+    "System Design": {
+        questions: [
+            {
+                question: "What is the main benefit of load balancing?",
+                options: ["Security", "Scalability", "Cost", "Latency"]
+            },
+            {
+                question: "Which database is best for storing relationships?",
+                options: ["Relational DB", "NoSQL DB", "Graph DB", "Key-Value Store"]
+            },
+            {
+                question: "What is a CDN used for?",
+                options: ["Data Storage", "Caching", "Content Delivery", "Authentication"]
+            },
+            {
+                question: "Which is a stateless protocol?",
+                options: ["HTTP", "FTP", "SMTP", "SSH"]
+            },
+            {
+                question: "What is sharding?",
+                options: ["Replication", "Partitioning", "Caching", "Indexing"]
+            }
+        ]
+    },
+    JavaScript: {
+        questions: [
+            {
+                question: "Which keyword declares a block-scoped variable?",
+                options: ["var", "let", "const", "static"]
+            },
+            {
+                question: "What is the output of '2' + 2 in JavaScript?",
+                options: ["4", "'22'", "NaN", "undefined"]
+            },
+            {
+                question: "Which method converts JSON to a JS object?",
+                options: ["JSON.parse()", "JSON.stringify()", "parseJSON()", "toObject()"]
+            },
+            {
+                question: "Which of these is NOT a JavaScript data type?",
+                options: ["Number", "String", "Character", "Boolean"]
+            },
+            {
+                question: "What does DOM stand for?",
+                options: ["Document Object Model", "Data Object Model", "Document Oriented Model", "Data Oriented Model"]
+            }
+        ]
+    }
+};
+
 export default function Tests() {
     const [selectedTopic, setSelectedTopic] = useState(null);
     const [testData, setTestData] = useState(null);
@@ -59,9 +183,9 @@ export default function Tests() {
             const data = await generateTest(topic.name);
             setTestData(data);
         } catch (err) {
-            console.error(err);
-            setError('Failed to generate test. Please try again.');
-            setSelectedTopic(null);
+            // Fallback to static questions if API fails
+            setTestData(fallbackTests[topic.name]);
+            setError('Could not generate test from AI. Loaded fallback questions.');
         } finally {
             setLoading(null);
         }
@@ -91,14 +215,24 @@ export default function Tests() {
             })
         });
 
-        const json = await response.json();
-        const content = json.choices[0].message.content;
-
-        // Safely extract JSON block from the LLM output
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error('No valid JSON found in Groq response.');
-
-        return JSON.parse(jsonMatch[0]);
+        // Fallback fast: If not ok or empty, throw to trigger fallback
+        if (!response.ok) throw new Error('API error');
+        const text = await response.text();
+        if (!text) throw new Error('Empty response');
+        let json;
+        try {
+            json = JSON.parse(text);
+        } catch {
+            // Try to extract JSON block if extra text is present
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) throw new Error('No valid JSON found in API response.');
+            json = JSON.parse(jsonMatch[0]);
+        }
+        const content = json.choices?.[0]?.message?.content;
+        if (!content) throw new Error('No content in API response.');
+        const contentMatch = content.match(/\{[\s\S]*\}/);
+        if (!contentMatch) throw new Error('No valid JSON found in Groq response.');
+        return JSON.parse(contentMatch[0]);
     };
 
     if (selectedTopic && testData) {
@@ -192,7 +326,7 @@ export default function Tests() {
                     <p className="text-sm">
                         Each test contains 5 multiple-choice questions • Estimated time: 10-15 minutes
                     </p>
-                </div>
+                    </div>
             </div>
         </div>
     );
