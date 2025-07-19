@@ -331,7 +331,7 @@ const Dashboard = () => {
   return (
     <SidebarProvider>
       <motion.div
-        className="min-h-screen flex w-full"
+        className="min-h-screen h-screen flex w-full overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -504,7 +504,7 @@ const Dashboard = () => {
         </motion.div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col h-screen overflow-hidden">
           {/* Mobile Header */}
           <motion.div
             className="lg:hidden flex items-center justify-between p-4 border-b bg-background"
@@ -530,9 +530,9 @@ const Dashboard = () => {
           </motion.div>
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-hidden scrollbar-hide">
+          <main className="flex-1 overflow-hidden">
             <motion.div
-              className={`h-full overflow-y-auto scrollbar-hide ${
+              className={`h-full overflow-y-auto ${
                 fullScreenComponents.includes(activeTab)
                   ? "p-0"
                   : "container mx-auto p-4 lg:p-6"
@@ -541,9 +541,9 @@ const Dashboard = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
               style={{
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-                WebkitOverflowScrolling: "touch",
+                height: '100%',
+                overflowY: 'auto',
+                WebkitOverflowScrolling: 'touch'
               }}
             >
               <AnimatePresence mode="wait">
@@ -553,7 +553,7 @@ const Dashboard = () => {
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className="h-full"
+                  className="min-h-full"
                 >
                   {renderContent()}
                 </motion.div>
