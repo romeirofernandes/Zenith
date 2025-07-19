@@ -669,7 +669,7 @@ ${JSON.stringify(profile, null, 2)}
                         />
                         <textarea
                           className="w-full border rounded px-3 py-1 mb-2 text-sm"
-                          value={exp.details.join("\n")}
+                          value={(exp.details ?? [""]).join("\n")}
                           onChange={(e) =>
                             handleArrayChange(
                               "experience",
@@ -871,7 +871,7 @@ ${JSON.stringify(profile, null, 2)}
                           {exp.duration}
                         </div>
                         <ul className="list-disc ml-5 text-sm text-gray-800">
-                          {exp.details.filter(Boolean).map((detail, i) => (
+                          {(exp.details || []).filter(Boolean).map((detail, i) => (
                             <li key={i} className="mb-1">
                               {detail}
                             </li>
