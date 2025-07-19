@@ -36,9 +36,9 @@ import {
   Target,
 } from "lucide-react";
 
-import Profile from "../components/Dashboard/Profile";
-import Jobs from "@/components/Dashboard/Jobs";
-import WishList from "@/components/Dashboard/WishList";
+import Profile from "../components/dashboard/Profile";
+import Jobs from "@/components/dashboard/Jobs";
+import WishList from "@/components/dashboard/WishList";
 import Tests from "../components/dashboard/Tests";
 import InterviewPrep from "./InterviewPrep";
 import SkillMap from "../components/dashboard/SkillMap";
