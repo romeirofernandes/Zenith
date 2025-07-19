@@ -45,7 +45,6 @@ const topics = [
     }
 ];
 
-// Fallback test data for all topics
 const fallbackTests = {
     Aptitude: {
         questions: [

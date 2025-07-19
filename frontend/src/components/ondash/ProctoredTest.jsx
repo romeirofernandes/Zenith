@@ -4,7 +4,7 @@ import * as mobilenet from '@tensorflow-models/mobilenet';
 import '@tensorflow/tfjs';
 import { marked } from 'marked';
 
-export default function ProctoredTest({ topic, testData, difficulty, onRetakeTest, onNewTest }) {
+export default function ProctoredTest({ topic, testData, difficulty, onNewTest, onRetakeTest }) {
     const videoRef = useRef(null);
     const [phoneDetected, setPhoneDetected] = useState(false);
     const [currentAnswers, setCurrentAnswers] = useState(Array(testData.questions.length).fill(null));
@@ -17,8 +17,9 @@ export default function ProctoredTest({ topic, testData, difficulty, onRetakeTes
     const [selectedWeakArea, setSelectedWeakArea] = useState(null);
     const [learningResources, setLearningResources] = useState(null);
     const [loadingResources, setLoadingResources] = useState(false);
+    const [modelLoaded, setModelLoaded] = useState(false);
 
-    // Phone detection and proctoring logic (keep exactly the same)
+    // Phone detection and proctoring logic
     useEffect(() => {
         if (phoneDetected && !isSubmitted) {
             setCheatReason('Mobile phone detected in camera. Test ended.');
@@ -27,9 +28,14 @@ export default function ProctoredTest({ topic, testData, difficulty, onRetakeTes
     }, [phoneDetected, isSubmitted]);
 
     useEffect(() => {
+        let stream;
+        let model;
+        let mobileNetModel;
+        let interval;
+
         async function enableCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
+                stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: "user", 
                         width: 320, 
@@ -38,12 +44,87 @@ export default function ProctoredTest({ topic, testData, difficulty, onRetakeTes
                 });
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
+                    // Wait for video to be ready
+                    await new Promise((resolve) => {
+                        videoRef.current.onloadedmetadata = resolve;
+                    });
                 }
             } catch (err) {
                 setCameraError('Camera access denied or not available. Please allow camera permission to continue the test.');
+                return null;
+            }
+            return stream;
+        }
+
+        async function loadModels() {
+            try {
+                model = await cocoSsd.load();
+                mobileNetModel = await mobilenet.load();
+                setModelLoaded(true);
+                return { model, mobileNetModel };
+            } catch (err) {
+                console.error('Error loading models:', err);
+                return null;
             }
         }
-        enableCamera();
+
+        async function initDetection() {
+            const stream = await enableCamera();
+            if (!stream) return;
+            
+            const models = await loadModels();
+            if (!models) return;
+
+            interval = setInterval(async () => {
+                try {
+                    if (
+                        videoRef.current &&
+                        videoRef.current.readyState === 4 &&
+                        !cameraError &&
+                        !isSubmitted
+                    ) {
+                        // First try COCO-SSD
+                        const predictions = await models.model.detect(videoRef.current);
+                        
+                        const foundPhone = predictions.some(
+                            (p) =>
+                                (
+                                    (p.class === 'cell phone' && p.score > 0.1) ||
+                                    (p.class === 'camera' && p.score > 0.1) ||
+                                    (p.class === 'remote' && p.score > 0.1)
+                                ) &&
+                                p.bbox && p.bbox[2] * p.bbox[3] > 4000
+                        );
+
+                        if (foundPhone) {
+                            setPhoneDetected(true);
+                            setUsingMobileNet(false);
+                        } else {
+                            // Fallback to MobileNet
+                            const result = await models.mobileNetModel.classify(videoRef.current);
+                            const foundMobileNet = result.some(
+                                (r) =>
+                                    (
+                                        r.className.toLowerCase().includes('cell phone') ||
+                                        r.className.toLowerCase().includes('mobile') ||
+                                        r.className.toLowerCase().includes('smartphone') ||
+                                        r.className.toLowerCase().includes('camera') ||
+                                        r.className.toLowerCase().includes('lens')
+                                    ) &&
+                                    r.probability > 0.4
+                            );
+                            setUsingMobileNet(true);
+                            setPhoneDetected(foundMobileNet);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Detection error:', err);
+                    // Continue running even if detection fails
+                }
+            }, 1000);
+        }
+
+        initDetection();
 
         const endTestDueToCheating = (reason) => {
             setCheatReason(reason);
@@ -82,6 +163,7 @@ export default function ProctoredTest({ topic, testData, difficulty, onRetakeTes
         document.addEventListener('keydown', handleKeyDown);
 
         return () => {
+            clearInterval(interval);
             window.removeEventListener('blur', handleBlur);
             document.removeEventListener('contextmenu', handleContextMenu);
             document.removeEventListener('copy', handleCopy);
@@ -91,61 +173,6 @@ export default function ProctoredTest({ topic, testData, difficulty, onRetakeTes
                 tracks.forEach(track => track.stop());
             }
         };
-    }, []);
-
-    useEffect(() => {
-        let model;
-        let interval;
-        let mobileNetModel;
-
-        async function loadModelAndDetect() {
-            model = await cocoSsd.load();
-            interval = setInterval(async () => {
-                if (
-                    videoRef.current &&
-                    videoRef.current.readyState === 4 &&
-                    !cameraError &&
-                    !isSubmitted
-                ) {
-                    const predictions = await model.detect(videoRef.current);
-
-                    const foundPhone = predictions.some(
-                        (p) =>
-                            (
-                                (p.class === 'cell phone' && p.score > 0.1) ||
-                                (p.class === 'camera' && p.score > 0.1) ||
-                                (p.class === 'remote' && p.score > 0.1)
-                            ) &&
-                            p.bbox && p.bbox[2] * p.bbox[3] > 4000
-                    );
-
-                    if (foundPhone) {
-                        setPhoneDetected(true);
-                        setUsingMobileNet(false);
-                    } else {
-                        if (!mobileNetModel) {
-                            mobileNetModel = await mobilenet.load();
-                        }
-                        const result = await mobileNetModel.classify(videoRef.current);
-                        const foundMobileNet = result.some(
-                            (r) =>
-                                (
-                                    r.className.toLowerCase().includes('cell phone') ||
-                                    r.className.toLowerCase().includes('mobile') ||
-                                    r.className.toLowerCase().includes('smartphone') ||
-                                    r.className.toLowerCase().includes('camera') ||
-                                    r.className.toLowerCase().includes('lens')
-                                ) &&
-                                r.probability > 0.4
-                        );
-                        setUsingMobileNet(true);
-                        setPhoneDetected(foundMobileNet);
-                    }
-                }
-            }, 900);
-        }
-        if (!cameraError && !isSubmitted) loadModelAndDetect();
-        return () => clearInterval(interval);
     }, [cameraError, isSubmitted]);
 
     const handleOptionClick = (questionIndex, optionIndex) => {
@@ -182,8 +209,8 @@ export default function ProctoredTest({ topic, testData, difficulty, onRetakeTes
         localStorage.setItem('testResults', JSON.stringify(testResults));
     };
 
-    const handleLearnTopic = async (topic) => {
-        setSelectedWeakArea(topic);
+    const handleLearnTopic = async (weakTopic) => {
+        setSelectedWeakArea(weakTopic);
         setLoadingResources(true);
         try {
             const apiKey = import.meta.env.VITE_GROQ_API_KEY;
@@ -192,7 +219,7 @@ export default function ProctoredTest({ topic, testData, difficulty, onRetakeTes
             const messages = [
                 {
                     role: 'user',
-                    content: `Provide a detailed explanation of ${topic} in the context of ${topic}. 
+                    content: `Provide a detailed explanation of ${weakTopic} in the context of ${topic}. 
                     Include key concepts, examples, and 2 practice questions with answers. 
                     Format your response in Markdown with headings, bullet points, and code blocks where appropriate.`
                 }
@@ -212,9 +239,9 @@ export default function ProctoredTest({ topic, testData, difficulty, onRetakeTes
             });
 
             const data = await response.json();
-            setLearningResources(data.choices?.[0]?.message?.content || `# ${topic}\n\nCould not fetch learning resources. Please search online for "${topic} in ${topic}".`);
+            setLearningResources(data.choices?.[0]?.message?.content || `# ${weakTopic}\n\nCould not fetch learning resources. Please search online for "${weakTopic} in ${topic}".`);
         } catch (err) {
-            setLearningResources(`# ${topic}\n\nCould not fetch learning resources. Please search online for "${topic} in ${topic}".`);
+            setLearningResources(`# ${weakTopic}\n\nCould not fetch learning resources. Please search online for "${weakTopic} in ${topic}".`);
         } finally {
             setLoadingResources(false);
         }
@@ -362,6 +389,7 @@ export default function ProctoredTest({ topic, testData, difficulty, onRetakeTes
                     ref={videoRef}
                     autoPlay
                     playsInline
+                    muted
                     width={240}
                     height={280}
                     style={{ borderRadius: '8px', border: '2px solid #3b82f6', background: '#eee' }}
