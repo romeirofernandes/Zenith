@@ -394,25 +394,30 @@ ${JSON.stringify(profile, null, 2)}
       console.log(data);
       let improved = null;
       try {
-        const match = data.choices[0].message.content.match(
-          /```json\s*([\s\S]*?)\s*```/
-        );
-        if (match) {
-          improved = JSON.parse(match[1]);
-        } else {
-          const match2 =
-            data.choices[0].message.content.match(/```([\s\S]*?)```/);
-          if (match2) {
-            improved = JSON.parse(match2[1]);
-          } else {
-            improved = JSON.parse(data.choices[0].message.content);
+        // Try to extract the first JSON block from the response
+        const rawContent = data.choices[0].message.content;
+        const jsonMatch = rawContent.match(/{[\s\S]*}/);
+        if (jsonMatch) {
+          try {
+            improved = JSON.parse(jsonMatch[0]);
+          } catch (jsonErr) {
+            // Try to fix common issues: replace single quotes with double quotes
+            const fixed = jsonMatch[0].replace(/'/g, '"');
+            improved = JSON.parse(fixed);
           }
+        } else {
+          improved = JSON.parse(rawContent);
         }
       } catch (error) {
         console.log("AI JSON parse error:", error);
+        alert("AI returned invalid JSON. Please try again or check the console for details.");
+        console.log("Raw AI response:", data.choices[0].message.content);
       }
       if (improved) setProfile(improved);
-      else alert("AI could not improve the resume. Try again.");
+      else if (!window.alerted) {
+        window.alerted = true;
+        alert("AI could not improve the resume. Try again.");
+      }
     } catch (err) {
       alert("AI enhancement failed. Try again.");
     }

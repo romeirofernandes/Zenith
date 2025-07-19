@@ -1,12 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import * as cocoSsd from '@tensorflow-models/coco-ssd';
+import * as mobilenet from '@tensorflow-models/mobilenet';
+import '@tensorflow/tfjs';
 
 export default function ProctoredTest({ topic, testData }) {
+    const videoRef = useRef(null);
+    const [phoneDetected, setPhoneDetected] = useState(false);
     const [currentAnswers, setCurrentAnswers] = useState(Array(testData.questions.length).fill(null));
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [score, setScore] = useState(0);
     const [cheatReason, setCheatReason] = useState('');
+    const [cameraError, setCameraError] = useState('');
+    const [usingMobileNet, setUsingMobileNet] = useState(false);
+
+    // End test if phone detected
+    useEffect(() => {
+        if (phoneDetected && !isSubmitted) {
+            setCheatReason('Mobile phone detected in camera. Test ended.');
+            setIsSubmitted(true);
+        }
+    }, [phoneDetected, isSubmitted]);
 
     useEffect(() => {
+        // Request camera permission and stream
+        async function enableCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 320, height: 240 } });
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            } catch (err) {
+                setCameraError('Camera access denied or not available. Please allow camera permission to continue the test.');
+            }
+        }
+        enableCamera();
+
         const endTestDueToCheating = (reason) => {
             setCheatReason(reason);
             setIsSubmitted(true);
@@ -48,8 +76,70 @@ export default function ProctoredTest({ topic, testData }) {
             document.removeEventListener('contextmenu', handleContextMenu);
             document.removeEventListener('copy', handleCopy);
             document.removeEventListener('keydown', handleKeyDown);
+            // Stop camera stream on unmount
+            if (videoRef.current && videoRef.current.srcObject) {
+                const tracks = videoRef.current.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+            }
         };
     }, []);
+
+    useEffect(() => {
+        let model;
+        let interval;
+        let mobileNetModel;
+
+        async function loadModelAndDetect() {
+            model = await cocoSsd.load();
+            interval = setInterval(async () => {
+                if (
+                    videoRef.current &&
+                    videoRef.current.readyState === 4 &&
+                    !cameraError &&
+                    !isSubmitted
+                ) {
+                    const predictions = await model.detect(videoRef.current);
+
+                    // Try to detect "cell phone" or "camera" with lower threshold for "cell phone"
+                    const foundPhone = predictions.some(
+                        (p) =>
+                            (
+                                (p.class === 'cell phone' && p.score > 0.1) ||
+                                (p.class === 'camera' && p.score > 0.1) ||
+                                (p.class === 'remote' && p.score > 0.1)
+                            ) &&
+                            p.bbox && p.bbox[2] * p.bbox[3] > 4000
+                    );
+
+                    if (foundPhone) {
+                        setPhoneDetected(true);
+                        setUsingMobileNet(false);
+                    } else {
+                        // If COCO-SSD fails, try MobileNet classification
+                        if (!mobileNetModel) {
+                            mobileNetModel = await mobilenet.load();
+                        }
+                        const result = await mobileNetModel.classify(videoRef.current);
+                        const foundMobileNet = result.some(
+                            (r) =>
+                                (
+                                    r.className.toLowerCase().includes('cell phone') ||
+                                    r.className.toLowerCase().includes('mobile') ||
+                                    r.className.toLowerCase().includes('smartphone') ||
+                                    r.className.toLowerCase().includes('camera') ||
+                                    r.className.toLowerCase().includes('lens')
+                                ) &&
+                                r.probability > 0.4
+                        );
+                        setUsingMobileNet(true);
+                        setPhoneDetected(foundMobileNet);
+                    }
+                }
+            }, 900);
+        }
+        if (!cameraError && !isSubmitted) loadModelAndDetect();
+        return () => clearInterval(interval);
+    }, [cameraError, isSubmitted]);
 
     const handleOptionClick = (questionIndex, optionIndex) => {
         const updatedAnswers = [...currentAnswers];
@@ -88,7 +178,7 @@ export default function ProctoredTest({ topic, testData }) {
 
     return (
         <div
-            className="p-8"
+            className="p-8 relative"
             style={{
                 userSelect: 'none',
                 WebkitUserSelect: 'none',
@@ -96,7 +186,43 @@ export default function ProctoredTest({ topic, testData }) {
                 msUserSelect: 'none',
             }}
         >
+            {/* Camera feed at top right */}
+            <div
+                style={{
+                    position: 'absolute',
+                    top: 24,
+                    right: 24,
+                    zIndex: 50,
+                    background: 'rgba(255,255,255,0.8)',
+                    borderRadius: '12px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                    padding: '6px'
+                }}
+            >
+                <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    width={240}
+                    height={280}
+                    style={{ borderRadius: '8px', border: '2px solid #3b82f6', background: '#eee' }}
+                />
+                {cameraError && (
+                    <div className="mt-2 text-xs text-red-600 max-w-[140px]">{cameraError}</div>
+                )}
+                {phoneDetected && (
+                    <div className="mt-2 text-xs text-red-600 max-w-[140px] font-bold">
+                        Mobile Phone Detected! ({usingMobileNet ? 'MobileNet' : 'COCO-SSD'})
+                    </div>
+                )}
+            </div>
+
             <h1 className="text-2xl font-bold mb-4">Proctored Test: {topic}</h1>
+            {cameraError && (
+                <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                    {cameraError}
+                </div>
+            )}
             <div className="space-y-6">
                 {testData.questions.map((q, qIndex) => (
                     <div key={qIndex} className="p-4 border rounded shadow">
@@ -120,6 +246,7 @@ export default function ProctoredTest({ topic, testData }) {
             <button
                 className="mt-6 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 onClick={handleSubmit}
+                disabled={!!cameraError}
             >
                 Submit Test
             </button>
