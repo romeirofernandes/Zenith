@@ -36,17 +36,17 @@ import {
   Target,
 } from "lucide-react";
 
-import Profile from "../components/dashboard/Profile";
-import Jobs from "@/components/dashboard/Jobs";
-import WishList from "@/components/dashboard/WishList";
-import Tests from "../components/dashboard/Tests";
+import Profile from "../components/ondash/Profile";
+import Jobs from "@/components/ondash/Jobs";
+import WishList from "@/components/ondash/WishList";
+import Tests from "../components/ondash/Tests";
 import InterviewPrep from "./InterviewPrep";
-import SkillMap from "../components/dashboard/SkillMap";
-import ResumeBuilder from "../components/dashboard/ResumeBuilder";
-import Achievements from "../components/dashboard/Achievements";
-import ProfileAnalytics from "../components/dashboard/ProfileAnalytics";
-import ProjectRecommendations from "../components/dashboard/ProjectRecommendations";
-import ColdEmail from "../components/dashboard/ColdEmail";
+import SkillMap from "../components/ondash/SkillMap";
+import ResumeBuilder from "../components/ondash/ResumeBuilder";
+import Achievements from "../components/ondash/Achievements";
+import ProfileAnalytics from "../components/ondash/ProfileAnalytics";
+import ProjectRecommendations from "../components/ondash/ProjectRecommendations";
+import ColdEmail from "../components/ondash/ColdEmail";
 
 // Update the scrollbarHideStyle constant at the top of the file
 const scrollbarHideStyle = `
