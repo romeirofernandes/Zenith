@@ -7,7 +7,6 @@ import Landing from "./pages/Landing";
 import SkillMap from "./components/ondash/SkillMap";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./components/ondash/Profile";
-import Interview from "./components/ondash/Interview";
 import InterviewPrep from "./pages/InterviewPrep";
 import Moat from "./pages/Moat";
 import Tests from "./components/ondash/Tests";
@@ -54,7 +53,6 @@ const App = () => {
           />
           <Route path="/skillmap" element={<SkillMap />} />
           <Route path="/profile" element={user ? <Profile /> : <Login />} />
-          <Route path="/interview" element={user ? <Interview /> : <Login />} />
           <Route
             path="/interviewprep"
             element={user ? <InterviewPrep /> : <Login />}

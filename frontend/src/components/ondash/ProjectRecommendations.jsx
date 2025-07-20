@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, Loader2, Search, Rocket, Github } from "lucide-react"; // Added Rocket and GitHub icons
+import { Lightbulb, Loader2, Search, Rocket, Github } from "lucide-react";
 
 const ProjectRecommendations = () => {
   const [jobType, setJobType] = useState("");
@@ -10,7 +10,6 @@ const ProjectRecommendations = () => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
-  // Helper to fetch YouTube video links by scraping (for demo only)
   const fetchYouTubeLinks = async (query) => {
     try {
       const res = await fetch(
@@ -19,16 +18,12 @@ const ProjectRecommendations = () => {
         )}`
       );
       const text = await res.text();
-      // Extract video IDs from the HTML
       const videoIds = Array.from(
         text.matchAll(/"videoId":"(.*?)"/g),
         (m) => m[1]
       );
-      // Remove duplicates and take top 3
       const uniqueIds = [...new Set(videoIds)].slice(0, 3);
-      return uniqueIds.map(
-        (id) => `https://www.youtube.com/watch?v=${id}`
-      );
+      return uniqueIds.map((id) => `https://www.youtube.com/watch?v=${id}`);
     } catch {
       return [];
     }
@@ -39,18 +34,14 @@ const ProjectRecommendations = () => {
     setSearched(true);
     setRecommendations([]);
     try {
-      // 1. GitHub Search API
       const githubRes = await fetch(
         `https://api.github.com/search/repositories?q=${encodeURIComponent(
           jobType + " project"
         )}&sort=stars&order=desc&per_page=3`
       );
       const githubData = await githubRes.json();
-
-      // 2. YouTube (scrape)
       const youtubeLinks = await fetchYouTubeLinks(jobType);
 
-      // Combine results
       const projects = [];
       for (let i = 0; i < 3; i++) {
         const gh = githubData.items?.[i];
@@ -60,7 +51,7 @@ const ProjectRecommendations = () => {
             title: gh?.name || "Project",
             description: gh?.description || "",
             technologies: gh?.language ? [gh.language] : [],
-            difficulty: "", // Not available from API
+            difficulty: "",
             github: gh?.html_url || "",
             youtube: yt || "",
           });
@@ -88,17 +79,17 @@ const ProjectRecommendations = () => {
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={e => {
+            onSubmit={(e) => {
               e.preventDefault();
               if (jobType.trim()) fetchRecommendations();
             }}
-            className="flex gap-2"
+            className="flex flex-col sm:flex-row gap-2"
           >
             <input
               className="border rounded px-3 py-2 flex-1"
               placeholder="e.g. Frontend Developer, Data Scientist, SDE at Google"
               value={jobType}
-              onChange={e => setJobType(e.target.value)}
+              onChange={(e) => setJobType(e.target.value)}
               required
             />
             <Button
@@ -129,7 +120,10 @@ const ProjectRecommendations = () => {
       {recommendations.length > 0 && (
         <div className="flex flex-col gap-8">
           {recommendations.map((proj, idx) => (
-            <Card key={proj.title + idx} className="shadow-lg w-full">
+            <Card
+              key={proj.title + idx}
+              className="shadow-lg w-full overflow-hidden"
+            >
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <Lightbulb className="w-6 h-6 text-primary" />
@@ -137,13 +131,14 @@ const ProjectRecommendations = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-row gap-6 flex-wrap items-start">
-                  {/* Left: Project Info */}
+                <div className="flex flex-col lg:flex-row gap-6 items-start">
                   <div className="flex-1 min-w-[220px]">
                     <div className="mb-2 text-gray-700">{proj.description}</div>
                     <div className="mb-3 flex flex-wrap gap-2">
                       {proj.technologies?.map((tech, i) => (
-                        <Badge key={i} variant="outline" className="text-xs">{tech}</Badge>
+                        <Badge key={i} variant="outline" className="text-xs">
+                          {tech}
+                        </Badge>
                       ))}
                     </div>
                     {proj.difficulty && (
@@ -180,15 +175,17 @@ const ProjectRecommendations = () => {
                       )}
                     </div>
                   </div>
-                  {/* Right: Gitdiagram iframe */}
                   {proj.github && (
                     <div className="flex-1 min-w-[320px] max-w-xl">
                       <iframe
                         title="Gitdiagram"
-                        src={proj.github.replace('github.com', 'gitdiagram.com')}
+                        src={proj.github.replace(
+                          "github.com",
+                          "gitdiagram.com"
+                        )}
                         width="100%"
                         height="300"
-                        style={{ border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                        className="border border-gray-300 rounded-lg"
                         allowFullScreen
                       ></iframe>
                     </div>

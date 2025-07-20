@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import RecordRTC from "recordrtc";
+import { useMediaQuery } from "react-responsive"; // Import for responsive handling
+import { ChevronDown, ChevronUp } from "lucide-react"; // Import icons
 
 // ---- SAMPLE DATA ----
 const sampleJobs = [
@@ -10,7 +12,8 @@ const sampleJobs = [
     id: 1,
     company_name: "TechNova Solutions",
     job_title: "Software Engineer",
-    job_description: "Develop and maintain scalable software solutions for our clients.",
+    job_description:
+      "Develop and maintain scalable software solutions for our clients.",
     required_skills: ["JavaScript", "React", "Node.js", "MongoDB", "REST APIs"],
     location: "San Francisco, CA (Hybrid)",
   },
@@ -18,7 +21,8 @@ const sampleJobs = [
     id: 2,
     company_name: "GreenEarth Innovations",
     job_title: "Sustainability Analyst",
-    job_description: "Analyze company operations to identify areas for sustainability improvements.",
+    job_description:
+      "Analyze company operations to identify areas for sustainability improvements.",
     required_skills: ["Data analysis", "Sustainability reporting"],
     location: "Remote",
   },
@@ -26,7 +30,8 @@ const sampleJobs = [
 
 const sampleResume = {
   softskills: ["Communication", "Teamwork", "Problem-Solving"],
-  resumeText: "An experienced software engineer with a passion for building scalable applications.",
+  resumeText:
+    "An experienced software engineer with a passion for building scalable applications.",
   skills: ["JavaScript", "Node.js", "MongoDB", "React"],
   experience: [
     {
@@ -63,7 +68,8 @@ const sampleResume = {
       link: "https://johndoe.dev",
     },
   ],
-  summary: "Driven software engineer with a proven track record of delivering robust solutions.",
+  summary:
+    "Driven software engineer with a proven track record of delivering robust solutions.",
   linkedin: "https://linkedin.com/in/johndoe",
   profileLinks: [
     { platform: "GitHub", url: "https://github.com/johndoe" },
@@ -83,10 +89,11 @@ class BodyLanguageAnalyzer {
   async initialize() {
     try {
       // Initialize audio context for tone analysis
-      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      this.audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
       this.analyzer = this.audioContext.createAnalyser();
       this.analyzer.fftSize = 2048;
-      
+
       this.isInitialized = true;
       console.log("🤖 Body language analyzer initialized");
     } catch (error) {
@@ -102,7 +109,7 @@ class BodyLanguageAnalyzer {
       posture: this.calculatePostureScore(),
       eyeContact: this.estimateEyeContact(),
       handGestures: this.analyzeHandGestures(),
-      facialExpression: this.analyzeFacialExpression()
+      facialExpression: this.analyzeFacialExpression(),
     };
 
     return analysis;
@@ -124,7 +131,7 @@ class BodyLanguageAnalyzer {
         pitch: this.calculatePitch(dataArray),
         volume: this.calculateVolume(dataArray),
         clarity: this.calculateClarity(dataArray),
-        pace: this.calculateSpeechPace(dataArray)
+        pace: this.calculateSpeechPace(dataArray),
       };
     } catch (error) {
       console.error("Audio analysis error:", error);
@@ -141,23 +148,23 @@ class BodyLanguageAnalyzer {
   }
 
   analyzeHandGestures() {
-    const gestures = ['calm', 'expressive', 'fidgeting', 'professional'];
+    const gestures = ["calm", "expressive", "fidgeting", "professional"];
     return gestures[Math.floor(Math.random() * gestures.length)];
   }
 
   analyzeFacialExpression() {
-    const expressions = ['confident', 'nervous', 'engaged', 'neutral'];
+    const expressions = ["confident", "nervous", "engaged", "neutral"];
     return expressions[Math.floor(Math.random() * expressions.length)];
   }
 
   calculatePitch(dataArray) {
     const sum = dataArray.reduce((a, b) => a + b, 0);
-    return Math.floor((sum / dataArray.length) * 100 / 255);
+    return Math.floor((sum / dataArray.length) * 100) / 255;
   }
 
   calculateVolume(dataArray) {
     const sum = dataArray.reduce((a, b) => a + b, 0);
-    return Math.floor((sum / dataArray.length) * 100 / 255);
+    return Math.floor((sum / dataArray.length) * 100) / 255;
   }
 
   calculateClarity(dataArray) {
@@ -165,7 +172,7 @@ class BodyLanguageAnalyzer {
   }
 
   calculateSpeechPace(dataArray) {
-    const speeds = ['too slow', 'perfect', 'too fast', 'good'];
+    const speeds = ["too slow", "perfect", "too fast", "good"];
     return speeds[Math.floor(Math.random() * speeds.length)];
   }
 
@@ -184,10 +191,10 @@ class BodyLanguageAnalyzer {
     if (audioAnalysis?.volume > 80) {
       feedback.push("🔉 Lower your voice slightly");
     }
-    if (audioAnalysis?.pace === 'too fast') {
+    if (audioAnalysis?.pace === "too fast") {
       feedback.push("⏳ Slow down your speech pace");
     }
-    if (audioAnalysis?.pace === 'too slow') {
+    if (audioAnalysis?.pace === "too slow") {
       feedback.push("⚡ Speed up your speech a bit");
     }
 
@@ -198,6 +205,8 @@ class BodyLanguageAnalyzer {
 const bodyLanguageAnalyzer = new BodyLanguageAnalyzer();
 
 const InterviewPrep = () => {
+  const isMobile = useMediaQuery({ maxWidth: 768 }); // Detect mobile screens
+
   // EXISTING STATE
   const [jobs, setJobs] = useState([]);
   const [resume, setResume] = useState(null);
@@ -230,14 +239,17 @@ const InterviewPrep = () => {
 
   // EXISTING SPEECH RECOGNITION SETUP
   useEffect(() => {
-    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+    if (
+      !("webkitSpeechRecognition" in window || "SpeechRecognition" in window)
+    ) {
       console.warn("SpeechRecognition not supported in this browser.");
       return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    
+
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = "en-US";
@@ -265,12 +277,12 @@ const InterviewPrep = () => {
       }
 
       if (finalTranscript) {
-        setTranscript(prev => prev + finalTranscript);
+        setTranscript((prev) => prev + finalTranscript);
         transcriptRef.current += finalTranscript + " ";
       }
-      
+
       if (interimTranscript) {
-        setTranscript(prev => {
+        setTranscript((prev) => {
           const baseTxt = prev.replace(/ \[speaking\.\.\.\].*/, "");
           return baseTxt + " [speaking...] " + interimTranscript;
         });
@@ -347,11 +359,15 @@ const InterviewPrep = () => {
     setBodyLanguageAnalysis(bodyAnalysis);
 
     // Analyze audio tone
-    const audioAnalysisResult = bodyLanguageAnalyzer.analyzeAudioTone(audioStream);
+    const audioAnalysisResult =
+      bodyLanguageAnalyzer.analyzeAudioTone(audioStream);
     setAudioAnalysis(audioAnalysisResult);
 
     // Generate real-time feedback
-    const feedback = bodyLanguageAnalyzer.generateRealTimeFeedback(bodyAnalysis, audioAnalysisResult);
+    const feedback = bodyLanguageAnalyzer.generateRealTimeFeedback(
+      bodyAnalysis,
+      audioAnalysisResult
+    );
     setRealTimeFeedback(feedback);
   };
 
@@ -364,17 +380,23 @@ const InterviewPrep = () => {
         const user = JSON.parse(localStorage.getItem("firebaseUser"));
         const firebaseUid = user?.uid || localStorage.getItem("firebaseUid");
         if (firebaseUid) {
-          const jobsRes = await fetch(`${import.meta.env.VITE_API_URL}/jobs/wishlist/user/${firebaseUid}`);
+          const jobsRes = await fetch(
+            `${import.meta.env.VITE_API_URL}/jobs/wishlist/user/${firebaseUid}`
+          );
           const jobsJson = await jobsRes.json();
-          if (Array.isArray(jobsJson.wishlist) && jobsJson.wishlist.length > 0) jobsData = jobsJson.wishlist;
+          if (Array.isArray(jobsJson.wishlist) && jobsJson.wishlist.length > 0)
+            jobsData = jobsJson.wishlist;
         }
       } catch {}
       try {
-        const resumeRes = await fetch(`${import.meta.env.VITE_API_URL}/profile/resume`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        });
+        const resumeRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/profile/resume`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          }
+        );
         const resumeJson = await resumeRes.json();
         if (resumeJson.resume) resumeData = resumeJson.resume;
       } catch {}
@@ -387,14 +409,17 @@ const InterviewPrep = () => {
   // EXISTING: Initialize interview
   const startInterview = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/interview/questions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          job: selectedJob,
-          resume,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/interview/questions`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            job: selectedJob,
+            resume,
+          }),
+        }
+      );
       const data = await res.json();
       let qs = [];
       if (Array.isArray(data.questions) && data.questions.length > 0) {
@@ -410,12 +435,14 @@ const InterviewPrep = () => {
         ];
         setQuestions(qs);
       }
-      setAnswers(qs.map(q => ({
-        question: q,
-        textAnswer: "",
-        transcript: "",
-        timeTaken: 0,
-      })));
+      setAnswers(
+        qs.map((q) => ({
+          question: q,
+          textAnswer: "",
+          transcript: "",
+          timeTaken: 0,
+        }))
+      );
     } catch {
       const qs = [
         "Tell me about yourself.",
@@ -425,12 +452,14 @@ const InterviewPrep = () => {
         "Why do you want to work at this company?",
       ];
       setQuestions(qs);
-      setAnswers(qs.map(q => ({
-        question: q,
-        textAnswer: "",
-        transcript: "",
-        timeTaken: 0,
-      })));
+      setAnswers(
+        qs.map((q) => ({
+          question: q,
+          textAnswer: "",
+          transcript: "",
+          timeTaken: 0,
+        }))
+      );
     }
     setStep(1);
     setCurrentQ(0);
@@ -442,15 +471,15 @@ const InterviewPrep = () => {
   // ENHANCED: Start recording with analysis
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: true, 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
-        }
+          autoGainControl: true,
+        },
       });
-      
+
       setAudioStream(stream);
       videoRef.current.srcObject = stream;
       recorderRef.current = new RecordRTC(stream, { type: "video" });
@@ -459,12 +488,12 @@ const InterviewPrep = () => {
       setTimer(0);
       setTranscript("");
       transcriptRef.current = "";
-      
+
       // Reset analysis data
       setBodyLanguageAnalysis(null);
       setAudioAnalysis(null);
       setRealTimeFeedback([]);
-      
+
       timerInterval.current = setInterval(() => {
         setTimer((t) => t + 1);
       }, 1000);
@@ -475,7 +504,6 @@ const InterviewPrep = () => {
           recognitionRef.current.start();
         }
       }, 500);
-
     } catch (error) {
       console.error("Error starting recording:", error);
     }
@@ -487,17 +515,19 @@ const InterviewPrep = () => {
       console.log("🛑 Stopping speech recognition...");
       recognitionRef.current.stop();
     }
-    
+
     // Stop analysis
     if (analysisInterval.current) {
       clearInterval(analysisInterval.current);
     }
-    
-    const cleanedTranscript = transcriptRef.current.replace(/ \[speaking\.\.\.\].*/, "").trim();
+
+    const cleanedTranscript = transcriptRef.current
+      .replace(/ \[speaking\.\.\.\].*/, "")
+      .trim();
     console.log("💾 Saving transcript:", cleanedTranscript);
 
     // Get current textarea value
-    const currentTextValue = document.querySelector('textarea')?.value || "";
+    const currentTextValue = document.querySelector("textarea")?.value || "";
 
     // ENHANCED: Save analysis data with answer
     setAnswers((prev) => {
@@ -510,7 +540,7 @@ const InterviewPrep = () => {
         textAnswer: currentTextValue || cleanedTranscript,
         bodyLanguageAnalysis: bodyLanguageAnalysis,
         audioAnalysis: audioAnalysis,
-        realTimeFeedback: realTimeFeedback
+        realTimeFeedback: realTimeFeedback,
       };
       return copy;
     });
@@ -569,18 +599,20 @@ const InterviewPrep = () => {
     try {
       if (recording) {
         await stopRecording();
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       setStep(2);
       setFeedback({ loading: true });
 
       // Ensure current answer is saved
-      const currentAnswerValue = document.querySelector('textarea')?.value || "";
-      
+      const currentAnswerValue =
+        document.querySelector("textarea")?.value || "";
+
       const finalAnswers = answers.map((answer, i) => {
-        const textValue = i === currentQ ? currentAnswerValue : (answer?.textAnswer || "");
-        
+        const textValue =
+          i === currentQ ? currentAnswerValue : answer?.textAnswer || "";
+
         return {
           questionNumber: i + 1,
           question: questions[i],
@@ -589,7 +621,7 @@ const InterviewPrep = () => {
           timeTaken: answer?.timeTaken || 0,
           hasVideo: mediaBlobs[i] ? true : false,
           bodyLanguageAnalysis: answer?.bodyLanguageAnalysis || null,
-          audioAnalysis: answer?.audioAnalysis || null
+          audioAnalysis: answer?.audioAnalysis || null,
         };
       });
 
@@ -600,39 +632,48 @@ const InterviewPrep = () => {
         resume: resume,
         questions: questions,
         answers: finalAnswers,
-        totalTime: finalAnswers.reduce((sum, answer) => sum + (answer?.timeTaken || 0), 0),
-        completedAt: new Date().toISOString()
+        totalTime: finalAnswers.reduce(
+          (sum, answer) => sum + (answer?.timeTaken || 0),
+          0
+        ),
+        completedAt: new Date().toISOString(),
       };
 
       const formData = new FormData();
       formData.append("interviewData", JSON.stringify(interviewData));
-      
+
       mediaBlobs.forEach((blob, index) => {
         formData.append(`video_${index}`, blob, `answer_${index}.webm`);
       });
-      
+
       let authToken = localStorage.getItem("authToken");
-      
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/interview/submit`, {
-        method: "POST",
-        headers: {
-          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-        },
-        body: formData,
-      });
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/interview/submit`,
+        {
+          method: "POST",
+          headers: {
+            ...(authToken && { Authorization: `Bearer ${authToken}` }),
+          },
+          body: formData,
+        }
+      );
 
       if (!res.ok) {
         if (res.status === 401) {
           console.warn("Auth token expired, submitting without authentication");
-          const retryRes = await fetch(`${import.meta.env.VITE_API_URL}/interview/submit`, {
-            method: "POST",
-            body: formData,
-          });
-          
+          const retryRes = await fetch(
+            `${import.meta.env.VITE_API_URL}/interview/submit`,
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
           if (!retryRes.ok) {
             throw new Error(`HTTP error! status: ${retryRes.status}`);
           }
-          
+
           const data = await retryRes.json();
           setFeedback(data.feedback || data);
           return;
@@ -642,37 +683,43 @@ const InterviewPrep = () => {
 
       const data = await res.json();
       console.log("✅ Interview feedback received:", data);
-      
+
       setFeedback(data.feedback || data);
-      
     } catch (error) {
       console.error("❌ Error submitting interview:", error);
-      
+
       setFeedback({
         overallFeedback: {
-          strengths: "You completed the interview successfully and provided thoughtful responses to all questions.",
-          weaknesses: "Consider providing more specific examples and quantifiable achievements in your answers.",
-          tipsForImprovement: "Practice speaking more slowly and clearly, and use the STAR method (Situation, Task, Action, Result) for behavioral questions."
+          strengths:
+            "You completed the interview successfully and provided thoughtful responses to all questions.",
+          weaknesses:
+            "Consider providing more specific examples and quantifiable achievements in your answers.",
+          tipsForImprovement:
+            "Practice speaking more slowly and clearly, and use the STAR method (Situation, Task, Action, Result) for behavioral questions.",
         },
         perQuestion: questions.map((question, i) => ({
           question: question,
           feedback: {
-            strengths: answers[i]?.textAnswer || answers[i]?.transcript ? "You provided a clear response to this question." : "You attempted to answer this question.",
+            strengths:
+              answers[i]?.textAnswer || answers[i]?.transcript
+                ? "You provided a clear response to this question."
+                : "You attempted to answer this question.",
             weaknesses: "Could be more detailed and include specific examples.",
-            tipsForImprovement: "Consider structuring your answer with clear beginning, middle, and end."
-          }
+            tipsForImprovement:
+              "Consider structuring your answer with clear beginning, middle, and end.",
+          },
         })),
         score: {
           overall: 75,
           communication: 80,
           technical: 70,
-          confidence: 75
+          confidence: 75,
         },
         recommendations: [
           "Practice common interview questions",
           "Prepare specific examples from your experience",
-          "Work on speaking clearly and at an appropriate pace"
-        ]
+          "Work on speaking clearly and at an appropriate pace",
+        ],
       });
     }
   };
@@ -693,26 +740,46 @@ const InterviewPrep = () => {
           {analysisEnabled ? "🔴 Disable AI Coach" : "🎯 Enable AI Coach"}
         </Button>
       </div>
-      
+
       {analysisEnabled && (
         <div className="space-y-3">
           {/* Body Language Metrics */}
           {bodyLanguageAnalysis && (
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white p-3 rounded-lg">
-                <div className="text-sm font-semibold text-gray-600">Posture</div>
+                <div className="text-sm font-semibold text-gray-600">
+                  Posture
+                </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-lg font-bold text-blue-600">{bodyLanguageAnalysis.posture}%</div>
-                  <Badge variant={bodyLanguageAnalysis.posture > 75 ? "default" : "destructive"}>
+                  <div className="text-lg font-bold text-blue-600">
+                    {bodyLanguageAnalysis.posture}%
+                  </div>
+                  <Badge
+                    variant={
+                      bodyLanguageAnalysis.posture > 75
+                        ? "default"
+                        : "destructive"
+                    }
+                  >
                     {bodyLanguageAnalysis.posture > 75 ? "Good" : "Improve"}
                   </Badge>
                 </div>
               </div>
               <div className="bg-white p-3 rounded-lg">
-                <div className="text-sm font-semibold text-gray-600">Eye Contact</div>
+                <div className="text-sm font-semibold text-gray-600">
+                  Eye Contact
+                </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-lg font-bold text-green-600">{bodyLanguageAnalysis.eyeContact}%</div>
-                  <Badge variant={bodyLanguageAnalysis.eyeContact > 70 ? "default" : "destructive"}>
+                  <div className="text-lg font-bold text-green-600">
+                    {bodyLanguageAnalysis.eyeContact}%
+                  </div>
+                  <Badge
+                    variant={
+                      bodyLanguageAnalysis.eyeContact > 70
+                        ? "default"
+                        : "destructive"
+                    }
+                  >
                     {bodyLanguageAnalysis.eyeContact > 70 ? "Great" : "Focus"}
                   </Badge>
                 </div>
@@ -724,18 +791,34 @@ const InterviewPrep = () => {
           {audioAnalysis && (
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white p-3 rounded-lg">
-                <div className="text-sm font-semibold text-gray-600">Voice Tone</div>
+                <div className="text-sm font-semibold text-gray-600">
+                  Voice Tone
+                </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-lg font-bold text-indigo-600">{audioAnalysis.pitch}%</div>
+                  <div className="text-lg font-bold text-indigo-600">
+                    {audioAnalysis.pitch}%
+                  </div>
                   <Badge variant="secondary">{audioAnalysis.pace}</Badge>
                 </div>
               </div>
               <div className="bg-white p-3 rounded-lg">
-                <div className="text-sm font-semibold text-gray-600">Volume</div>
+                <div className="text-sm font-semibold text-gray-600">
+                  Volume
+                </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-lg font-bold text-orange-600">{audioAnalysis.volume}%</div>
-                  <Badge variant={audioAnalysis.volume > 40 && audioAnalysis.volume < 80 ? "default" : "destructive"}>
-                    {audioAnalysis.volume > 40 && audioAnalysis.volume < 80 ? "Perfect" : "Adjust"}
+                  <div className="text-lg font-bold text-orange-600">
+                    {audioAnalysis.volume}%
+                  </div>
+                  <Badge
+                    variant={
+                      audioAnalysis.volume > 40 && audioAnalysis.volume < 80
+                        ? "default"
+                        : "destructive"
+                    }
+                  >
+                    {audioAnalysis.volume > 40 && audioAnalysis.volume < 80
+                      ? "Perfect"
+                      : "Adjust"}
                   </Badge>
                 </div>
               </div>
@@ -745,10 +828,15 @@ const InterviewPrep = () => {
           {/* Real-time Feedback */}
           {realTimeFeedback.length > 0 && (
             <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-              <div className="text-sm font-semibold text-yellow-800 mb-2">💡 Live Tips:</div>
+              <div className="text-sm font-semibold text-yellow-800 mb-2">
+                💡 Live Tips:
+              </div>
               <ul className="space-y-1">
                 {realTimeFeedback.slice(0, 3).map((tip, index) => (
-                  <li key={index} className="text-sm text-yellow-700 flex items-center gap-2">
+                  <li
+                    key={index}
+                    className="text-sm text-yellow-700 flex items-center gap-2"
+                  >
                     <span className="w-1 h-1 bg-yellow-500 rounded-full"></span>
                     {tip}
                   </li>
@@ -764,49 +852,77 @@ const InterviewPrep = () => {
   // EXISTING: Step 0 - Job Selection
   if (step === 0)
     return (
-      <Card className="max-w-5xl mx-auto mt-12 ">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-primary"> AI Interview Prep</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 text-muted-foreground">Select a job to start your mock interview:</div>
-          <div className="grid gap-3">
-            {(Array.isArray(jobs) ? jobs : []).map((job) => {
-              const isSelected = selectedJob?._id === job._id;
-              return (
-                <Button
-                  key={job._id || job.jobtitle}
-                  variant={isSelected ? "default" : "outline"}
-                  className={`w-full justify-start ${
-                    isSelected
-                      ? "bg-blue-100 text-primary border-primary"
-                      : "bg-white text-black border-gray-200"
-                  } hover:bg-blue-100 transition-colors`}
-                  onClick={() => setSelectedJob(job)}
-                >
-                  <span className="font-semibold">{job.company_name}</span>
-                  <span className="ml-2 text-xs text-muted-foreground">{job.job_title}</span>
-                </Button>
-              );
-            })}
-          </div>
-          <Button
-            className="mt-6 w-full"
-            disabled={!selectedJob}
-            onClick={startInterview}
+<Card className="max-w-5xl mx-auto mt-6 px-4 md:px-0">
+  <CardHeader>
+    <CardTitle className="text-2xl font-bold text-primary text-center md:text-left">
+      AI Interview Prep
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="mb-4 text-muted-foreground text-center md:text-left">
+      Select a job to start your mock interview:
+    </div>
+    <div className="grid gap-3">
+      {(Array.isArray(jobs) ? jobs : []).map((job) => {
+        const isExpanded = selectedJob?._id === job._id;
+
+        return (
+          <div
+            key={job._id || job.jobtitle}
+            className="border rounded-lg p-3 bg-white shadow-sm"
           >
-             Start Interview
-          </Button>
-        </CardContent>
-      </Card>
+            {/* Company Name with Chevron */}
+            <div
+              className="flex justify-between items-center cursor-pointer"
+              onClick={() =>
+                setSelectedJob(isExpanded ? null : job) // Toggle expansion
+              }
+            >
+              <span className="font-semibold text-lg text-foreground">
+                {job.company_name}
+              </span>
+              {isExpanded ? (
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              )}
+            </div>
+
+            {/* Collapsible Job Details */}
+            {isExpanded && (
+              <div className="mt-3 text-sm text-muted-foreground space-y-2">
+                <div>
+                  <b>Role:</b> {job.job_title}
+                </div>
+                <div>
+                  <b>Location:</b> {job.location}
+                </div>
+                <div>
+                  <b>Required Skills:</b> {job.required_skills.join(", ")}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+    <Button
+      className="mt-6 w-full"
+      disabled={!selectedJob}
+      onClick={startInterview}
+    >
+      Start Interview
+    </Button>
+  </CardContent>
+</Card>
     );
 
   // ENHANCED: Step 1 - Interview with AI Analysis
   if (step === 1)
     return (
-      <Card className="max-w-6xl mx-auto mt-12">
+      <Card className="max-w-6xl mx-auto mt-6 px-4 md:px-0">
         <CardHeader>
-          <CardTitle className="text-xl font-bold text-primary">
+          <CardTitle className="text-xl font-bold text-primary text-center md:text-left">
             📝 Question {currentQ + 1} of {questions.length}
           </CardTitle>
         </CardHeader>
@@ -814,12 +930,19 @@ const InterviewPrep = () => {
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Video and Controls */}
             <div className="lg:col-span-2">
-              <div className="mb-4 text-lg font-medium text-foreground">{questions[currentQ]}</div>
-              <video ref={videoRef} autoPlay muted className="rounded-lg border mb-4 w-full h-64 object-cover bg-black" />
-              
-              <div className="flex items-center gap-4 mb-4">
-                <Button 
-                  onClick={startRecording} 
+              <div className="mb-4 text-lg font-medium text-foreground text-center md:text-left">
+                {questions[currentQ]}
+              </div>
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                className="rounded-lg border mb-4 w-full h-64 object-cover bg-black"
+              />
+
+              <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
+                <Button
+                  onClick={startRecording}
                   disabled={recording}
                   className={recording ? "bg-red-500 hover:bg-red-600" : ""}
                 >
@@ -829,7 +952,11 @@ const InterviewPrep = () => {
                   ⏹️ Stop
                 </Button>
                 <span className="text-muted-foreground">⏱️ {timer}s</span>
-                {isListening && <span className="text-green-500 text-sm">🎤 Listening...</span>}
+                {isListening && (
+                  <span className="text-green-500 text-sm">
+                    🎤 Listening...
+                  </span>
+                )}
               </div>
 
               {/* Transcription Display */}
@@ -837,14 +964,18 @@ const InterviewPrep = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-lg">🎤</span>
                   <b className="text-blue-800">Live Transcription:</b>
-                  {isListening && <span className="animate-pulse text-green-600">●</span>}
+                  {isListening && (
+                    <span className="animate-pulse text-green-600">●</span>
+                  )}
                 </div>
                 <div className="min-h-[60px] text-gray-800 leading-relaxed">
                   {transcript ? (
                     <span className="whitespace-pre-wrap">{transcript}</span>
                   ) : (
                     <span className="text-gray-400 italic">
-                      {recording ? "🎯 Start speaking..." : "Click 'Start Recording' and speak clearly"}
+                      {recording
+                        ? "🎯 Start speaking..."
+                        : "Click 'Start Recording' and speak clearly"}
                     </span>
                   )}
                 </div>
@@ -862,21 +993,33 @@ const InterviewPrep = () => {
             {/* Right Column - AI Analysis */}
             <div className="lg:col-span-1">
               <RealTimeFeedbackPanel />
-              
+
               {/* Body Language Summary */}
               {bodyLanguageAnalysis && (
                 <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
-                  <h4 className="font-semibold text-gray-800 mb-3">📊 Body Language</h4>
+                  <h4 className="font-semibold text-gray-800 mb-3">
+                    📊 Body Language
+                  </h4>
                   <div className="space-y-2 text-sm">
-                    <div>Hand Gestures: <Badge variant="outline">{bodyLanguageAnalysis.handGestures}</Badge></div>
-                    <div>Expression: <Badge variant="outline">{bodyLanguageAnalysis.facialExpression}</Badge></div>
+                    <div>
+                      Hand Gestures:{" "}
+                      <Badge variant="outline">
+                        {bodyLanguageAnalysis.handGestures}
+                      </Badge>
+                    </div>
+                    <div>
+                      Expression:{" "}
+                      <Badge variant="outline">
+                        {bodyLanguageAnalysis.facialExpression}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
           </div>
-          
-          <div className="flex justify-between mt-6">
+
+          <div className="flex flex-col md:flex-row justify-between mt-6 gap-4">
             <Button
               variant="outline"
               disabled={currentQ === 0}
@@ -887,7 +1030,10 @@ const InterviewPrep = () => {
             {currentQ < questions.length - 1 ? (
               <Button onClick={handleNext}>Next ➡️</Button>
             ) : (
-              <Button onClick={submitInterview} className="bg-green-600 hover:bg-green-700">
+              <Button
+                onClick={submitInterview}
+                className="bg-green-600 hover:bg-green-700"
+              >
                 🎉 Submit Interview
               </Button>
             )}
@@ -899,13 +1045,17 @@ const InterviewPrep = () => {
   // ENHANCED: Step 2 - Feedback with Body Language Analysis
   if (step === 2)
     return (
-      <Card className="max-w-4xl mx-auto mt-12">
+      <Card className="max-w-4xl mx-auto mt-6 px-4 md:px-0">
         <CardHeader>
-          <CardTitle className="text-xl font-bold text-primary">📊 Your Interview Feedback</CardTitle>
+          <CardTitle className="text-xl font-bold text-primary text-center md:text-left">
+            📊 Your Interview Feedback
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-6 p-4 bg-green-50 rounded-lg border-l-4 border-green-400">
-            <h3 className="font-semibold text-green-800 mb-2">🎯 Overall Feedback</h3>
+            <h3 className="font-semibold text-green-800 mb-2">
+              🎯 Overall Feedback
+            </h3>
             <div className="text-green-700">
               {feedback?.loading ? (
                 <div className="flex items-center gap-2">
@@ -914,93 +1064,165 @@ const InterviewPrep = () => {
                 </div>
               ) : typeof feedback?.overallFeedback === "string" ? (
                 feedback.overallFeedback
-              ) : feedback?.overallFeedback && typeof feedback.overallFeedback === "object" ? (
+              ) : feedback?.overallFeedback &&
+                typeof feedback.overallFeedback === "object" ? (
                 <ul className="list-disc ml-4 space-y-1">
                   {feedback.overallFeedback.strengths && (
-                    <li><b>Strengths:</b> {feedback.overallFeedback.strengths}</li>
+                    <li>
+                      <b>Strengths:</b> {feedback.overallFeedback.strengths}
+                    </li>
                   )}
                   {feedback.overallFeedback.weaknesses && (
-                    <li><b>Areas to Improve:</b> {feedback.overallFeedback.weaknesses}</li>
+                    <li>
+                      <b>Areas to Improve:</b>{" "}
+                      {feedback.overallFeedback.weaknesses}
+                    </li>
                   )}
                   {feedback.overallFeedback.tipsForImprovement && (
-                    <li><b>Tips:</b> {feedback.overallFeedback.tipsForImprovement}</li>
+                    <li>
+                      <b>Tips:</b> {feedback.overallFeedback.tipsForImprovement}
+                    </li>
                   )}
                 </ul>
-              ) : "Great job completing the interview!"}
+              ) : (
+                "Great job completing the interview!"
+              )}
             </div>
           </div>
 
           {/* NEW: Body Language Summary */}
-          {!feedback?.loading && answers.some(a => a.bodyLanguageAnalysis) && (
-            <div className="mb-6 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-400">
-              <h3 className="font-semibold text-purple-800 mb-3">🤖 Body Language & Tone Analysis</h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-white p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2">📐 Average Scores</h4>
-                  <div className="space-y-2">
-                    {answers.filter(a => a.bodyLanguageAnalysis).length > 0 && (
-                      <>
-                        <div className="flex justify-between">
-                          <span>Posture:</span>
-                          <Badge>{Math.round(answers.filter(a => a.bodyLanguageAnalysis).reduce((sum, a) => sum + a.bodyLanguageAnalysis.posture, 0) / answers.filter(a => a.bodyLanguageAnalysis).length)}%</Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Eye Contact:</span>
-                          <Badge>{Math.round(answers.filter(a => a.bodyLanguageAnalysis).reduce((sum, a) => sum + a.bodyLanguageAnalysis.eyeContact, 0) / answers.filter(a => a.bodyLanguageAnalysis).length)}%</Badge>
-                        </div>
-                      </>
-                    )}
+          {!feedback?.loading &&
+            answers.some((a) => a.bodyLanguageAnalysis) && (
+              <div className="mb-6 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+                <h3 className="font-semibold text-purple-800 mb-3">
+                  🤖 Body Language & Tone Analysis
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-white p-4 rounded-lg">
+                    <h4 className="font-semibold mb-2">📐 Average Scores</h4>
+                    <div className="space-y-2">
+                      {answers.filter((a) => a.bodyLanguageAnalysis).length >
+                        0 && (
+                        <>
+                          <div className="flex justify-between">
+                            <span>Posture:</span>
+                            <Badge>
+                              {Math.round(
+                                answers
+                                  .filter((a) => a.bodyLanguageAnalysis)
+                                  .reduce(
+                                    (sum, a) =>
+                                      sum + a.bodyLanguageAnalysis.posture,
+                                    0
+                                  ) /
+                                  answers.filter((a) => a.bodyLanguageAnalysis)
+                                    .length
+                              )}
+                              %
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Eye Contact:</span>
+                            <Badge>
+                              {Math.round(
+                                answers
+                                  .filter((a) => a.bodyLanguageAnalysis)
+                                  .reduce(
+                                    (sum, a) =>
+                                      sum + a.bodyLanguageAnalysis.eyeContact,
+                                    0
+                                  ) /
+                                  answers.filter((a) => a.bodyLanguageAnalysis)
+                                    .length
+                              )}
+                              %
+                            </Badge>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2">🎵 Voice Analysis</h4>
-                  <div className="space-y-2 text-sm">
-                    <div>Most common pace: <Badge variant="outline">Good</Badge></div>
-                    <div>Tone consistency: <Badge variant="outline">Stable</Badge></div>
+                  <div className="bg-white p-4 rounded-lg">
+                    <h4 className="font-semibold mb-2">🎵 Voice Analysis</h4>
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        Most common pace: <Badge variant="outline">Good</Badge>
+                      </div>
+                      <div>
+                        Tone consistency:{" "}
+                        <Badge variant="outline">Stable</Badge>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {!feedback?.loading && (
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg">📝 Question-by-Question Analysis</h3>
-              {(Array.isArray(feedback?.perQuestion) ? feedback.perQuestion : []).map((q, i) => (
+              <h3 className="font-semibold text-lg">
+                📝 Question-by-Question Analysis
+              </h3>
+              {(Array.isArray(feedback?.perQuestion)
+                ? feedback.perQuestion
+                : []
+              ).map((q, i) => (
                 <div key={i} className="bg-gray-50 rounded-lg p-4 border">
-                  <div className="font-semibold text-gray-800 mb-2">❓ {q.question}</div>
-                  
+                  <div className="font-semibold text-gray-800 mb-2">
+                    ❓ {q.question}
+                  </div>
+
                   {/* Answer and body language data */}
                   <div className="grid md:grid-cols-2 gap-4 mb-3">
                     <div className="text-sm text-blue-900 p-2 bg-blue-50 rounded">
                       <b>Your answer:</b>{" "}
                       {answers[i]?.textAnswer || answers[i]?.transcript || (
-                        <span className="italic text-gray-500">No text recorded</span>
+                        <span className="italic text-gray-500">
+                          No text recorded
+                        </span>
                       )}
                     </div>
-                    
+
                     {answers[i]?.bodyLanguageAnalysis && (
                       <div className="text-sm p-2 bg-purple-50 rounded">
                         <b>Body Language:</b>
                         <div className="mt-1 flex gap-2">
-                          <Badge size="sm">Posture: {answers[i].bodyLanguageAnalysis.posture}%</Badge>
-                          <Badge size="sm" variant="outline">{answers[i].bodyLanguageAnalysis.handGestures}</Badge>
+                          <Badge size="sm">
+                            Posture: {answers[i].bodyLanguageAnalysis.posture}%
+                          </Badge>
+                          <Badge size="sm" variant="outline">
+                            {answers[i].bodyLanguageAnalysis.handGestures}
+                          </Badge>
                         </div>
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="text-gray-700">
                     <b>💡 Feedback:</b>{" "}
                     {typeof q.feedback === "string" ? (
                       q.feedback
                     ) : q.feedback && typeof q.feedback === "object" ? (
                       <ul className="list-disc ml-4 mt-1">
-                        {q.feedback.strengths && <li><b>Strengths:</b> {q.feedback.strengths}</li>}
-                        {q.feedback.weaknesses && <li><b>Improve:</b> {q.feedback.weaknesses}</li>}
-                        {q.feedback.tipsForImprovement && <li><b>Tips:</b> {q.feedback.tipsForImprovement}</li>}
+                        {q.feedback.strengths && (
+                          <li>
+                            <b>Strengths:</b> {q.feedback.strengths}
+                          </li>
+                        )}
+                        {q.feedback.weaknesses && (
+                          <li>
+                            <b>Improve:</b> {q.feedback.weaknesses}
+                          </li>
+                        )}
+                        {q.feedback.tipsForImprovement && (
+                          <li>
+                            <b>Tips:</b> {q.feedback.tipsForImprovement}
+                          </li>
+                        )}
                       </ul>
-                    ) : "Good response!"}
+                    ) : (
+                      "Good response!"
+                    )}
                   </div>
                 </div>
               ))}

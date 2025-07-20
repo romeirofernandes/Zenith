@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import mermaid from "mermaid";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { useMediaQuery } from "react-responsive"; // Add this import
 
 // Initialize Mermaid with optimized configuration for faster rendering
 mermaid.initialize({
@@ -72,6 +73,8 @@ mermaid.initialize({
 const STORAGE_KEY = "coldEmailData";
 
 const ColdEmail = () => {
+  const isMobile = useMediaQuery({ maxWidth: 768 }); // Detect mobile screens
+
   const [formData, setFormData] = useState({
     startupName: "",
     website: "",
@@ -815,17 +818,17 @@ P.S. I'd be happy to share the prototype and technical breakdown if you're inter
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
       <div className="flex-shrink-0 bg-card border-b p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
-              <Target className="w-6 h-6" />
+            <h1 className="text-xl md:text-2xl font-bold text-primary flex items-center gap-2">
+              <Target className="w-5 h-5 md:w-6 md:h-6" />
               Strategy Generator
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm mt-1 md:mt-0">
               Build a competitor in days, get noticed by founders
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-3 md:mt-0">
             <Button onClick={resetData} variant="outline" size="sm">
               <RefreshCw className="w-3 h-3 mr-1" />
               Reset
@@ -835,10 +838,12 @@ P.S. I'd be happy to share the prototype and technical breakdown if you're inter
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full flex">
+      <div className="flex-1 overflow-auto">
+        {" "}
+        {/* Changed from overflow-hidden to overflow-auto */}
+        <div className="h-full flex flex-col md:flex-row">
           {/* Left Panel - Input Form */}
-          <div className="w-1/3 border-r bg-card">
+          <div className="w-full md:w-1/3 border-r bg-card">
             <ScrollArea className="h-full">
               <div className="p-4">
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -994,8 +999,8 @@ P.S. I'd be happy to share the prototype and technical breakdown if you're inter
                 {results.roadmap.length > 0 && (
                   <div className="space-y-4">
                     {/* Header */}
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-xl font-bold">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+                      <h2 className="text-lg md:text-xl font-bold">
                         {formData.startupName} Strategy
                       </h2>
                       <Button
@@ -1003,6 +1008,7 @@ P.S. I'd be happy to share the prototype and technical breakdown if you're inter
                         disabled={isExporting}
                         variant="outline"
                         size="sm"
+                        className="mt-3 md:mt-0"
                       >
                         {isExporting ? (
                           <>
@@ -1020,11 +1026,33 @@ P.S. I'd be happy to share the prototype and technical breakdown if you're inter
 
                     <Tabs defaultValue="roadmap" className="w-full">
                       <TabsList className="grid w-full grid-cols-5 text-xs">
-                        <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
-                        <TabsTrigger value="flowchart">Chart</TabsTrigger>
-                        <TabsTrigger value="features">Features</TabsTrigger>
-                        <TabsTrigger value="analysis">Analysis</TabsTrigger>
-                        <TabsTrigger value="email">Email</TabsTrigger>
+                        <TabsTrigger value="roadmap">
+                          {isMobile ? (
+                            <MapPin className="w-4 h-4" />
+                          ) : (
+                            "Roadmap"
+                          )}
+                        </TabsTrigger>
+                        <TabsTrigger value="flowchart">
+                          {isMobile ? <Code className="w-4 h-4" /> : "Chart"}
+                        </TabsTrigger>
+                        <TabsTrigger value="features">
+                          {isMobile ? (
+                            <Lightbulb className="w-4 h-4" />
+                          ) : (
+                            "Features"
+                          )}
+                        </TabsTrigger>
+                        <TabsTrigger value="analysis">
+                          {isMobile ? (
+                            <TrendingUp className="w-4 h-4" />
+                          ) : (
+                            "Analysis"
+                          )}
+                        </TabsTrigger>
+                        <TabsTrigger value="email">
+                          {isMobile ? <Mail className="w-4 h-4" /> : "Email"}
+                        </TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="roadmap" className="space-y-3 mt-4">

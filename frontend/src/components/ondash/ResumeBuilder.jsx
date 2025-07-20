@@ -6,9 +6,7 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
-// import { auth } from "../config/firebase";
 import { auth } from "@/config/firebase";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -410,7 +408,9 @@ ${JSON.stringify(profile, null, 2)}
         }
       } catch (error) {
         console.log("AI JSON parse error:", error);
-        alert("AI returned invalid JSON. Please try again or check the console for details.");
+        alert(
+          "AI returned invalid JSON. Please try again or check the console for details."
+        );
         console.log("Raw AI response:", data.choices[0].message.content);
       }
       if (improved) setProfile(improved);
@@ -426,8 +426,8 @@ ${JSON.stringify(profile, null, 2)}
 
   // --- Resume Section ---
   return (
-    <div className="h-screen flex flex-col bg-background">
-      {/* Header with Action Buttons */}
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Header */}
       <div className="flex-shrink-0 bg-card border-b p-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-primary">Resume Builder</h1>
@@ -435,43 +435,34 @@ ${JSON.stringify(profile, null, 2)}
             <PDFDownloadLink
               document={<ResumePDF profile={profile} />}
               fileName={`${profile.name.replace(/\s/g, "_") || "resume"}.pdf`}
-              className="bg-primary text-white font-bold px-4 py-2 rounded hover:bg-primary/90 transition inline-block text-center text-sm"
+              className="bg-primary text-white font-bold px-4 py-2 rounded hover:bg-primary/90 transition text-sm"
             >
               {({ blob, url, loading, error }) =>
                 loading ? "Generating PDF..." : "Download PDF"
               }
             </PDFDownloadLink>
             <button
-              className="bg-black text-white font-bold px-4 py-2 rounded hover:bg-gray-900 transition flex items-center gap-2 text-sm"
+              className="bg-black text-white font-bold px-4 py-2 rounded hover:bg-gray-900 transition text-sm"
               onClick={enhanceWithAI}
               disabled={loadingAI}
               type="button"
             >
               {loadingAI ? (
-                <span className="animate-spin mr-2 w-4 h-4 border-b-2 border-white rounded-full"></span>
+                <span className="animate-spin w-4 h-4 border-b-2 border-white rounded-full"></span>
               ) : (
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 4v16m8-8H4" />
-                </svg>
+                "Enhance with AI"
               )}
-              Enhance with AI
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Content - Side by Side */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Input Form */}
-        <div className="w-1/2 border-r bg-card">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        {/* Left Panel */}
+        <div className="w-full lg:w-1/2 border-r bg-card">
           <ScrollArea className="h-full">
-            <div className="p-6">
+            <div className="p-4 lg:p-6">
               <h2 className="text-xl font-bold mb-4 text-primary">
                 Resume Details
               </h2>
@@ -775,15 +766,16 @@ ${JSON.stringify(profile, null, 2)}
           </ScrollArea>
         </div>
 
-        {/* Right Panel - Resume Preview */}
-        <div className="w-1/2 bg-gray-50">
+        {/* Right Panel */}
+        <div className="w-full lg:w-1/2 bg-gray-50">
           <ScrollArea className="h-full">
-            <div className="p-6">
+            <div className="p-4 lg:p-6">
               <div
                 ref={resumeRef}
-                className="bg-white rounded-lg shadow-lg p-8 mx-auto"
+                className="bg-white rounded-lg shadow-lg p-6 lg:p-8 mx-auto"
                 style={{
-                  width: "8.5in",
+                  width: "100%",
+                  maxWidth: "8.5in",
                   minHeight: "11in",
                   fontFamily: "Arial, sans-serif",
                   fontSize: "14px",
@@ -876,11 +868,13 @@ ${JSON.stringify(profile, null, 2)}
                           {exp.duration}
                         </div>
                         <ul className="list-disc ml-5 text-sm text-gray-800">
-                          {(exp.details || []).filter(Boolean).map((detail, i) => (
-                            <li key={i} className="mb-1">
-                              {detail}
-                            </li>
-                          ))}
+                          {(exp.details || [])
+                            .filter(Boolean)
+                            .map((detail, i) => (
+                              <li key={i} className="mb-1">
+                                {detail}
+                              </li>
+                            ))}
                         </ul>
                       </div>
                     ))}
